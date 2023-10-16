@@ -1,6 +1,6 @@
 # Lucky Robots Training Framework
 
-Lucky Robots is an innovative training framework that harnesses the power of Unreal Engine 5.2 to provide realistic, immersive, and safe environments for robot training. We believe in gentle methods and progressive learning experiences, hence the name "Lucky Robots" - because no robots are harmed in our training processes.
+Lucky Robots is a training framework that uses Unreal Engine 5.2 to provide realistic, immersive, and safe environments for robot training. We believe in "gentle" methods and progressive learning experiences, hence the name "Lucky Robots" - because no robots are harmed in our training processes.
 
 ![Lucky Robots Logo](./assets/logo.png)
 
