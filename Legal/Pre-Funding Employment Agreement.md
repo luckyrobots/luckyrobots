@@ -39,12 +39,12 @@ THIS AGREEMENT (hereinafter referred to as the "Agreement") is entered into as o
 
 **2. CONSULTANT DUTIES**
 
-- Company agrees that Consultant’s current hourly rate is ______ [X USD], wherein X is defined as the Consultant’s last earned salary divided by (12 months and 160 hours) multiplied by 20%.
-- Consultant agrees to a discounted rate of ________ [Y USD] per hour, for services rendered under this Agreement.
+- Company agrees that Consultant’s current hourly rate is ______ (X USD), wherein X is defined as the Consultant’s last earned salary divided by (12 months and 160 hours) multiplied by 20%.
+- Consultant agrees to a discounted rate of ________ (Y USD) per hour, for services rendered under this Agreement.
 
 **3. COMPENSATION**
 
-- Consultant agrees to track all working hours spent on the project using a mutually agreed-upon time-tracking tool and to provide a daily summary video via [Loom] to the relevant Slack channel or DM to the founder.
+- Consultant agrees to track all working hours spent on the project using a mutually agreed-upon time-tracking tool and to provide a daily summary video via (Loom) to the relevant Slack channel or DM to the founder.
 - Unless requested otherwise, Consultant agrees to work in blocks of 4 consecutive hours, do not bill or report less than 4 consecutive hours.
 - Meetings shall generally not be considered as billable hours. The Consultant is entrusted to exercise judgment in determining the billability of hours spent in meetings. Should a meeting be primarily and substantially devoted to work-related matters, wherein at least 75% of the meeting duration is focused on specific project-related discussions, such meeting may be deemed billable. Conversely, any meeting primarily utilized for social interactions, discussions of current events, or any topic not directly pertinent to the project, shall not be billed.
 
@@ -52,8 +52,8 @@ THIS AGREEMENT (hereinafter referred to as the "Agreement") is entered into as o
 
 Upon securing funding, the Company agrees to compensate the Consultant by one of the following methods, or a combination thereof, at the discretion of the Company:
 
-a. Cash Bonus: 150% of Total Discounted Hours. Calculated as [Total Worked Hours * (Y - X) * 1.5]
-b. Stock Bonus: 250% of Total Discounted Hours. Calculated as [Total Worked Hours * (Y - X) * 2.5], converted to preferred stock.
+a. Cash Bonus: 150% of Total Discounted Hours. Calculated as (Total Worked Hours * (Y - X) * 1.5)
+b. Stock Bonus: 250% of Total Discounted Hours. Calculated as (Total Worked Hours * (Y - X) * 2.5), converted to preferred stock.
 c. A combination of (a) and (b) as agreed upon at the time.
 
 **5. FUTURE EMPLOYMENT**
