@@ -1,9 +1,9 @@
 
-** PREAMBLE TO THE AGREEMENT ** 
+***PREAMBLE TO THE AGREEMENT***
 
-Lucky Robots aims to become a transparent, open-source company that will provide free software to developers and will seek to be profitable in the long run by providing commercial license as well. It will raise funds in the future, but for the time being, it's founder (me/Devrim) is financing our journey from his savings.
+Lucky Robots aspires to become a transparent, open-source company that offers free software for non-commercial purposes to developers, students, and similar users. In the long term, the company plans to achieve profitability by offering paid licenses to commercial entities. While we aim to raise funds in the future, for now, I, the founder, Devrim, am financing our journey using my personal savings.
 
-For those who are joining us in these early stages, here's how I'm recognizing your valuable contributions: Let's use an example for clarity. Imagine your standard hourly rate is $100. However, you decide to support our vision and work for $50/hr for a total of 1,000 hours. In this scenario, you'd have been paid $50k and have provided an additional $50k worth of value to Lucky Robots. When we secure our future funding, here's my commitment to you: I can either compensate you with 150% of that deferred $50k (amounting to $75,000) in cash, or if you prefer an equity route, I'd offer 250% (which is $125,000) in preferred stock.
+To those joining us during these foundational stages, I'd like to explain how I plan to recognize your invaluable contributions. As an illustration, let's assume your standard hourly rate is $100. But, in support of our mission, you choose to work for $50/hr, accumulating a total of 1,000 hours. In this instance, you'd receive $50k, effectively contributing an additional $50k in value to Lucky Robots. When we manage to secure external funding, here's my pledge to you: I can either offer a compensation of 150% of that deferred $50k (equaling $75,000) in cash, or if equity is more your style, I'd present an option of 250% (amounting to $125,000) in preferred stock.
 
 In light of this, I have a few guidelines and expectations:
 
@@ -13,7 +13,19 @@ In light of this, I have a few guidelines and expectations:
    
 3. **Billing Etiquette**: Social minutes or casual interactions shouldn't appear on the bill. However, I encourage you to have these moments—connecting with the team is essential. Let's try to keep them reasonable.
 
+
+
+
+
+
+
 ---
+
+
+
+
+
+
 
 **CONSULTATION AND COMPENSATION AGREEMENT**
 
