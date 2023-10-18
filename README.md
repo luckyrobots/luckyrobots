@@ -45,12 +45,17 @@ Lucky Robots is a training framework that uses Unreal Engine 5.2 to provide real
    . venv_lucky_robots/bin/activate
    pip install -r requirements.txt
    ```
-
-3. **Launch Unreal Project**
+3. **Setup Local Redis with Docker**
+   ```bash
+   cd redis
+   docker build -t="dockerfile/redis" github.com/dockerfile/redis
+   docker run -d --name redis -p 6379:6379 dockerfile/redis
+   ```
+4. **Launch Unreal Project**
 
    Open the provided `.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
 
-4. **Connect Python Script**
+5. **Connect Python Script**
 
    Modify the `config.py` file with the appropriate paths and settings for your setup.
 
