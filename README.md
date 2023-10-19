@@ -6,7 +6,6 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-![Lucky Robots Logo](./assets/logo.png)
 
 ## Table of Contents
 
