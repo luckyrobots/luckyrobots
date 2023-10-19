@@ -48,8 +48,8 @@ Lucky Robots is a training framework that uses Unreal Engine 5.2 to provide real
 3. **Setup Local Redis with Docker**
    ```bash
    cd redis
-   docker build -t="dockerfile/redis" github.com/dockerfile/redis
-   docker run -d --name redis -p 6379:6379 dockerfile/redis
+   docker pull redis
+   docker run -p 6379:6379 redis
    ```
 4. **Launch Unreal Project**
 
