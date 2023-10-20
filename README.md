@@ -1,8 +1,12 @@
-# Lucky Robots Training Framework
+# Lucky Robots Virtual Training Environment
 
-Lucky Robots is a training framework that uses Unreal Engine 5.2 to provide realistic, immersive, and safe environments for robot training. We believe in "gentle" methods and progressive learning experiences, hence the name "Lucky Robots" - because no robots are harmed in our training processes.
+Lucky Robots: Where robots come for a boot camp, like going to a spa day! 🤖💆‍♂️ We use the fancy Unreal Engine 5.2, Open3D and YoloV8 to create a lavish, virtual 5-star resort experience for our metal buddies so they're absolutely pumped before they meet the real world. Our training framework? More like a robotic paradise with zero robot mishaps. "Gentle" methods? We're practically the robot whisperers here, you won't see humans with metal sticks around. That's why it's "Lucky Robots" because every robot leaves our sessions feeling like they just won the jackpot – all without a scratch! 🎰🤣 
 
-![Lucky Robots Logo](./assets/logo.png)
+Remember, no robots were emotionally or physically harmed in our ultra-luxurious training process. 
+
+Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
+
+https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6a0-ef3e2ea7a31c.mp4
 
 ## Table of Contents
 

@@ -91,3 +91,4 @@ DerivedDataCache/*
 .tm_properties
 /venv_lucky_robots/
 .idea/
+.DS_Store
