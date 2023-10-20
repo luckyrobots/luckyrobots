@@ -1,5 +1,7 @@
 #include "GameDatabase.h"
 
+#include "Misc/DateTime.h"
+
 GameDatabase::GameDatabase(FString Path, ESQLiteDatabaseOpenMode OpenMode)
 {
 	// OpenMode's:
@@ -21,11 +23,8 @@ GameDatabase::GameDatabase(FString Path, ESQLiteDatabaseOpenMode OpenMode)
 	// @alphanumeric (name) e.g. select * from people where name = '@name'
 	// $alphanumeric (name) e.g. select * from people where name = '@name'
 
-	const TCHAR* SaveQuery = TEXT("replace into players (id, x, y, z) values ($id, $x, $y, $z)");
-	SaveStatement.Create(*Database, SaveQuery, ESQLitePreparedStatementFlags::Persistent);
-
-	const TCHAR* LoadQuery = TEXT("select * from players where id = $id limit 1");
-	LoadStatement.Create(*Database, LoadQuery, ESQLitePreparedStatementFlags::Persistent);
+	//const FString SaveQuery = TEXT("INSERT INTO Screenshots (left_camera, right_camera, taken_date) values ($left_camera, $right_camera, $taken_date)");
+	//SaveStatement.Create(*Database, *SaveQuery, ESQLitePreparedStatementFlags::Persistent);
 }
 
 GameDatabase::~GameDatabase()
@@ -43,42 +42,29 @@ GameDatabase::~GameDatabase()
 	}
 }
 
-bool GameDatabase::SavePlayerPosition(int32 PlayerId, FVector Position)
+bool GameDatabase::SaveScreenshot(TArrayView<const uint8> LeftCameraData, TArrayView<const uint8> RightCameraData)
 {
-	if (Database->IsValid() && SaveStatement.IsValid())
+	if (Database && Database->IsValid())
 	{
-		SaveStatement.Reset();
+		const FString Query = TEXT("INSERT INTO Screenshots (left_camera, right_camera, taken_date) values ($left_camera, $right_camera, $taken_date)");
+
+		FSQLitePreparedStatement Statement;
+		Statement.Reset();
+		Statement.Create(*Database, *Query, ESQLitePreparedStatementFlags::Persistent);
 
 		bool bBindingSuccess = true;
-		bBindingSuccess = bBindingSuccess && SaveStatement.SetBindingValueByName(TEXT("$id"), PlayerId);
-		bBindingSuccess = bBindingSuccess && SaveStatement.SetBindingValueByName(TEXT("$x"), Position.X);
-		bBindingSuccess = bBindingSuccess && SaveStatement.SetBindingValueByName(TEXT("$y"), Position.Y);
-		bBindingSuccess = bBindingSuccess && SaveStatement.SetBindingValueByName(TEXT("$z"), Position.Z);
+		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$left_camera"), LeftCameraData);
+		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$right_camera"), RightCameraData);
+		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$taken_date"), FDateTime::Now().ToUnixTimestamp());
 
-		if (!bBindingSuccess || !SaveStatement.Execute())
+		if (!bBindingSuccess || !Statement.Execute())
 		{
 			return false;
 		}
 	}
-
-	return true;
-}
-
-FVector GameDatabase::LoadPlayerPosition(int32 PlayerId)
-{
-	FVector Position = FVector(0.0f, 0.0f, 0.0f);
-
-	if (Database->IsValid() && LoadStatement.IsValid())
-	{
-		LoadStatement.Reset();
-
-		if (LoadStatement.SetBindingValueByName(TEXT("$id"), PlayerId) && LoadStatement.Execute() && LoadStatement.Step() == ESQLitePreparedStatementStepResult::Row)
-		{
-			LoadStatement.GetColumnValueByName(TEXT("x"), Position.X);
-			LoadStatement.GetColumnValueByName(TEXT("y"), Position.Y);
-			LoadStatement.GetColumnValueByName(TEXT("z"), Position.Z);
-		}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Database not Valid"));
 	}
 
-	return Position;
+	return true;
 }
