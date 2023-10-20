@@ -49,15 +49,17 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    . venv_lucky_robots/bin/activate
    pip install -r requirements.txt
    ```
-3. **Setup Local Redis with Docker**
+3. **(Optional) Setup Local Redis with Docker**
    ```bash
    cd redis
    docker pull redis
    docker run -p 6379:6379 redis
    ```
+   Project will use SQLite by default
+
 4. **Launch Unreal Project**
 
-   Open the provided `.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
+   Open the provided `controllable_pawn.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
 
 5. **Connect Python Script**
 
@@ -74,7 +76,7 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    With the simulation running, execute your Python script to interface with the Unreal simulation and start training your robot.
 
    ```bash
-   python train_robot.py
+   python main.py
    ```
 
 ## Support
