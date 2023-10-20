@@ -1,0 +1,45 @@
+{
+	"FileVersion": 3,
+	"Version": 0,
+	"VersionName": "1.2",
+	"FriendlyName": "DTRedis",
+	"Description": "Redis Connector / UE5.2",
+	"Category": "DT",
+	"CreatedBy": "Dexter Wan",
+	"CreatedByURL": "45141961@qq.com",
+	"DocsURL": "",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/fd98577f848c4b6fbeabb2de4218025a",
+	"SupportURL": "",
+	"EngineVersion": "5.2.0",
+	"CanContainContent": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "DTRedisLib",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux"
+			]
+		},
+		{
+			"Name": "DTRedis",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux"
+			]
+		},
+		{
+			"Name": "DTRedisEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux"
+			]
+		}
+	]
+}
