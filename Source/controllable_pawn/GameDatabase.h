@@ -8,8 +8,7 @@ public:
     GameDatabase(FString Path, ESQLiteDatabaseOpenMode OpenMode);
     ~GameDatabase();
 
-    bool SavePlayerPosition(int32 PlayerId, FVector Position);
-    FVector LoadPlayerPosition(int32 PlayerId);
+    bool SaveScreenshot(TArrayView<const uint8> LeftCameraData, TArrayView<const uint8> RightCameraData);
 
 private:
     FSQLiteDatabase* Database;
