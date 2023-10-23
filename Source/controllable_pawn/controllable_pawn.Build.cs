@@ -8,6 +8,17 @@ public class controllable_pawn : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        PublicIncludePaths.AddRange(
+           new string[] {
+                "controllable_pawn"
+           }
+       );
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+            }
+        );
+
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
         PublicDependencyModuleNames.AddRange(new string[] { "DatabaseSupport", "SQLiteCore", "SQLiteSupport" });
 
