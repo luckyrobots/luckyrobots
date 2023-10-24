@@ -20,9 +20,6 @@ void ASQLiteActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FString AbsoluteFilePath = FPaths::ProjectContentDir() + "Database\\db.sqlite";
-
-	Database = new GameDatabase(AbsoluteFilePath, ESQLiteDatabaseOpenMode::ReadWrite);
 }
 
 // Called every frame
@@ -30,14 +27,4 @@ void ASQLiteActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void ASQLiteActor::TakeScreenshot() {
-	UE_LOG(LogTemp, Log, TEXT("Hello"));
-
-
-	TArrayView<const uint8> LeftCameraData;
-	TArrayView<const uint8> RightCameraData;
-
-	Database->SaveScreenshot(LeftCameraData, RightCameraData);
 }

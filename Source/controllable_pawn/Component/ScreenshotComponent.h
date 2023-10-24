@@ -21,5 +21,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TakeScreenShot(UCameraComponent* LeftCamera, UCameraComponent* RightCamera);
-	bool ProcessCamera(UCameraComponent* Camera, TArray<uint8>& OutData);
+	bool ProcessCamera(UCameraComponent* Camera, FString TextureName, TArray<uint8>& OutData);
+
+
+public:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FVector2D ScreenshotSize;
 };
