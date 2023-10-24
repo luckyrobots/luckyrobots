@@ -3,8 +3,6 @@
 
 #include "SQLiteActor.h"
 
-#include "GameDatabase.h"
-
 
 // Sets default values
 ASQLiteActor::ASQLiteActor()

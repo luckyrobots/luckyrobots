@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "GameDatabase.h"
 #include "SQLiteActor.generated.h"
 
 
