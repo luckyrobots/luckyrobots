@@ -8,6 +8,7 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetRenderingLibrary.h"
 
 #include "Subsystem/DatabaseSubsystem.h"
 
@@ -15,6 +16,7 @@ UScreenshotComponent::UScreenshotComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	ScreenshotSize = FVector2D(640, 480);
 }
 
 void UScreenshotComponent::BeginPlay()
@@ -37,70 +39,62 @@ void UScreenshotComponent::TakeScreenShot(UCameraComponent* LeftCamera, UCameraC
 
 	if (LeftCamera) 
 	{
-		ProcessCamera(LeftCamera, LeftCameraData);
+		ProcessCamera(LeftCamera, "LeftCamera", LeftCameraData);
 	}
 
 	if (RightCamera)
 	{
-		ProcessCamera(RightCamera, RightCameraData);
+		ProcessCamera(RightCamera, "RightCamera", RightCameraData);
 	}
 
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
 	UDatabaseSubsystem* DatabaseSubsystem = GameInstance->GetSubsystem<UDatabaseSubsystem>();
-
 	DatabaseSubsystem->SaveScreenshot(LeftCameraData, RightCameraData);
 }
 
-bool UScreenshotComponent::ProcessCamera(UCameraComponent* Camera, TArray<uint8>& OutData)
+bool UScreenshotComponent::ProcessCamera(UCameraComponent* Camera, FString TextureName, TArray<uint8>& OutData)
 {
 	UTextureRenderTarget2D* TextureRenderTarget = NewObject<UTextureRenderTarget2D>();
 	TextureRenderTarget->InitAutoFormat(256, 256);
-	TextureRenderTarget->InitCustomFormat(640, 480, PF_B8G8R8A8, true);
+	TextureRenderTarget->InitCustomFormat(ScreenshotSize.X, ScreenshotSize.Y, PF_B8G8R8A8, true);
 	TextureRenderTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
-	TextureRenderTarget->ClearColor = FLinearColor::White;
 	TextureRenderTarget->bGPUSharedFlag = true;
 
 	USceneCaptureComponent2D* CaptureScene = NewObject<USceneCaptureComponent2D>(this, USceneCaptureComponent2D::StaticClass());
 	CaptureScene->AttachToComponent(Camera,FAttachmentTransformRules::KeepRelativeTransform);
-	CaptureScene->bCaptureEveryFrame = true;
 	CaptureScene->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_LegacySceneCapture;
 	CaptureScene->CompositeMode = ESceneCaptureCompositeMode::SCCM_Overwrite;
 	CaptureScene->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
 	CaptureScene->TextureTarget = TextureRenderTarget;
+	CaptureScene->CaptureScene();
 
-	UE_LOG(LogTemp, Log, TEXT("Camera Position %s"), *Camera->GetComponentLocation().ToString());
-	UE_LOG(LogTemp, Log, TEXT("Capture Position %s"), *CaptureScene->GetComponentLocation().ToString());
-
-	UE_LOG(LogTemp, Log, TEXT("Camera Rotation %s"), *Camera->GetComponentRotation().ToString());
-	UE_LOG(LogTemp, Log, TEXT("Capture Rotation %s"), *CaptureScene->GetComponentRotation().ToString());
-
-
-	UTexture2D* Aux2DTex = TextureRenderTarget->ConstructTexture2D(this, "AlphaTex", EObjectFlags::RF_NoFlags, CTF_DeferCompression);
-	Aux2DTex->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-
+	UTexture2D* Aux2DTex = CaptureScene->TextureTarget->ConstructTexture2D(this, TextureName, EObjectFlags::RF_NoFlags, CTF_DeferCompression);
+	Aux2DTex->CompressionSettings = TextureCompressionSettings::TC_Default;
+	Aux2DTex->SRGB = 0;
 #if WITH_EDITORONLY_DATA
 	Aux2DTex->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
 #endif
-
-	Aux2DTex->SRGB = 0;
 	Aux2DTex->UpdateResource();
 
 	FColor* FormatedImageData = NULL;
 	Aux2DTex->GetPlatformData()->Mips[0].BulkData.GetCopy((void**)&FormatedImageData);
 
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
-	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::JPEG);
+	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
 
 	if (!ImageWrapper.IsValid())
 	{
 		return false;
 	}
 
-	if (!ImageWrapper->SetRaw(&FormatedImageData[0], TextureRenderTarget->SizeX * TextureRenderTarget->SizeY * sizeof(FColor), TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, ERGBFormat::BGRA, 8))
+	if (!ImageWrapper->SetRaw(&FormatedImageData[0], CaptureScene->TextureTarget->SizeX * CaptureScene->TextureTarget->SizeY * sizeof(FColor), CaptureScene->TextureTarget->SizeX, CaptureScene->TextureTarget->SizeY, ERGBFormat::BGRA, 8))
 	{
 		return false;
 	}
 
 	OutData = ImageWrapper->GetCompressed(90);
+
+	CaptureScene->DestroyComponent();
+
 	return true;
 }
