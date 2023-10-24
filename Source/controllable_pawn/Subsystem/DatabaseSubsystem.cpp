@@ -13,7 +13,7 @@ void UDatabaseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	FString AbsoluteFilePath = FPaths::ProjectContentDir() + "Database\\db.sqlite";
 
-	if (!Database->Open(*AbsoluteFilePath, ESQLiteDatabaseOpenMode::ReadWrite) || !Database->IsValid())
+	if (!Database->Open(*AbsoluteFilePath, ESQLiteDatabaseOpenMode::ReadWriteCreate) || !Database->IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to open database: %s"), *Database->GetLastError());
 	}
