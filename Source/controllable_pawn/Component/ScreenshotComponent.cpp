@@ -17,6 +17,11 @@ UScreenshotComponent::UScreenshotComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	ScreenshotSize = FVector2D(640, 480);
+	TargetGamma = 2.f;
+
+	PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_LegacySceneCapture;
+	CompositeMode = ESceneCaptureCompositeMode::SCCM_Overwrite;
+	CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
 }
 
 void UScreenshotComponent::BeginPlay()
@@ -57,42 +62,50 @@ bool UScreenshotComponent::ProcessCamera(UCameraComponent* Camera, FString Textu
 	UTextureRenderTarget2D* TextureRenderTarget = NewObject<UTextureRenderTarget2D>();
 	TextureRenderTarget->InitAutoFormat(256, 256);
 	TextureRenderTarget->InitCustomFormat(ScreenshotSize.X, ScreenshotSize.Y, PF_B8G8R8A8, true);
-	TextureRenderTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
+	//TextureRenderTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
 	TextureRenderTarget->bGPUSharedFlag = true;
 
 	USceneCaptureComponent2D* CaptureScene = NewObject<USceneCaptureComponent2D>(this, USceneCaptureComponent2D::StaticClass());
 	CaptureScene->AttachToComponent(Camera,FAttachmentTransformRules::KeepRelativeTransform);
-	CaptureScene->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_LegacySceneCapture;
-	CaptureScene->CompositeMode = ESceneCaptureCompositeMode::SCCM_Overwrite;
-	CaptureScene->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	CaptureScene->PrimitiveRenderMode = PrimitiveRenderMode;
+	CaptureScene->CompositeMode = CompositeMode;
+	CaptureScene->CaptureSource = CaptureSource;
 	CaptureScene->TextureTarget = TextureRenderTarget;
+	CaptureScene->TextureTarget->TargetGamma = TargetGamma;
+	CaptureScene->bUseRayTracingIfEnabled = bUseRayTracingIfEnabled;
+
+	if (PostProcessMaterial)
+	{
+		CaptureScene->PostProcessSettings.AddBlendable(PostProcessMaterial, 1);
+	}
+
 	CaptureScene->CaptureScene();
-
-	UTexture2D* Aux2DTex = CaptureScene->TextureTarget->ConstructTexture2D(this, TextureName, EObjectFlags::RF_NoFlags, CTF_DeferCompression);
-	Aux2DTex->CompressionSettings = TextureCompressionSettings::TC_Default;
-	Aux2DTex->SRGB = 0;
-#if WITH_EDITORONLY_DATA
-	Aux2DTex->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-#endif
-	Aux2DTex->UpdateResource();
-
-	FColor* FormatedImageData = NULL;
-	Aux2DTex->GetPlatformData()->Mips[0].BulkData.GetCopy((void**)&FormatedImageData);
 
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
+
+	TArray<FColor> Image;
+	Image.AddZeroed(CaptureScene->TextureTarget->SizeX * CaptureScene->TextureTarget->SizeY);
+
+	FTextureRenderTargetResource* RenderTargetResource;
+	RenderTargetResource = CaptureScene->TextureTarget->GameThread_GetRenderTargetResource();
+
+	FReadSurfaceDataFlags ReadSurfaceDataFlags;
+	ReadSurfaceDataFlags.SetLinearToGamma(false);
+
+	RenderTargetResource->ReadPixels(Image, ReadSurfaceDataFlags);
 
 	if (!ImageWrapper.IsValid())
 	{
 		return false;
 	}
 
-	if (!ImageWrapper->SetRaw(&FormatedImageData[0], CaptureScene->TextureTarget->SizeX * CaptureScene->TextureTarget->SizeY * sizeof(FColor), CaptureScene->TextureTarget->SizeX, CaptureScene->TextureTarget->SizeY, ERGBFormat::BGRA, 8))
+	if (!ImageWrapper->SetRaw(Image.GetData(), Image.GetAllocatedSize(), CaptureScene->TextureTarget->SizeX, CaptureScene->TextureTarget->SizeY, ERGBFormat::BGRA, 8))
 	{
 		return false;
 	}
 
-	OutData = ImageWrapper->GetCompressed(90);
+	OutData = ImageWrapper->GetCompressed();
 
 	CaptureScene->DestroyComponent();
 
