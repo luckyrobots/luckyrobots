@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ActorComponent.h"
+#include "Components/SceneCaptureComponent.h"
 #include "ScreenshotComponent.generated.h"
 
 
@@ -26,6 +27,24 @@ public:
 
 public:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D ScreenshotSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TargetGamma;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ESceneCapturePrimitiveRenderMode PrimitiveRenderMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<enum ESceneCaptureCompositeMode> CompositeMode;
+
+	UPROPERTY(interp)
+	TEnumAsByte<enum ESceneCaptureSource> CaptureSource;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUseRayTracingIfEnabled;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterial* PostProcessMaterial;
 };
