@@ -22,6 +22,8 @@ UScreenshotComponent::UScreenshotComponent()
 	PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_LegacySceneCapture;
 	CompositeMode = ESceneCaptureCompositeMode::SCCM_Overwrite;
 	CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+
+	FScreenshotRequest::OnScreenshotCaptured().AddUObject(this, &ThisClass::OnDebugScreenshotTaken);
 }
 
 void UScreenshotComponent::BeginPlay()
@@ -37,7 +39,38 @@ void UScreenshotComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 }
 
-void UScreenshotComponent::TakeScreenShot(UCameraComponent* LeftCamera, UCameraComponent* RightCamera)
+void UScreenshotComponent::DebugScreenshot()
+{
+	FScreenshotRequest::RequestScreenshot(false);
+}
+
+void UScreenshotComponent::OnDebugScreenshotTaken(int32 Width, int32 Height, const TArray<FColor>& Colors)
+{
+	UE_LOG(LogTemp, Warning, TEXT("--- Screenshot Taken"));
+
+	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
+	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
+
+	if (!ImageWrapper.IsValid())
+	{
+		return;
+	}
+
+	if (!ImageWrapper->SetRaw(Colors.GetData(), Colors.GetAllocatedSize(), Width, Height, ERGBFormat::BGRA, 8))
+	{
+		return;
+	}
+
+	TArray<uint8> LeftCameraData;
+	TArray<uint8> RightCameraData;
+	LeftCameraData = ImageWrapper->GetCompressed();
+
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
+	UDatabaseSubsystem* DatabaseSubsystem = GameInstance->GetSubsystem<UDatabaseSubsystem>();
+	DatabaseSubsystem->SaveScreenshot(LeftCameraData, RightCameraData);
+}
+
+void UScreenshotComponent::TakeScreenshot(UCameraComponent* LeftCamera, UCameraComponent* RightCamera)
 {
 	TArray<uint8> LeftCameraData;
 	TArray<uint8> RightCameraData;
@@ -61,8 +94,8 @@ bool UScreenshotComponent::ProcessCamera(UCameraComponent* Camera, FString Textu
 {
 	UTextureRenderTarget2D* TextureRenderTarget = NewObject<UTextureRenderTarget2D>();
 	TextureRenderTarget->InitAutoFormat(256, 256);
-	TextureRenderTarget->InitCustomFormat(ScreenshotSize.X, ScreenshotSize.Y, PF_B8G8R8A8, true);
-	//TextureRenderTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
+	TextureRenderTarget->InitCustomFormat(ScreenshotSize.X, ScreenshotSize.Y, PF_FloatRGBA, true);
+	TextureRenderTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA16f;
 	TextureRenderTarget->bGPUSharedFlag = true;
 
 	USceneCaptureComponent2D* CaptureScene = NewObject<USceneCaptureComponent2D>(this, USceneCaptureComponent2D::StaticClass());
@@ -73,11 +106,6 @@ bool UScreenshotComponent::ProcessCamera(UCameraComponent* Camera, FString Textu
 	CaptureScene->TextureTarget = TextureRenderTarget;
 	CaptureScene->TextureTarget->TargetGamma = TargetGamma;
 	CaptureScene->bUseRayTracingIfEnabled = bUseRayTracingIfEnabled;
-
-	if (PostProcessMaterial)
-	{
-		CaptureScene->PostProcessSettings.AddBlendable(PostProcessMaterial, 1);
-	}
 
 	CaptureScene->CaptureScene();
 
@@ -108,6 +136,57 @@ bool UScreenshotComponent::ProcessCamera(UCameraComponent* Camera, FString Textu
 	OutData = ImageWrapper->GetCompressed();
 
 	CaptureScene->DestroyComponent();
+
+	return true;
+}
+
+void UScreenshotComponent::SaveRenderTarget(UTextureRenderTarget2D* LeftRenderTarget, UTextureRenderTarget2D* RightRenderTarget)
+{
+	TArray<uint8> LeftCameraData;
+	TArray<uint8> RightCameraData;
+
+	if (LeftRenderTarget)
+	{
+		ProcessRenderTarget(LeftRenderTarget, "LeftCamera", LeftCameraData);
+	}
+
+	if (RightRenderTarget)
+	{
+		ProcessRenderTarget(RightRenderTarget, "RightCamera", RightCameraData);
+	}
+
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
+	UDatabaseSubsystem* DatabaseSubsystem = GameInstance->GetSubsystem<UDatabaseSubsystem>();
+	DatabaseSubsystem->SaveScreenshot(LeftCameraData, RightCameraData);
+}
+
+bool UScreenshotComponent::ProcessRenderTarget(UTextureRenderTarget2D* RenderTarget, FString TextureName, TArray<uint8>& OutData)
+{
+	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
+	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
+
+	TArray<FColor> Image;
+	Image.AddZeroed(RenderTarget->SizeX * RenderTarget->SizeY);
+
+	FTextureRenderTargetResource* RenderTargetResource;
+	RenderTargetResource = RenderTarget->GameThread_GetRenderTargetResource();
+
+	FReadSurfaceDataFlags ReadSurfaceDataFlags;
+	ReadSurfaceDataFlags.SetLinearToGamma(false);
+
+	RenderTargetResource->ReadPixels(Image, ReadSurfaceDataFlags);
+
+	if (!ImageWrapper.IsValid())
+	{
+		return false;
+	}
+
+	if (!ImageWrapper->SetRaw(Image.GetData(), Image.GetAllocatedSize(), RenderTarget->SizeX, RenderTarget->SizeY, ERGBFormat::BGRA, 8))
+	{
+		return false;
+	}
+
+	OutData = ImageWrapper->GetCompressed();
 
 	return true;
 }

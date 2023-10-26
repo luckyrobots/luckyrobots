@@ -21,9 +21,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	void TakeScreenShot(UCameraComponent* LeftCamera, UCameraComponent* RightCamera);
+	void DebugScreenshot();
+	void OnDebugScreenshotTaken(int32 Width, int32 Height, const TArray<FColor>& Colors);
+
+	UFUNCTION(BlueprintCallable)
+	void TakeScreenshot(UCameraComponent* LeftCamera, UCameraComponent* RightCamera);
 	bool ProcessCamera(UCameraComponent* Camera, FString TextureName, TArray<uint8>& OutData);
 
+	UFUNCTION(BlueprintCallable)
+	void SaveRenderTarget(UTextureRenderTarget2D* LeftRenderTarget, UTextureRenderTarget2D* RightRenderTarget);
+	bool ProcessRenderTarget(UTextureRenderTarget2D* RenderTarget, FString TextureName, TArray<uint8>& OutData);
 
 public:
 
@@ -45,6 +52,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bUseRayTracingIfEnabled;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UMaterial* PostProcessMaterial;
+protected:
+	FDelegateHandle RequestScreenshotDelegateHandle;
 };
