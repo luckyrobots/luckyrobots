@@ -1,9 +1,9 @@
 
 ***PREAMBLE TO THE AGREEMENT***
 
-Lucky Robots aspires to become a transparent, open-source company that offers free software for non-commercial purposes to developers, students, and similar users. In the long term, the company plans to achieve profitability by offering paid licenses to commercial entities. While we aim to raise funds in the future, for now, I, the founder, Devrim, am financing our journey using my personal savings.
+Lucky Robots aspires to become a transparent, open-source company that offers free MIT licensed software for non-commercial purposes to developers, students, and similar users. In the long term, the company plans to achieve profitability by offering commercial licenses to for-profit entities. While we aim to raise funds in the future, for now, I, the founder, Devrim, am financing our journey using my own money. Because this is a company I've dreamt of building ever since I was a little kid.
 
-To those joining us during these foundational stages, I'd like to explain how I plan to recognize your invaluable contributions. As an illustration, let's assume your standard hourly rate is $100. But, in support of our mission, you choose to work for $50/hr, accumulating a total of 1,000 hours. In this instance, you'd receive $50k, effectively contributing an additional $50k in value to Lucky Robots. When we manage to secure external funding, here's my pledge to you: I can either offer a compensation of 150% of that deferred $50k (equaling $75,000) in cash, or if equity is more your style, I'd present an option of 250% (amounting to $125,000) in preferred stock.
+For those joining us during this foundational stage, cash resources are dissimilar to a VC backed startup. If you're considering offering a discount on your hourly rate, it would be greatly appreciated, but it's entirely optional. To illustrate how I plan to recognize such contributions, let's use an example. Assume your standard hourly rate is $100. If you choose to work for $50/hr in support of this project and log a total of 1,000 hours, you'd earn $50k, effectively contributing an additional $50k in value to Lucky Robots. Once we secure external funding, I can offer either 150% of that deferred $50k (totalling $75,000) in cash, or if you prefer equity, an option equivalent to 250% (amounting to $125,000) in preferred stock. However, if you prefer to stick to your standard hourly rate, we can certainly accommodate that.
 
 In light of this, I have a few guidelines and expectations:
 
@@ -40,7 +40,7 @@ THIS AGREEMENT (hereinafter referred to as the "Agreement") is entered into as o
 **2. CONSULTANT DUTIES**
 
 - Company agrees that Consultant’s current hourly rate is ______ (X USD), wherein X is defined as the Consultant’s last earned salary divided by (12 months and 160 hours) multiplied by 20%.
-- Consultant agrees to a discounted rate of ________ (Y USD) per hour, for services rendered under this Agreement.
+- (Optional) Consultant agrees to a discounted rate of ________ (Y USD) per hour, for services rendered under this Agreement.
 
 **3. COMPENSATION**
 
