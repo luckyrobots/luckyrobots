@@ -5,6 +5,10 @@
 
 #include "Misc/DateTime.h"
 
+const FString TruncateScreenShot = "DELETE FROM Screenshots";
+
+const FString Vacuum = "VACUUM";
+
 void UDatabaseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -18,6 +22,15 @@ void UDatabaseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		UE_LOG(LogTemp, Warning, TEXT("Failed to open database: %s"), *Database->GetLastError());
 	}
 
+	if (Database->IsValid())
+	{
+		Database->Execute(*TruncateScreenShot);
+
+		Database->Execute(*Vacuum);
+	}
+
+	ScreenshotCount = 0;
+	CurrentScreenshot = 0;
 }
 
 void UDatabaseSubsystem::Deinitialize()
@@ -47,13 +60,31 @@ bool UDatabaseSubsystem::SaveScreenshot(TArrayView<const uint8> LeftCameraData, 
 {
 	if (Database && Database->IsValid())
 	{
-		const FString Query = TEXT("INSERT INTO Screenshots (left_camera, right_camera, taken_date) values ($left_camera, $right_camera, $taken_date)");
+		FString Query;
+
+		if (ScreenshotCount < 60)
+		{
+			ScreenshotCount++;
+			CurrentScreenshot++;
+			Query = TEXT("INSERT INTO Screenshots (id, left_camera, right_camera, taken_date) values ($id, $left_camera, $right_camera, $taken_date)");
+		}
+		else
+		{
+			CurrentScreenshot++;
+
+			if (CurrentScreenshot >= 60)
+			{
+				CurrentScreenshot = 1;
+			}
+			Query = TEXT("UPDATE Screenshots SET left_camera = $left_camera, right_camera = $right_camera, taken_date = $taken_date WHERE id = $id");
+		}
 
 		FSQLitePreparedStatement Statement;
 		Statement.Reset();
 		Statement.Create(*Database, *Query, ESQLitePreparedStatementFlags::Persistent);
 
 		bool bBindingSuccess = true;
+		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$id"), CurrentScreenshot);
 		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$left_camera"), LeftCameraData);
 		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$right_camera"), RightCameraData);
 		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$taken_date"), FDateTime::Now().ToUnixTimestamp());
