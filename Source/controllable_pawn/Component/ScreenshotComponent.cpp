@@ -22,8 +22,6 @@ UScreenshotComponent::UScreenshotComponent()
 	PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_LegacySceneCapture;
 	CompositeMode = ESceneCaptureCompositeMode::SCCM_Overwrite;
 	CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-
-	FScreenshotRequest::OnScreenshotCaptured().AddUObject(this, &ThisClass::OnDebugScreenshotTaken);
 }
 
 void UScreenshotComponent::BeginPlay()
@@ -41,12 +39,16 @@ void UScreenshotComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 void UScreenshotComponent::DebugScreenshot()
 {
+	UGameViewportClient* GameViewportClient = GEngine->GameViewport;
+	GameViewportClient->OnScreenshotCaptured().AddUObject(this, &ThisClass::OnDebugScreenshotTaken);
+
 	FScreenshotRequest::RequestScreenshot(false);
 }
 
 void UScreenshotComponent::OnDebugScreenshotTaken(int32 Width, int32 Height, const TArray<FColor>& Colors)
 {
-	UE_LOG(LogTemp, Warning, TEXT("--- Screenshot Taken"));
+	UGameViewportClient* GameViewportClient = GEngine->GameViewport;
+	GameViewportClient->OnScreenshotCaptured().RemoveAll(this);
 
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
