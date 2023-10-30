@@ -92,3 +92,5 @@ DerivedDataCache/*
 /venv_lucky_robots/
 .idea/
 .DS_Store
+lr_venv/
+tmp/
