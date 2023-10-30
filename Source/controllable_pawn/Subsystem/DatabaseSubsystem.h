@@ -28,4 +28,8 @@ public:
 private:
 	FSQLiteDatabase* Database;
 
+private:
+	int32 ScreenshotCount;
+	int32 CurrentScreenshot;
+
 };
