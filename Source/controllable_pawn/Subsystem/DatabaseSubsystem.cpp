@@ -6,6 +6,7 @@
 #include "Misc/DateTime.h"
 
 const FString TruncateScreenShot = "DELETE FROM Screenshots";
+const FString TruncateMovements = "DELETE FROM Movements";
 
 const FString Vacuum = "VACUUM";
 
@@ -13,20 +14,34 @@ void UDatabaseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	Database = new FSQLiteDatabase();
+	OutputDatabase = new FSQLiteDatabase();
+	InputDatabase = new FSQLiteDatabase();
 
-	FString AbsoluteFilePath = FPaths::ProjectContentDir() + "Database\\db.sqlite";
+	FString OutputAbsoluteFilePath = FPaths::ProjectContentDir() + "Database\\output.sqlite";
+	FString InputAbsoluteFilePath = FPaths::ProjectContentDir() + "Database\\input.sqlite";
 
-	if (!Database->Open(*AbsoluteFilePath, ESQLiteDatabaseOpenMode::ReadWriteCreate) || !Database->IsValid())
+	if (!OutputDatabase->Open(*OutputAbsoluteFilePath, ESQLiteDatabaseOpenMode::ReadWriteCreate) || !OutputDatabase->IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to open database: %s"), *Database->GetLastError());
+		UE_LOG(LogTemp, Warning, TEXT("Failed to open Output database: %s"), *OutputDatabase->GetLastError());
 	}
 
-	if (Database->IsValid())
+	if (!InputDatabase->Open(*InputAbsoluteFilePath, ESQLiteDatabaseOpenMode::ReadOnly) || !InputDatabase->IsValid())
 	{
-		Database->Execute(*TruncateScreenShot);
+		UE_LOG(LogTemp, Warning, TEXT("Failed to open Input database: %s"), *InputDatabase->GetLastError());
+	}
 
-		Database->Execute(*Vacuum);
+	if (OutputDatabase->IsValid())
+	{
+		OutputDatabase->Execute(*TruncateScreenShot);
+
+		OutputDatabase->Execute(*Vacuum);
+	}
+
+	if (InputDatabase->IsValid())
+	{
+		InputDatabase->Execute(*TruncateMovements);
+
+		InputDatabase->Execute(*Vacuum);
 	}
 
 	ScreenshotCount = 0;
@@ -37,13 +52,13 @@ void UDatabaseSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
-	if (!Database->Close())
+	if (!OutputDatabase->Close())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to close database: %s"), *Database->GetLastError());
+		UE_LOG(LogTemp, Warning, TEXT("Failed to close database: %s"), *OutputDatabase->GetLastError());
 	}
 	else
 	{
-		delete Database;
+		delete OutputDatabase;
 	}
 }
 
@@ -58,7 +73,7 @@ bool UDatabaseSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 bool UDatabaseSubsystem::SaveScreenshot(TArrayView<const uint8> LeftCameraData, TArrayView<const uint8> RightCameraData)
 {
-	if (Database && Database->IsValid())
+	if (OutputDatabase && OutputDatabase->IsValid())
 	{
 		FString Query;
 
@@ -81,7 +96,7 @@ bool UDatabaseSubsystem::SaveScreenshot(TArrayView<const uint8> LeftCameraData, 
 
 		FSQLitePreparedStatement Statement;
 		Statement.Reset();
-		Statement.Create(*Database, *Query, ESQLitePreparedStatementFlags::Persistent);
+		Statement.Create(*OutputDatabase, *Query, ESQLitePreparedStatementFlags::Persistent);
 
 		bool bBindingSuccess = true;
 		bBindingSuccess = bBindingSuccess && Statement.SetBindingValueByName(TEXT("$id"), CurrentScreenshot);
@@ -95,8 +110,37 @@ bool UDatabaseSubsystem::SaveScreenshot(TArrayView<const uint8> LeftCameraData, 
 		}
 	}
 	else {
-		UE_LOG(LogTemp, Error, TEXT("Database not Valid"));
+		UE_LOG(LogTemp, Error, TEXT("OutputDatabase not Valid"));
 	}
 
 	return true;
+}
+
+FDatabaseMovements UDatabaseSubsystem::GetLastMovement()
+{
+	if (InputDatabase && InputDatabase->IsValid())
+	{
+		FString Query = TEXT("SELECT command, scale FROM Movements ORDER BY created_at DESC LIMIT 1");
+		
+
+		FSQLitePreparedStatement Statement;
+		Statement.Reset();
+		Statement.Create(*InputDatabase, *Query, ESQLitePreparedStatementFlags::Persistent);
+
+		FDatabaseMovements Result;
+
+		while (Statement.Step() == ESQLitePreparedStatementStepResult::Row)
+		{
+			Statement.GetColumnValueByName(TEXT("command"), Result.Command);
+			Statement.GetColumnValueByName(TEXT("scale"), Result.Scale);
+		}
+
+		return Result;
+		
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("InputDatabase not Valid"));
+	}
+
+	return FDatabaseMovements();
 }
