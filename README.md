@@ -87,6 +87,10 @@ For any queries, issues, or feature requests, please refer to our [issues page](
 
 We welcome contributions! Please read our [contributing guide](CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to Lucky Robots.
 
+## Join our team?
+
+Absolutely! Ideally contribute a few PRs and [come over!](https://github.com/lucky-robots/lucky-robots/blob/main/Legal/Pre-Funding%20Employment%20Agreement.md) 
+
 ## License
 
 Lucky Robots Training Framework is released under the [MIT License](LICENSE.md).
