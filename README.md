@@ -16,6 +16,7 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 - [Usage](#usage)
 - [Support](#support)
 - [Contributing](#contributing)
+- [Join Our Team](#join-our-team)
 - [License](#license)
 
 ## Features
@@ -49,13 +50,13 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    . venv_lucky_robots/bin/activate
    pip install -r requirements.txt
    ```
-3. **(Optional) Setup Local Redis with Docker**
+3. **Setup Local Redis with Docker**
    ```bash
    cd redis
    docker pull redis
    docker run -p 6379:6379 redis
    ```
-   Project will use SQLite by default
+   Project will use SQLite for writing camera outputs and Redis for moving the robot. We will switch to RabbitMQ soon and deprecate both.
 
 4. **Launch Unreal Project**
 
