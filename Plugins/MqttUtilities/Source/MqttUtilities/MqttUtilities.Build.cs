@@ -15,48 +15,27 @@ public class MqttUtilities : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicIncludePaths.AddRange(
-			new string[] {
+		PublicIncludePaths.AddRange(new string[] {
                 Path.Combine (ModuleDirectory, "Public")
-				// ... add public include paths required here ...
-			}
-			);
+		});
 
-
-		PrivateIncludePaths.AddRange(
-			new string[] {
+		PrivateIncludePaths.AddRange(new string[] {
                 Path.Combine (ModuleDirectory, "Private")
-				// ... add other private include paths required here ...
-			}
-			);
+		});
 
+		PublicDependencyModuleNames.AddRange(new string[] {
+			"Core",
+		});
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				// ... add other public dependencies that you statically link with here ...
-			}
-			);
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"CoreUObject",
+			"Engine",
+            "Projects",
+		});
 
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"CoreUObject",
-				"Engine",
-                "Projects",
-                // ... add private dependencies that you statically link with here ...
-			}
-			);
-
-
-		DynamicallyLoadedModuleNames.AddRange(
-			new string[]
-			{
-				// ... add any modules that your module loads dynamically here ...
-			}
-			);
+		DynamicallyLoadedModuleNames.AddRange(new string[] {
+			// ... add any modules that your module loads dynamically here ...
+	    });
 
 
         // Additional routine for Windows
@@ -140,7 +119,7 @@ public class MqttUtilities : ModuleRules
         if(Target.Platform == UnrealTargetPlatform.Linux)
         {
             DynamicLibExtension = ".so";
-						StaticLibExtension = "_static.a";
+			StaticLibExtension = "_static.a";
         }
 
         string ThirdPartyPath = Path.Combine(ModuleDirectory, "../ThirdParty", Target.Platform.ToString());
