@@ -9,6 +9,10 @@ struct MQTTUTILITIES_API FMqttMessage
 {
 	GENERATED_BODY()
 
+	/** Message topic. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MQTT")
+	FString Topic;
+
 	/** Message content. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MQTT")
 	FString Message;
@@ -16,10 +20,6 @@ struct MQTTUTILITIES_API FMqttMessage
 	/** Message content buffer. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MQTT")
 	TArray<uint8> MessageBuffer;
-
-	/** Message topic. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MQTT")
-	FString Topic;
 
 	/** Retain flag. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MQTT")
