@@ -102,3 +102,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "MQTT")
 	virtual void SetOnErrorHandler(const FOnMqttErrorDelegate& onErrorCallback) = 0;
 };
+
+typedef TSharedPtr<class IMqttClientInterface, ESPMode::ThreadSafe> IMqttClientPtr;

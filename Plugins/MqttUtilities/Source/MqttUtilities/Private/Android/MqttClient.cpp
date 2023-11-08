@@ -18,7 +18,7 @@ void UMqttClient::PostInitProperties()
 
 void UMqttClient::BeginDestroy()
 {
-	UE_LOG(LogTemp, Warning, TEXT("GOOGLEMAPSVIEW => UGoogleMapsView::BeginDestroy()"));
+	UE_LOG(LogTemp, Warning, TEXT("MQTTCLIENT => UMqttClient::BeginDestroy()"));
 
 	if (UMqttClient::StaticClass()->GetDefaultObject() != this)
 	{
