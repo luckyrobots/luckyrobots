@@ -1,0 +1,37 @@
+{
+  "name": "@epicgames-ps/cirrus-webserver",
+  "version": "0.0.1",
+  "description": "The reference signalling and web server for Pixel Streaming: Cirrus",
+  "private": true,
+  "scripts": {
+    "store_password": "run-script-os",
+    "store_password:default": "./platform_scripts/bash/node/bin/node ./modules/authentication/db/store_password.js --usersFile=./modules/authentication/db/users.json",
+    "store_password:windows": "platform_scripts\\cmd\\node\\node.exe ./modules/authentication/db/store_password.js --usersFile=./modules/authentication/db/users.json",
+    "start-local": "run-script-os --",
+    "start-local:default": "./platform_scripts/bash/Start_Local.sh",
+    "start-local:windows": ".\\platform_scripts\\cmd\\Start_Local.bat",
+    "start-signalling-server": "run-script-os --",
+    "start-signalling-server:default": "./platform_scripts/bash/Start_SignallingServer.sh",
+    "start-signalling-server:windows": ".\\platform_scripts\\cmd\\Start_SignallingServer.bat",
+    "start-with-turn-signalling-server": "run-script-os --",
+    "start-with-turn-signalling-server:default": "./platform_scripts/bash/Start_WithTurn_SignallingServer.sh",
+    "start-wiht-turn-signalling-server:windows": ".\\platform_scripts\\cmd\\Start_WithTurn_SignallingServer.bat",
+    "start": "run-script-os",
+    "start:default": "if [ `id -u` -eq 0 ] || [ ! -z $NO_SUDO ]\nthen\n export process=\"./platform_scripts/bash/node/bin/node cirrus.js\"\nelse\n export process=\"sudo ./platform_scripts/bash/node/bin/node cirrus.js\"\nfi\n$process ",
+    "start:windows": "platform_scripts\\cmd\\node\\node.exe cirrus.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "express-session": "^1.15.6",
+    "helmet": "^3.21.3",
+    "lusca": "^1.7.0",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
+    "run-script-os": "^1.1.6",
+    "ws": "^7.1.2",
+    "y18n": "^5.0.5",
+    "yargs": "^15.3.0"
+  }
+}
