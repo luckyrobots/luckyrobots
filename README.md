@@ -56,13 +56,16 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    docker pull redis
    docker run -p 6379:6379 redis
    ```
-   Project will use SQLite for writing camera outputs and Redis for moving the robot. We will switch to RabbitMQ soon and deprecate both.
 
-4. **Launch Unreal Project**
+4. **Setup PixelStreaming**
+
+   - Run `setup.bat` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
+
+5. **Launch Unreal Project**
 
    Open the provided `controllable_pawn.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
 
-5. **Connect Python Script**
+6. **Connect Python Script**
 
    Modify the `config.py` file with the appropriate paths and settings for your setup.
 
@@ -70,7 +73,8 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 
 1. **Start Unreal Simulation**
 
-   Launch the Unreal Project and play the simulation scenario you wish to train your robot in.
+   - Run `Start_SignallingServer.ps1` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
+   - Launch the Unreal Project and play the simulation scenario you wish to train your robot in. You must launch it in Standalone Mode
 
 2. **Run Python Training Script**
 
