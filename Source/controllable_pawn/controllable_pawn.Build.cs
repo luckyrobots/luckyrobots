@@ -32,12 +32,5 @@ public class controllable_pawn : ModuleRules
             "SQLiteSupport" 
         });
 
-        PublicDependencyModuleNames.AddRange(new string[] { 
-            "MqttUtilities" 
-        });
-
-        PrivateDependencyModuleNames.AddRange(new string[] {
-            "MqttUtilities"
-        });
     }
 }
