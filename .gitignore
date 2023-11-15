@@ -92,17 +92,3 @@ DerivedDataCache/*
 /venv_lucky_robots/
 .idea/
 .DS_Store
-lr_venv/
-tmp/
-
-
-#Pixel Streaming
-Samples/*
-Ressources/SignallingWebServer/logs/*
-Ressources/SignallingWebServer/node_modules/*
-Ressources/SignallingWebServer/platform_scripts/bash/coturn/*
-Ressources/SignallingWebServer/platform_scripts/bash/node/*
-Ressources/SignallingWebServer/platform_scripts/bash/setenv/*
-Ressources/SignallingWebServer/platform_scripts/cmd/coturn/*
-Ressources/SignallingWebServer/platform_scripts/cmd/node/*
-Ressources/SignallingWebServer/platform_scripts/cmd/setenv/*
