@@ -16,6 +16,7 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 - [Usage](#usage)
 - [Support](#support)
 - [Contributing](#contributing)
+- [Join Our Team](#join-our-team)
 - [License](#license)
 
 ## Features
@@ -49,19 +50,22 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    . venv_lucky_robots/bin/activate
    pip install -r requirements.txt
    ```
-3. **(Optional) Setup Local Redis with Docker**
+3. **Setup Local Redis with Docker**
    ```bash
    cd redis
    docker pull redis
    docker run -p 6379:6379 redis
    ```
-   Project will use SQLite by default
 
-4. **Launch Unreal Project**
+4. **Setup PixelStreaming**
+
+   - Run `setup.bat` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
+
+5. **Launch Unreal Project**
 
    Open the provided `controllable_pawn.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
 
-5. **Connect Python Script**
+6. **Connect Python Script**
 
    Modify the `config.py` file with the appropriate paths and settings for your setup.
 
@@ -69,7 +73,9 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 
 1. **Start Unreal Simulation**
 
-   Launch the Unreal Project and play the simulation scenario you wish to train your robot in.
+   - Run `Start_SignallingServer.ps1` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
+   - Launch the Unreal Project and play the simulation scenario you wish to train your robot in. You must launch it in Standalone Mode
+   - Then you can browse to http://127.0.0.1/?StreamerId=LeftCamera and to http://127.0.0.1/?StreamerId=RightCamera to get both remote camera
 
 2. **Run Python Training Script**
 
@@ -86,6 +92,10 @@ For any queries, issues, or feature requests, please refer to our [issues page](
 ## Contributing
 
 We welcome contributions! Please read our [contributing guide](CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to Lucky Robots.
+
+## Join our team?
+
+Absolutely! Ideally contribute a few PRs and [come over!](https://github.com/lucky-robots/lucky-robots/blob/main/Legal/Pre-Funding%20Employment%20Agreement.md) 
 
 ## License
 
