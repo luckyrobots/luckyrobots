@@ -75,6 +75,7 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 
    - Run `Start_SignallingServer.ps1` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
    - Launch the Unreal Project and play the simulation scenario you wish to train your robot in. You must launch it in Standalone Mode
+   - Then you can browse to http://127.0.0.1/?StreamerId=LeftCamera and to http://127.0.0.1/?StreamerId=RightCamera to get both remote camera
 
 2. **Run Python Training Script**
 
@@ -94,7 +95,7 @@ We welcome contributions! Please read our [contributing guide](CONTRIBUTING.md) 
 
 ## Join our team?
 
-Absolutely! Ideally contribute a few PRs and [come over!](https://github.com/lucky-robots/lucky-robots/blob/main/Legal/Pre-Funding%20Employment%20Agreement.md) 
+Absolutely! Ideally contribute a few PRs and let us know!
 
 ## License
 
