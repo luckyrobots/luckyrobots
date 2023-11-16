@@ -95,7 +95,7 @@ We welcome contributions! Please read our [contributing guide](CONTRIBUTING.md) 
 
 ## Join our team?
 
-Absolutely! Ideally contribute a few PRs and [come over!](https://github.com/lucky-robots/lucky-robots/blob/main/Legal/Pre-Funding%20Employment%20Agreement.md) 
+Absolutely! Ideally contribute a few PRs and let us know!
 
 ## License
 
