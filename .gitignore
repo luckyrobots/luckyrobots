@@ -98,11 +98,11 @@ tmp/
 
 #Pixel Streaming
 Samples/*
-Ressources/SignallingWebServer/logs/*
-Ressources/SignallingWebServer/node_modules/*
-Ressources/SignallingWebServer/platform_scripts/bash/coturn/*
-Ressources/SignallingWebServer/platform_scripts/bash/node/*
-Ressources/SignallingWebServer/platform_scripts/bash/setenv/*
-Ressources/SignallingWebServer/platform_scripts/cmd/coturn/*
-Ressources/SignallingWebServer/platform_scripts/cmd/node/*
-Ressources/SignallingWebServer/platform_scripts/cmd/setenv/*
+Resources/SignallingWebServer/logs/*
+Resources/SignallingWebServer/node_modules/*
+Resources/SignallingWebServer/platform_scripts/bash/coturn/*
+Resources/SignallingWebServer/platform_scripts/bash/node/*
+Resources/SignallingWebServer/platform_scripts/bash/setenv/*
+Resources/SignallingWebServer/platform_scripts/cmd/coturn/*
+Resources/SignallingWebServer/platform_scripts/cmd/node/*
+Resources/SignallingWebServer/platform_scripts/cmd/setenv/*
