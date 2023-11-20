@@ -3,16 +3,6 @@
 	"EngineAssociation": "5.2",
 	"Category": "",
 	"Description": "",
-	"Modules": [
-		{
-			"Name": "controllable_pawn",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine"
-			]
-		}
-	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
