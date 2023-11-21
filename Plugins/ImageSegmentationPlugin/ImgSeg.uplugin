@@ -12,7 +12,7 @@
 	"SupportURL": "https://discord.gg/sUyxEa4dv2",
 	"EngineVersion": "5.2.0",
 	"CanContainContent": true,
-	"Installed": true,
+	"Installed": false,
 	"Modules": [
 		{
 			"Name": "ImgSeg",
