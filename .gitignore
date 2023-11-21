@@ -29,7 +29,6 @@ Saved
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -60,9 +59,6 @@ Saved
 SourceArt/**/*.png
 SourceArt/**/*.tga
 
-# Binary Files
-Binaries/*
-Plugins/*/Binaries/*
 
 # Builds
 Build/*
