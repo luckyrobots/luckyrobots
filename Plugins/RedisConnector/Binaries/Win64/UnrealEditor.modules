@@ -1,9 +1,0 @@
-{
-	"BuildId": "25360045",
-	"Modules": 
-	{
-		"DTRedis": "UnrealEditor-DTRedis.dll",
-		"DTRedisEditor": "UnrealEditor-DTRedisEditor.dll",
-		"DTRedisLib": "UnrealEditor-DTRedisLib.dll"
-	}
-}
