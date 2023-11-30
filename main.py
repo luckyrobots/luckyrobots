@@ -38,11 +38,10 @@ def move_robot():
         setVariable("next_move", "a")
         time.sleep(0.1)
 
+move_robot()
 
-# move_robot()
 
-
-display_stream()
+# display_stream()
 
 
 
