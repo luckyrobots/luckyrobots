@@ -91,6 +91,10 @@ lr_venv/
 tmp/
 
 
+# Binary Files
+Binaries/*
+Plugins/*/Binaries/*
+
 #Pixel Streaming
 Samples/*
 Resources/SignallingWebServer/logs/*
