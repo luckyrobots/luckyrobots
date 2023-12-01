@@ -4,37 +4,10 @@
 	"Category": "",
 	"Description": "",
 	"Plugins": [
-		{
-			"Name": "ModelingToolsEditorMode",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
-		},
-		{
-			"Name": "SQLiteCore",
-			"Enabled": true
-		},
-		{
-			"Name": "SQLiteSupport",
-			"Enabled": true
-		},
-		{
-			"Name": "DTRedis",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/fd98577f848c4b6fbeabb2de4218025a"
-		},
+
 		{
 			"Name": "PixelStreaming",
 			"Enabled": true
-		},
-		{
-			"Name": "VisualStudioTools",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/362651520df94e4fa65492dbcba44ae2",
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
 		}
 	]
 }
