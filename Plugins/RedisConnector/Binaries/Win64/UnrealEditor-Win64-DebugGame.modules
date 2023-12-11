@@ -1,0 +1,9 @@
+{
+	"BuildId": "25360045",
+	"Modules": 
+	{
+		"DTRedis": "UnrealEditor-DTRedis-Win64-DebugGame.dll",
+		"DTRedisEditor": "UnrealEditor-DTRedisEditor-Win64-DebugGame.dll",
+		"DTRedisLib": "UnrealEditor-DTRedisLib-Win64-DebugGame.dll"
+	}
+}
