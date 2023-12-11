@@ -105,3 +105,4 @@ Resources/SignallingWebServer/platform_scripts/bash/setenv/*
 Resources/SignallingWebServer/platform_scripts/cmd/coturn/*
 Resources/SignallingWebServer/platform_scripts/cmd/node/*
 Resources/SignallingWebServer/platform_scripts/cmd/setenv/*
+.vsconfig
