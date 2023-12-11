@@ -45,17 +45,35 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 
    Ensure you have Python 3.10 installed. Set up a virtual environment:
 
-   ```bash
-   python -m venv venv_lucky_robots
-   . venv_lucky_robots/bin/activate
+   ```
+   # Windows Powershell
+   python -m venv lr_venv
+   .\lr_venv\Scripts\activate.ps1
    pip install -r requirements.txt
    ```
 3. **Setup Local Redis with Docker**
-   ```bash
-   cd redis
+
+   ```
+   # Windows Powershell or bash
    docker pull redis
    docker run -p 6379:6379 redis
    ```
+
+4. **Compile project files with VStudio 2019 or 2022**
+
+    Ensure you have VStudio installed (not VSCode) and click Tools > Get Tools and Features
+    Make sure you have following modules installed.
+        - Game Development with C++
+        - .NET Desktop Development
+    
+    Then 
+    - Right-click on controllable_pawn.uproject, 
+    - Show More > Generate VStudio Files
+    - Double click on newly generated VS file, controllable_pawn.sln
+    - Click "Build > Build controllable_pawn"
+
+    If this process ends with zero errors in a few seconds then you're ready run the project, if you have errors, it's mainly because it failed to install VS components.
+
 
 4. **Setup PixelStreaming**
 
@@ -65,17 +83,16 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 
    Open the provided `controllable_pawn.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
 
-6. **Connect Python Script**
-
-   Modify the `config.py` file with the appropriate paths and settings for your setup.
 
 ## Usage
 
 1. **Start Unreal Simulation**
 
-   - Run `Start_SignallingServer.ps1` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
-   - Launch the Unreal Project and play the simulation scenario you wish to train your robot in. You must launch it in Standalone Mode
-   - Then you can browse to http://127.0.0.1/?StreamerId=LeftCamera and to http://127.0.0.1/?StreamerId=RightCamera to get both remote camera
+   - Run `.\run_pixel_streaming_server.ps1`
+   - Inside Unreal Editor you have a big green Play button. before you click that, there is a three dot icon next to it that says "Change Play Mode and Play Settings"
+   - Click that and then tick "Standalone Game" 
+   - Launch the game by clicking that Play button and play the simulation scenario you wish to train your robot in.
+   - Then you can browse to http://127.0.0.1/?StreamerId=LeftCamera and to http://127.0.0.1/?StreamerId=RightCamera to see what your robot is seeing (optional).
 
 2. **Run Python Training Script**
 
