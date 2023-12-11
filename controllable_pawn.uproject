@@ -4,7 +4,6 @@
 	"Category": "",
 	"Description": "",
 	"Plugins": [
-
 		{
 			"Name": "PixelStreaming",
 			"Enabled": true
@@ -13,6 +12,10 @@
 			"Name": "DTRedis",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/fd98577f848c4b6fbeabb2de4218025a"
+		},
+		{
+			"Name": "HttpBlueprint",
+			"Enabled": true
 		}
 	]
 }
