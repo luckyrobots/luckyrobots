@@ -1,8 +1,6 @@
 import time
-import redis
 import cv2
 import numpy as np
-import urllib.request
 import asyncio
 import websockets
 import json
@@ -15,25 +13,38 @@ from aiortc import (
   RTCIceServer,
 )
 from aiortc.contrib.media import MediaRelay, MediaRecorder
-from ultralytics import YOLO
-import torch
-from MLs.depth_estimation import create_side_by_side, generate_depth_map
-from midas.model_loader import load_model
+# from ultralytics import YOLO
+# import torch
+# from MLs.depth_estimation import create_side_by_side, generate_depth_map
+# from midas.model_loader import load_model
 import threading
-import throttle
+
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
-POOL = redis.ConnectionPool(host='9.tcp.ngrok.io', port=22832, db=0)
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
-def getVariable(variable_name):
-    my_server = redis.Redis(connection_pool=POOL)
-    response = my_server.get(variable_name)
-    return response
+next_move = 'a'
 
-def setVariable(variable_name, variable_value):
-    my_server = redis.Redis(connection_pool=POOL)
-    my_server.set(variable_name, variable_value)
+
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        global next_move
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(next_move.encode('utf-8'))
+        next_move = '0'
+
+# Set the port to 3000
+port = 3000
+server_address = ('', port)
+
+httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
+print(f"Server running on port {port}...")
+httpd.serve_forever()
+
+
 
 def parseCandidate(cand) -> RTCIceCandidate:
     # print('candidate recieved: ', cand)
