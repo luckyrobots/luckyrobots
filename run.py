@@ -40,7 +40,7 @@ class WebRTCServer:
                 print("WebSocket connection established")
                 while True:
                     message = await websocket.recv()
-                    print(f"Received message: {message}")
+                    # print(f"Received message: {message}")
                     data = json.loads(message)
 
                     if (data['type'] == 'config'):
