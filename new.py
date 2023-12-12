@@ -15,11 +15,15 @@ from aiortc import (
 from aiortc.contrib.media import MediaRelay, MediaRecorder
 import threading
 import queue
+import numpy as np
 
 next_move = 'a'
 
 async def handle(request):
-    return web.Response(text=next_move)
+    global next_move
+    a = next_move
+    next_move = '0'
+    return web.Response(text=a)
 
 app = web.Application()
 app.router.add_get('/', handle)
@@ -86,12 +90,26 @@ async def run(pc):
 frame_queue = queue.Queue()
 
 def display_images():
+    global next_move
     while True:
         frame = frame_queue.get()
         if frame is None:
+            print("shit frame")
             break
-        cv2.imshow('stream', frame)
-        cv2.waitKey(1)  # Display the image for 1 ms
+        if len(frame.shape) == 3:
+            # print("This frame is an image.")
+            cv2.imshow('stream', frame)
+            cv2.waitKey(1)  # Display the image for 1 ms
+
+            array = ["a","s","d","q","w","e","z","x"]
+            random_item = np.random.choice(array)
+            next_move = random_item
+
+        elif len(frame.shape) == 4:
+            print("This frame is a video.")
+            break 
+        
+
 
 # Start the display thread
 display_thread = threading.Thread(target=display_images)
