@@ -7,6 +7,7 @@ class ImageProcessor:
         self.frame = frame
 
     def process_image(self, server):
+        print("Inside process_image method")
         while True:
             frame = server.frame_queue.get()
             if frame is None:
