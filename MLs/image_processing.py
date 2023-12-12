@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-
 class ImageProcessor:
     """Example class for image processing"""
     def __init__(self, frame):
@@ -14,6 +13,9 @@ class ImageProcessor:
                 break
             array = ["a", "s", "d", "q", "w", "e", "z", "x"]
             server.next_move = np.random.choice(array)
+            self.frame = frame  # Update self.frame with the new frame data
             self.frame = cv2.resize(self.frame, (640, 320))
             cv2.imshow('stream', self.frame)
             cv2.waitKey(1)
+
+            
