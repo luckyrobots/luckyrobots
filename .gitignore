@@ -95,6 +95,8 @@ tmp/
 Binaries/*
 Plugins/*/Binaries/*
 
+Releases/*
+
 #Pixel Streaming
 Samples/*
 Resources/SignallingWebServer/logs/*
