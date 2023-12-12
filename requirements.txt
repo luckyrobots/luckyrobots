@@ -4,3 +4,4 @@ asyncio==
 numpy== 
 aiortc==
 websockets==
+aiohttp==

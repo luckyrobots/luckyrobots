@@ -22,30 +22,6 @@ import threading
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-next_move = 'a'
-
-
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        global next_move
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write(next_move.encode('utf-8'))
-        next_move = '0'
-
-# Set the port to 3000
-port = 3000
-server_address = ('', port)
-
-httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
-print(f"Server running on port {port}...")
-httpd.serve_forever()
-
-
-
 def parseCandidate(cand) -> RTCIceCandidate:
     # print('candidate recieved: ', cand)
     sdp = cand['candidate']
