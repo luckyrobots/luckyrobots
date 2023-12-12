@@ -98,6 +98,7 @@ def display_images():
             break
         if len(frame.shape) == 3:
             # print("This frame is an image.")
+            frame = cv2.resize(frame, (640, 320))
             cv2.imshow('stream', frame)
             cv2.waitKey(1)  # Display the image for 1 ms
 
