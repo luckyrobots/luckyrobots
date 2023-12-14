@@ -6,6 +6,16 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
+** UPDATE **
+
+Completed our first depth map using Midas monocular depth estimation model
+
+
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/647a5c32-297a-4157-b72b-afeacdaae48a
+
+
+
 https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6a0-ef3e2ea7a31c.mp4
 
 ## Table of Contents
