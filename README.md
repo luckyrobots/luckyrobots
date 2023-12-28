@@ -6,7 +6,17 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-** UPDATE **
+** UPDATE 12/27 **
+
+Lucky now has a drone  - like the Mars Rover! When it's activated camera feed switches to it automatically!
+
+
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/29103a5a-a209-4d49-acd1-adad88e5b590
+
+
+
+** UPDATE 5/12 **
 
 Completed our first depth map using Midas monocular depth estimation model
 
