@@ -85,35 +85,11 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    .\lr_venv\Scripts\activate.ps1
    pip install -r requirements.txt
    ```
-3. **Setup Local Redis with Docker**
+3. **Setup PixelStreaming**
 
-   ```
-   # Windows Powershell or bash
-   docker pull redis
-   docker run -p 6379:6379 redis
-   ```
+   - Run `setup.bat` located in `Resources\SignalingWebServer\platform_scripts\cmd`
 
-4. **Compile project files with VStudio 2019 or 2022**
-
-    Ensure you have VStudio installed (not VSCode) and click Tools > Get Tools and Features
-    Make sure you have following modules installed.
-        - Game Development with C++
-        - .NET Desktop Development
-    
-    Then 
-    - Right-click on controllable_pawn.uproject, 
-    - Show More > Generate VStudio Files
-    - Double click on newly generated VS file, controllable_pawn.sln
-    - Click "Build > Build controllable_pawn"
-
-    If this process ends with zero errors in a few seconds then you're ready run the project, if you have errors, it's mainly because it failed to install VS components.
-
-
-4. **Setup PixelStreaming**
-
-   - Run `setup.bat` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
-
-5. **Launch Unreal Project**
+4. **Launch Unreal Project**
 
    Open the provided `controllable_pawn.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
 
