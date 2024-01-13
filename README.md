@@ -19,6 +19,12 @@ We are now flying! Look at these environments, can you tell they're not real?
 ![Screenshot_8](https://github.com/lucky-robots/lucky-robots/assets/203507/26904b69-c8b8-467d-8355-595cc62ead3f)
 ![Screenshot_7](https://github.com/lucky-robots/lucky-robots/assets/203507/e43e25b0-b68d-4c1e-9a7d-800b9cf5312b)
 
+** UPDATE 1/13 **
+
+We are able to construct a 3d world using single camera @niconielsen32
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/f2fd19ee-b40a-4fef-bd30-72c56d0f9ead
+
 
 ** UPDATE 12/27 **
 
@@ -33,7 +39,6 @@ https://github.com/lucky-robots/lucky-robots/assets/203507/29103a5a-a209-4d49-ac
 ** UPDATE 5/12 **
 
 Completed our first depth map using Midas monocular depth estimation model
-
 
 
 https://github.com/lucky-robots/lucky-robots/assets/203507/647a5c32-297a-4157-b72b-afeacdaae48a
