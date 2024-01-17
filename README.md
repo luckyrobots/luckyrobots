@@ -6,6 +6,13 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
+** UPDATE 1/15 **
+
+Luck-e is starting to understand the world around us and navigate accordingly!
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/4e56bbc5-92da-4754-92f4-989b9cb86b6f
+
+
 ** UPDATE 1/13 **
 
 We are able to construct a 3d world using single camera @niconielsen32
