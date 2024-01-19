@@ -34,7 +34,7 @@ class WebRTCServer:
 
     async def run(self):
         print("Inside run method - starting")
-        uri = "ws://localhost/?StreamerId=LeftCamera"
+        uri = "ws://localhost:8080/?StreamerId=LeftCamera"
         try:
             async with websockets.connect(uri) as websocket:
                 print("WebSocket connection established")
