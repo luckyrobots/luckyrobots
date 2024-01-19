@@ -6,10 +6,48 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-** UPDATE **
+** UPDATE 1/15 **
+
+Luck-e is starting to understand the world around us and navigate accordingly!
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/4e56bbc5-92da-4754-92f4-989b9cb86b6f
+
+
+** UPDATE 1/13 **
+
+We are able to construct a 3d world using single camera @niconielsen32
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/f2fd19ee-b40a-4fef-bd30-72c56d0f9ead
+
+
+
+** UPDATE 12/29 **
+We are now flying! Look at these environments, can you tell they're not real?
+
+![Screenshot_18](https://github.com/lucky-robots/lucky-robots/assets/203507/f988a18e-9dc3-484e-9d9f-eb7ad57180b2)
+![Screenshot_17](https://github.com/lucky-robots/lucky-robots/assets/203507/f423d73f-d336-47b6-abf0-6f1b174bd740)
+![Screenshot_19](https://github.com/lucky-robots/lucky-robots/assets/203507/7f2b9ae2-f84f-41a1-8511-959e2586b809)
+![Screenshot_15](https://github.com/lucky-robots/lucky-robots/assets/203507/d65a0fb4-3a4d-4207-9181-2de0e2ce63ce)
+![Screenshot_11](https://github.com/lucky-robots/lucky-robots/assets/203507/cf328e8d-fc40-4be3-81ac-a900d0505fd8)
+![Screenshot_14](https://github.com/lucky-robots/lucky-robots/assets/203507/5ae9bf2d-246b-437f-ba1b-901a7f10b1fa)
+![Screenshot_12](https://github.com/lucky-robots/lucky-robots/assets/203507/e2f0684e-ca18-40b0-8680-76ccec918171)
+![Screenshot_8](https://github.com/lucky-robots/lucky-robots/assets/203507/26904b69-c8b8-467d-8355-595cc62ead3f)
+![Screenshot_7](https://github.com/lucky-robots/lucky-robots/assets/203507/e43e25b0-b68d-4c1e-9a7d-800b9cf5312b)
+
+
+** UPDATE 12/27 **
+
+Lucky now has a drone  - like the Mars Rover! When it's activated camera feed switches to it automatically!
+
+
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/29103a5a-a209-4d49-acd1-adad88e5b590
+
+
+
+** UPDATE 5/12 **
 
 Completed our first depth map using Midas monocular depth estimation model
-
 
 
 https://github.com/lucky-robots/lucky-robots/assets/203507/647a5c32-297a-4157-b72b-afeacdaae48a
@@ -61,35 +99,11 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    .\lr_venv\Scripts\activate.ps1
    pip install -r requirements.txt
    ```
-3. **Setup Local Redis with Docker**
+3. **Setup PixelStreaming**
 
-   ```
-   # Windows Powershell or bash
-   docker pull redis
-   docker run -p 6379:6379 redis
-   ```
+   - Run `setup.bat` located in `Resources\SignalingWebServer\platform_scripts\cmd`
 
-4. **Compile project files with VStudio 2019 or 2022**
-
-    Ensure you have VStudio installed (not VSCode) and click Tools > Get Tools and Features
-    Make sure you have following modules installed.
-        - Game Development with C++
-        - .NET Desktop Development
-    
-    Then 
-    - Right-click on controllable_pawn.uproject, 
-    - Show More > Generate VStudio Files
-    - Double click on newly generated VS file, controllable_pawn.sln
-    - Click "Build > Build controllable_pawn"
-
-    If this process ends with zero errors in a few seconds then you're ready run the project, if you have errors, it's mainly because it failed to install VS components.
-
-
-4. **Setup PixelStreaming**
-
-   - Run `setup.bat` located in `Ressources\SignalingWebServer\platform_scripts\cmd`
-
-5. **Launch Unreal Project**
+4. **Launch Unreal Project**
 
    Open the provided `controllable_pawn.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
 
