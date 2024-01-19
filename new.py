@@ -25,8 +25,11 @@ async def handle(request):
     next_move = '0'
     return web.Response(text=a)
 
+
 app = web.Application()
 app.router.add_get('/', handle)
+
+
 
 async def start_server(app):
     runner = web.AppRunner(app)
