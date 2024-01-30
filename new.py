@@ -25,8 +25,11 @@ async def handle(request):
     next_move = '0'
     return web.Response(text=a)
 
+
 app = web.Application()
 app.router.add_get('/', handle)
+
+
 
 async def start_server(app):
     runner = web.AppRunner(app)
@@ -69,7 +72,7 @@ async def run(pc):
       while True:
         message = await websocket.recv()
         data = json.loads(message)
-        
+
         if(data['type'] == 'config'):
           iceServers = []
           for server in data['peerConnectionOptions']['iceServers']:
@@ -108,8 +111,8 @@ def display_images():
 
         elif len(frame.shape) == 4:
             print("This frame is a video.")
-            break 
-        
+            break
+
 
 
 # Start the display thread
@@ -137,8 +140,6 @@ async def on_connectionstatechange():
 @pc.on("signalingstatechange")
 async def on_connectionstatechange():
   print("Signaling state is", pc.signalingState)
-
-
 
 
 loop = asyncio.get_event_loop()

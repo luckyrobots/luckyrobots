@@ -13,9 +13,9 @@
 			"Enabled": true
 		},
 		{
-			"Name": "DTRedis",
-			"Enabled": false,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/fd98577f848c4b6fbeabb2de4218025a"
+			"Name": "VaRest",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/e47be161e7a24e928560290abd5dcc4f"
 		}
 	]
 }
