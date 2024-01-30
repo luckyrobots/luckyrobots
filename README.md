@@ -99,6 +99,7 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
    .\lr_venv\Scripts\activate.ps1
    pip install -r requirements.txt
    ```
+
 3. **Setup PixelStreaming**
 
    - Run `setup.bat` located in `Resources\SignalingWebServer\platform_scripts\cmd`

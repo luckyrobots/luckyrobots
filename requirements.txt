@@ -1,7 +1,7 @@
-open3d==0.17.0
-opencv-python==4.8.1.78
-asyncio== 
-numpy== 
-aiortc==
-websockets==
-aiohttp==
+
+opencv-python
+asyncio
+numpy 
+aiortc
+websockets
+aiohttp
