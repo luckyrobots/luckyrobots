@@ -6,6 +6,12 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
+** UPDATE 2/6 **
+
+Lucky first release: https://drive.google.com/file/d/1qIbkez1VGU1WcIpqk8UuXTbSTMV7VC3R/view?amp;usp=embed_facebook
+
+Now you can run the simulation on your Windows Machine, and run your AI models against it. If you run into issues, please submit an issue.
+
 ** UPDATE 1/15 **
 
 Luck-e is starting to understand the world around us and navigate accordingly!
