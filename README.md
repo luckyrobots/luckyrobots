@@ -6,6 +6,16 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
+** UPDATE 2/8 **
+
+We are now writing prompts against the 3d environment we have reconstructed using point clouds...
+
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/a93c9f19-2891-40e1-8598-717ad13efba6
+
+
+
+
 ** UPDATE 2/6 **
 
 Lucky first release: https://drive.google.com/file/d/1qIbkez1VGU1WcIpqk8UuXTbSTMV7VC3R/view?amp;usp=embed_facebook
