@@ -1,7 +1,6 @@
 
 opencv-python
 asyncio
-numpy 
 aiortc
 websockets
 aiohttp

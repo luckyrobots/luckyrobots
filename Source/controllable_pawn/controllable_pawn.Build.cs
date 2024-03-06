@@ -26,11 +26,6 @@ public class controllable_pawn : ModuleRules
             "InputCore" 
         });
 
-        PublicDependencyModuleNames.AddRange(new string[] { 
-            "DatabaseSupport", 
-            "SQLiteCore", 
-            "SQLiteSupport" 
-        });
 
     }
 }
