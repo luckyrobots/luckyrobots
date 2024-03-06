@@ -6,6 +6,7 @@ from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
 
 class VideoImageTrack(VideoStreamTrack):
     """
+    We're not going to use this anymore - so let's delete soon.
     A video track that returns an image received from the WebRTC stream.
     """
     def __init__(self, track):
