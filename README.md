@@ -6,6 +6,39 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
+
+
+https://github.com/lucky-robots/lucky-robots/assets/203507/6c29b881-2ff6-4734-ad33-71c09ad75b62
+
+
+
+(Note for the repository: since it's almost impossible to develop a large game like this on github due to file size and bandwidth limitations (our repo is currently +250gb, we've moved our unreal source code to a local Perforce server, we'll find a way to share that with the public soon. if you need access please leave reach out, I will give you FTP access)
+
+### ** WHAT WE ARE WORKING ON NEXT **
+
+*   Camera Poses coming from Unreal (to have faster AI training)
+*   Depth map provided by Unreal (We tried [MiDAS](https://github.com/isl-org/MiDaS) and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) they work great but not 100%. We're certain this problem will be solved soon and we will simulate this in the meanwhile)
+*   Fully integrate with [ConceptGraphs](https://concept-graphs.github.io/) [Ali](https://github.com/alik-git) Welcome to our team! 🚀🚀🚀
+
+** UPDATE 3/6 **
+
+We have designed [Stretch 3 Robot](https://hello-robot.com/stretch-3-product) and working on adding this robot to our world
+
+<img width="504" alt="image" src="https://github.com/lucky-robots/lucky-robots/assets/203507/54b1bbbc-67e0-4add-a58f-84b08d14e680">
+
+
+** UPDATE 1/6 **
+
+WE GOT OUR FIRST TEST LINUX BUILD (NOT THE ACTUAL WORLD, THAT'S BEING BUILT) (TESTED ON UBUNTU 22.04)
+
+https://drive.google.com/file/d/1_OCMwn8awKZHBfCfc9op00y6TvetI18U/view?usp=sharing
+
+
+** UPDATE 2/15 **
+
+[Luck-e World second release is out (Windows only - we're working on Linux build next)!](https://drive.google.com/drive/folders/10sVx5eCcx7d9ZR6tn0zqeQCaOF84MIQt)
+
+
 ** UPDATE 2/8 **
 
 We are now writing prompts against the 3d environment we have reconstructed using point clouds...
