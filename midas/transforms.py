@@ -4,15 +4,7 @@ import math
 
 
 def apply_min_size(sample, size, image_interpolation_method=cv2.INTER_AREA):
-    """Rezise the sample to ensure the given size. Keeps aspect ratio.
 
-    Args:
-        sample (dict): sample
-        size (tuple): image size
-
-    Returns:
-        tuple: new size
-    """
     shape = list(sample["disparity"].shape)
 
     if shape[0] >= size[0] and shape[1] >= size[1]:

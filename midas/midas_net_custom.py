@@ -5,10 +5,6 @@ https://github.com/thomasjpfan/pytorch_refinenet/blob/master/pytorch_refinenet/r
 import torch
 import torch.nn as nn
 
-from .base_model import BaseModel
-from .blocks import FeatureFusionBlock, FeatureFusionBlock_custom, Interpolate, _make_encoder
-
-
 class MidasNet_small(BaseModel):
     """Network for monocular depth estimation.
     """

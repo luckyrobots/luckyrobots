@@ -10,7 +10,7 @@
 	"EnableWebserver": true,
 	"MatchmakerAddress": "",
 	"MatchmakerPort": 9999,
-	"PublicIp": "localhost",
+	"PublicIp": "0.0.0.0",
 	"HttpPort": 8080,
 	"HttpsPort": 443,
 	"StreamerPort": 8888,
