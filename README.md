@@ -11,7 +11,7 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. In the meantime, co-founder of Github [https://github.com/defunkt](@defunkt) is working on something at [void.dev] that should help with this. Hopefully we can try it out soon! If you need access or have ideas to work around this, give me a shout. I'll hook you up with FTP access for now.)
+(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. In the meantime, co-founder of Github [@defunkt](https://github.com/defunkt) is working on something at [void.dev](https://void.dev) that should help with this. Hopefully we can try it out soon! If you need access or have ideas to work around this, give me a shout. I'll hook you up with FTP access for now.)
 
 ### ** WHAT WE ARE WORKING ON NEXT **
 
