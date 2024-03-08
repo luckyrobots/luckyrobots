@@ -11,13 +11,7 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-
-
-
-
-
-
-(Note for the repository: since it's almost impossible to develop a large game like this on github due to file size and bandwidth limitations, since our repo is currently +250gb, we've moved our unreal source code to a local Perforce server, we'll find a way to share that with the public soon. if you need access please leave reach out, I will give you FTP access)
+(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. In the meantime, @defunkt and GitHub are working on something at void.dev that should help with this. Hopefully we can try it out soon! If you need access or have ideas to work around this, give us a shout. We'll hook you up with FTP access for now.)
 
 ### ** WHAT WE ARE WORKING ON NEXT **
 
