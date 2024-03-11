@@ -1,5 +1,5 @@
 # Lucky Robots
-## Robotics AI Training in Hyperrealistic Game Environments (sound on!)
+## Robotics-AI Training in Hyperrealistic Game Environments (sound on!)
 
 https://github.com/lucky-robots/lucky-robots/assets/203507/6c29b881-2ff6-4734-ad33-71c09ad75b62
 
