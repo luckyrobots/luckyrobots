@@ -15,9 +15,13 @@ Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
 ### ** WHAT WE ARE WORKING ON NEXT **
 
-*   Camera Poses coming from Unreal (to have faster AI training)
-*   Depth map provided by Unreal (We tried [MiDAS](https://github.com/isl-org/MiDaS) and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) they work great but not 100%. We're certain this problem will be solved soon and we will simulate this in the meanwhile)
-*   Fully integrate with [ConceptGraphs](https://concept-graphs.github.io/) [Ali](https://github.com/alik-git) Welcome to our team! 🚀🚀🚀
+*   [DONE] Camera Poses coming from Unreal (to have faster AI training)
+*   [DONE] Depth map provided by Unreal (We tried [MiDAS](https://github.com/isl-org/MiDaS) and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) they work great but not 100%. We're certain this problem will be solved soon and we will simulate this in the meanwhile)
+*   [WIP] Fully integrate with [ConceptGraphs](https://concept-graphs.github.io/) [Ali](https://github.com/alik-git) Welcome to our team! 🚀🚀🚀
+*   Adding a simple map (eg. VoxelNExt) to our stack so we can navigate while mapping
+*   Real-time ConceptGraph'ing...  
+
+** UPDATE 3/19 FIRST LUCKY WORLD UBUNTU BUILD IS COMPLETE: https://drive.google.com/drive/folders/15iYXzqFNEg1b2E6Ft1ErwynqBMaa0oOa
 
 ** UPDATE 3/6 **
 
