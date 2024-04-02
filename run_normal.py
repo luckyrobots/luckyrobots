@@ -34,7 +34,7 @@ class WebRTCServer:
 
     async def run(self):
         print("Inside run method - starting")
-        uri = "ws://localhost:8080/?StreamerId=LeftCamera"
+        uri = "ws://localhost:8080/?StreamerId=NormalCamera"
         try:
             async with websockets.connect(uri) as websocket:
                 print("WebSocket connection established")
@@ -49,7 +49,7 @@ class WebRTCServer:
                             iceServers.append(RTCIceServer(urls=server['urls']))
                         self.pc.__configration = RTCConfiguration(iceServers)
                         print(data['peerConnectionOptions']['iceServers'])
-                        await websocket.send(json.dumps({'type': 'subscribe', 'streamerId': 'LeftCamera'}))
+                        await websocket.send(json.dumps({'type': 'subscribe', 'streamerId': 'Normal Camera'}))
                     if (data['type'] == 'offer'):
                         await self.pc.setRemoteDescription(RTCSessionDescription(sdp=data['sdp'], type=data['type']))
                         await self.pc.setLocalDescription(await self.pc.createAnswer())
