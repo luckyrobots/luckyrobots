@@ -152,7 +152,7 @@ async def main():
     server = WebRTCServer()
     server.setup_peer_connection()
     image_processor = ImageProcessor(server)
-    display_thread = threading.Thread(target=image_processor.process_image, args=(server,))
+    display_thread = threading.Thread(target=image_processor.process_image, args=(server, "depth_camera"))
     display_thread.start()
 
     try:
