@@ -1,4 +1,6 @@
 import asyncio
+import datetime
+
 import websockets
 import json
 import cv2
@@ -11,20 +13,50 @@ import numpy as np
 
 from MLs.image_processing import ImageProcessor
 
+async def cors_middleware(app, handler):
+    async def middleware(request):
+        if request.method == 'OPTIONS':
+            resp = web.Response()
+        else:
+            try:
+                resp = await handler(request)
+            except web.HTTPNotFound:
+                resp = web.Response(status=404)
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Access-Control-Allow-Methods'] = ', '.join(
+            ('GET', 'POST', 'PUT', 'DELETE')
+        )
+        resp.headers['Access-Control-Allow-Headers'] = '*'
+        return resp
+
+    return middleware
+
 class WebRTCServer:
     def __init__(self, camera_type):
         self.camera_type = camera_type
         self.pc = RTCPeerConnection()
         self.frame_queue = queue.Queue()
         self.next_move = 'a'
-        self.app = web.Application()
+        self.app = web.Application(middlewares=[cors_middleware])
         self.app.router.add_get('/', self.handle)
+        self.app.router.add_get('/set-next-move', self.set_next_move)
+        self.app.router.add_get('/hit', self.hit)
         self.relay = MediaRelay()
+
+    async def hit(self, request):
+        print(request.rel_url)
+        body = [{"time": datetime.datetime.utcnow().isoformat()}]
+        return web.Response(body=json.dumps(body))
 
     async def handle(self, request):
         a = self.next_move
         self.next_move = '0'
         return web.Response(text=a)
+
+    async def set_next_move(self, request):
+        next_move = request.rel_url.query['next_move']
+        self.next_move = next_move
+        return web.Response(text=next_move)
 
     async def start_server(self):
         runner = web.AppRunner(self.app)
