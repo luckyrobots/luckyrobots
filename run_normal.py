@@ -1,6 +1,4 @@
 import asyncio
-import datetime
-
 import websockets
 import json
 import cv2
@@ -13,50 +11,20 @@ import numpy as np
 
 from MLs.image_processing import ImageProcessor
 
-async def cors_middleware(app, handler):
-    async def middleware(request):
-        if request.method == 'OPTIONS':
-            resp = web.Response()
-        else:
-            try:
-                resp = await handler(request)
-            except web.HTTPNotFound:
-                resp = web.Response(status=404)
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Methods'] = ', '.join(
-            ('GET', 'POST', 'PUT', 'DELETE')
-        )
-        resp.headers['Access-Control-Allow-Headers'] = '*'
-        return resp
-
-    return middleware
 
 class WebRTCServer:
-    def __init__(self, camera_type):
-        self.camera_type = camera_type
+    def __init__(self):
         self.pc = RTCPeerConnection()
         self.frame_queue = queue.Queue()
         self.next_move = 'a'
-        self.app = web.Application(middlewares=[cors_middleware])
+        self.app = web.Application()
         self.app.router.add_get('/', self.handle)
-        self.app.router.add_get('/set-next-move', self.set_next_move)
-        self.app.router.add_get('/hit', self.hit)
         self.relay = MediaRelay()
-
-    async def hit(self, request):
-        print(request.rel_url)
-        body = [{"time": datetime.datetime.utcnow().isoformat()}]
-        return web.Response(body=json.dumps(body))
 
     async def handle(self, request):
         a = self.next_move
         self.next_move = '0'
         return web.Response(text=a)
-
-    async def set_next_move(self, request):
-        next_move = request.rel_url.query['next_move']
-        self.next_move = next_move
-        return web.Response(text=next_move)
 
     async def start_server(self):
         runner = web.AppRunner(self.app)
@@ -65,26 +33,30 @@ class WebRTCServer:
         await site.start()
 
     async def run(self):
-        print(f"Inside run method - starting {self.camera_type}")
-        uri = f"ws://localhost:8080/?StreamerId={self.camera_type}"
+        print("Inside run method - starting")
+        uri = "ws://localhost:8080/?StreamerId=NormalCamera"
         try:
             async with websockets.connect(uri) as websocket:
                 print("WebSocket connection established")
                 while True:
                     message = await websocket.recv()
+                    # print(f"Received message: {message}")
                     data = json.loads(message)
 
-                    if data['type'] == 'config':
-                        iceServers = [RTCIceServer(urls=server['urls']) for server in data['peerConnectionOptions']['iceServers']]
+                    if (data['type'] == 'config'):
+                        iceServers = []
+                        for server in data['peerConnectionOptions']['iceServers']:
+                            iceServers.append(RTCIceServer(urls=server['urls']))
                         self.pc.__configration = RTCConfiguration(iceServers)
                         print(data['peerConnectionOptions']['iceServers'])
-                        await websocket.send(json.dumps({'type': 'subscribe', 'streamerId': "Depth Camera" if self.camera_type == "DepthCamera" else "Normal Camera"}))
-
-                    elif data['type'] == 'offer':
-                        await self.handle_offer(data, websocket)
-
-                    elif data['type'] == 'iceCandidate':
-                        await self.handle_ice_candidate(data)
+                        await websocket.send(json.dumps({'type': 'subscribe', 'streamerId': 'Normal Camera'}))
+                    if (data['type'] == 'offer'):
+                        await self.pc.setRemoteDescription(RTCSessionDescription(sdp=data['sdp'], type=data['type']))
+                        await self.pc.setLocalDescription(await self.pc.createAnswer())
+                        await websocket.send(json.dumps({'type': 'answer', 'sdp': self.pc.localDescription.sdp}))
+                    if (data['type'] == 'iceCandidate'):
+                        candidate = parse_candidate(data['candidate'])
+                        await self.pc.addIceCandidate(candidate)
         except Exception as e:
             print(f"WebSocket connection failed: {e}")
 
@@ -106,7 +78,7 @@ class WebRTCServer:
                 while True:
                     frame = await relayed_track.recv()
                     video_frame = frame.to_ndarray(format="bgr24")
-                    self.frame_queue.put(video_frame)
+                    self.frame_queue.put(video_frame)  # Add the frame to the queue
 
         @self.pc.on("connectionstatechange")
         async def on_connectionstatechange():
@@ -115,6 +87,7 @@ class WebRTCServer:
         @self.pc.on("signalingstatechange")
         async def on_signalingstatechange():
             print("Signaling state is", self.pc.signalingState)
+
 
 def parse_candidate(cand) -> RTCIceCandidate:
     sdp = cand['candidate']
@@ -144,38 +117,28 @@ def parse_candidate(cand) -> RTCIceCandidate:
 
     return candidate
 
+
 async def main():
-    depth_server = WebRTCServer('DepthCamera')
-    normal_server = WebRTCServer('NormalCamera')
 
-    depth_server.setup_peer_connection()
-    normal_server.setup_peer_connection()
-
-    image_processor_depth = ImageProcessor(depth_server)
-    image_processor_normal = ImageProcessor(normal_server)
-
-    depth_display_thread = threading.Thread(target=image_processor_depth.process_image, args=(depth_server, "depth_camera"))
-    normal_display_thread = threading.Thread(target=image_processor_normal.process_image, args=(normal_server, "normal_camera"))
-
-    depth_display_thread.start()
-    normal_display_thread.start()
+    server = WebRTCServer()
+    server.setup_peer_connection()
+    image_processor = ImageProcessor(server)
+    display_thread = threading.Thread(target=image_processor.process_image, args=(server, "normal_camera"))
+    display_thread.start()
 
     try:
         await asyncio.gather(
-            depth_server.run(),
-            normal_server.run(),
-            depth_server.start_server()
+            server.run(),
+            server.start_server()
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
     finally:
-        depth_server.frame_queue.put(None)
-        normal_server.frame_queue.put(None)
-        depth_display_thread.join()
-        normal_display_thread.join()
-        await depth_server.pc.close()
-        await normal_server.pc.close()
+        server.frame_queue.put(None)
+        display_thread.join()
+        await server.pc.close()
         print("done")
+
 
 if __name__ == "__main__":
     print("Starting server")

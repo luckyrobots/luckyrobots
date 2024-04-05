@@ -1,1 +1,90 @@
-tbd.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lucky robots</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        async function setNextMove(nextMove) {
+            try {
+                const response = await fetch(`http://localhost:3001/set-next-move?next_move=${encodeURIComponent(nextMove)}`, {
+                    method: 'GET'
+                });
+                const text = await response.text();
+                console.log('GET response text:', text);
+            } catch (error) {
+                console.error('There has been a problem with your fetch operation:', error);
+            }
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+            const nextMove = document.getElementById('next-move').value;
+            setNextMove(nextMove);
+        }
+
+        let intervalId = null;
+
+        async function fetchAndLog() {
+            if (intervalId !== null) return;
+            intervalId = setInterval(async () => {
+                try {
+                    const response = await fetch('http://localhost:3001/hit');
+                    const text = await response.text();
+                    console.log('GET response text:', text);
+                } catch (error) {
+                    console.error('There has been a problem with your fetch operation:', error);
+                }
+            }, 200);
+        }
+
+    </script>
+</head>
+<body onload="fetchAndLog()">
+<h1>Testing real robots</h1>
+<form onsubmit="submitForm(event)">
+    <label for="next-move">Write command here:</label><br/>
+    <input type="text" id="next-move">
+    <button type="submit">Send</button>
+</form>
+</body>
+</html>
