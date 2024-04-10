@@ -1,5 +1,7 @@
 import asyncio
 import datetime
+import logging
+import random
 
 import websockets
 import json
@@ -12,6 +14,9 @@ import queue
 import numpy as np
 
 from MLs.image_processing import ImageProcessor
+
+async def handle_404(request):
+    return web.Response(text='The resource was not found on this server!', status=404)
 
 async def cors_middleware(app, handler):
     async def middleware(request):
@@ -37,21 +42,53 @@ class WebRTCServer:
         self.pc = RTCPeerConnection()
         self.frame_queue = queue.Queue()
         self.next_move = 'a'
-        self.app = web.Application(middlewares=[cors_middleware])
+        self.app = web.Application(middlewares=[cors_middleware, self.log_middleware])
         self.app.router.add_get('/', self.handle)
         self.app.router.add_get('/set-next-move', self.set_next_move)
-        self.app.router.add_get('/hit', self.hit)
+        self.app.router.add_get('/hit/', self.hit)
+        self.app.router.add_get('/camera_position/', self.hit)
+        self.app.router.add_get('/robot_position/', self.hit)
+        self.app.router.add_get('/prompt/', self.hit)
+        self.app.router.add_get('/{tail:.*}', handle_404)
         self.relay = MediaRelay()
 
+    async def log_middleware(self, app, handler):
+        async def middleware(request):
+            response = await handler(request)
+            if response.status == 404:
+                pycharm_log = logging.getLogger('pycharm')
+                pycharm_log.error('Page not found: %s', request.path)
+            return response
+        return middleware
+
     async def hit(self, request):
-        print(request.rel_url)
-        body = [{"time": datetime.datetime.utcnow().isoformat()}]
-        return web.Response(body=json.dumps(body))
+        print(request.rel_url, request.rel_url.query)
+        count = request.rel_url.query.get("count", 0)
+        return web.json_response({"count": count})
+
+    async def prompt(self, request):
+        print(request.rel_url, request.rel_url.query)
+        prompt = request.rel_url.query.get("prompt", "Default prompt value.")
+        return web.json_response({"prompt": prompt})
+
+    async def camera_position(self, request):
+        print(request.rel_url, request.rel_url.query)
+        camera_posiiton = request.rel_url.query.dict()
+        return web.json_response({"camera_position": camera_posiiton})
+
+    async def robot_position(self, request):
+        print(request.rel_url, request.rel_url.query)
+        robot_position = request.rel_url.query.dict()
+        return web.json_response({"robot_position": robot_position})
 
     async def handle(self, request):
-        a = self.next_move
-        self.next_move = '0'
-        return web.Response(text=a)
+        print(request.rel_url, request.rel_url.query)
+        self.next_move = self.random_moves()
+        return web.Response(text=self.next_move)
+
+    def random_moves(self):
+        moves = ["w 50 1", "a 30 1", "s 50 5"]
+        return random.choice(moves)
 
     async def set_next_move(self, request):
         next_move = request.rel_url.query['next_move']
