@@ -15,8 +15,10 @@ import numpy as np
 
 from MLs.image_processing import ImageProcessor
 
+
 async def handle_404(request):
     return web.Response(text='The resource was not found on this server!', status=404)
+
 
 async def cors_middleware(app, handler):
     async def middleware(request):
@@ -35,6 +37,7 @@ async def cors_middleware(app, handler):
         return resp
 
     return middleware
+
 
 class WebRTCServer:
     def __init__(self, camera_type):
@@ -152,6 +155,7 @@ class WebRTCServer:
         @self.pc.on("signalingstatechange")
         async def on_signalingstatechange():
             print("Signaling state is", self.pc.signalingState)
+
 
 def parse_candidate(cand) -> RTCIceCandidate:
     sdp = cand['candidate']

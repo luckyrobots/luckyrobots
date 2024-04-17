@@ -19,9 +19,10 @@ class ImageProcessor:
             # server.next_move = np.random.choice(array)
             self.frame = frame  # Update self.frame with the new frame data
             resized_frame = cv2.resize(self.frame, (640, 320))  # Resize the frame
-            cv2.imshow('stream', resized_frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):  # Press 'q' to exit the loop
-                break
+            # print(resized_frame)
+            # cv2.imshow(camera_type, resized_frame)
+            # if cv2.waitKey(1) & 0xFF == ord('q'):  # Press 'q' to exit the loop
+            #     break
 
             # Create the directory if it doesn't exist
             directory_path = f"images/{camera_type}"
@@ -31,7 +32,7 @@ class ImageProcessor:
             # Save the frame with a timestamp in the file name
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"{directory_path}/{camera_type}_{timestamp}.jpg"
-            # cv2.imwrite(filename, resized_frame)
-            # print(f"Saved: {filename}")
+            cv2.imwrite(filename, resized_frame)
+            print(f"Saved: {filename}")
 
         cv2.destroyAllWindows()
