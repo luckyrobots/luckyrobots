@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-const _ = require('lodash');
+// const _ = require('lodash');
 tasks = [];
 let tasksIndex = 0;
 

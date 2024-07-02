@@ -10,7 +10,10 @@ broker = "0.0.0.0"  # Example broker, replace with your broker
 port = 1883
 image_topic = "test/image"
 text_topic = "test/text"
+task_complete = "task/complete"
+
 i=0
+
 with open('./base64img.txt', 'r') as file:
     base64_image = file.read().strip()
 
@@ -54,6 +57,7 @@ client.on_message = on_message
 # Subscribe to the topics
 client.subscribe(image_topic)
 client.subscribe(text_topic)
+client.subscribe(task_complete)
 #publish test message
 
 
@@ -62,6 +66,7 @@ client.loop_start()
 
 try:
     while True:
+
         # client.publish(text_topic, "Terminalden selaminaleykum!")
         client.publish(image_topic, base64_image)
         time.sleep(2)
