@@ -3,7 +3,7 @@ from pyee.base import EventEmitter
 event_emitter = EventEmitter()
 
 
-def data_handler(image_bytes, image_name):
-    # print(data)
+def data_handler(robot_images: list):
+    print(len(robot_images))
 
-event_emitter.add_listener("head_cam", data_handler)
+event_emitter.add_listener("robot_images", data_handler)

@@ -1,7 +1,9 @@
+import os
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+from Playground import event_emitter
 from Playground.process_image import ProcessImage
 
 image_processor = ProcessImage()
@@ -25,14 +27,29 @@ class Watcher:
 
 
 class Handler(FileSystemEventHandler):
+    file_num = 0
+    image_stack = []
+
     @staticmethod
     def on_created(event):
         if event.is_directory:
             return None
         else:
             print(f"Received created event - {event.src_path}")
+            file = Handler.get_file_name(event.src_path)
+            current_file_num = int(file.split('_')[0]) if file.split('_')[0].isdigit() else Handler.file_num
             file_bytes = Handler._read_file_with_retry(event.src_path)
-            image_processor.process(file_bytes, event.src_path)
+
+            if current_file_num == Handler.file_num:
+                Handler.image_stack.append({"file_path": event.src_path, "file_bytes": file_bytes})
+            else:
+                event_emitter.emit("robot_images", Handler.image_stack)
+                Handler.file_num = current_file_num
+                Handler.image_stack = [{"file_path": event.src_path, "file_bytes": file_bytes}]
+
+    @staticmethod
+    def get_file_name(file_path):
+        return os.path.basename(file_path)
 
     @staticmethod
     def on_modified(event):
