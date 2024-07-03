@@ -1,6 +1,6 @@
-
 opencv-python
 asyncio
 aiortc
 websockets
 aiohttp
+watchdog
