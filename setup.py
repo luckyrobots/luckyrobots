@@ -12,7 +12,7 @@ setup(
     url="https://github.com/lucky-robots/lucky-robots",
     packages=find_packages(),
     install_requires=[
-        "watchdog", "pyee", "flask"
+        "watchdog", "pyee", "Flask==2.3.2"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
