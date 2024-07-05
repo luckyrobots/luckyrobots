@@ -1,0 +1,8 @@
+opencv-python
+asyncio
+aiortc
+websockets
+aiohttp
+watchdog
+pyee
+flask
