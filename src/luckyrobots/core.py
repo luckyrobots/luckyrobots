@@ -1,12 +1,10 @@
 import os
 import time
+
+from luckyrobots import event_emitter
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from Playground import event_emitter
-from Playground.process_image import ProcessImage
-
-image_processor = ProcessImage()
 
 binary_path = None
 

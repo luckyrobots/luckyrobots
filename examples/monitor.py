@@ -1,5 +1,5 @@
-import luckyrobots.src as lr
-from luckyrobots.src.events import on_message
+import luckyrobots as lr
+from luckyrobots.events import on_message
 
 lr.binary_path = "C:\\Users\\Goran\\Downloads\\Windows06_28_2024\\Windows06_28_2024"
 
