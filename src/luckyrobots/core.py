@@ -1,12 +1,10 @@
 import os
 import time
-
+import sys
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-
-binary_path = None
-
+from luckyrobots.events import event_emitter
 
 class Watcher:
     def __init__(self, directory_path):
@@ -31,7 +29,6 @@ class Handler(FileSystemEventHandler):
 
     @staticmethod
     def on_created(event):
-        from .events import event_emitter
         if event.is_directory:
             return None
         else:
@@ -79,9 +76,16 @@ class Handler(FileSystemEventHandler):
             print(f"Failed to read {file_path} after {retries} attempts")
 
 
-def start():
+def start(binary_path):
     if binary_path is None:
         raise ValueError("binary_path is not set.")
-    directory_to_watch = os.path.join(binary_path, "LuckEWorld", "CamShots")
+    
+    if sys.platform == "darwin":  # macOS
+        directory_to_watch = os.path.join(binary_path, "Contents", "UE", "LuckEWorld", "CamShots")
+    else:  # Windows and other platforms
+        directory_to_watch = os.path.join(binary_path, "LuckEWorld", "CamShots")
+    
     watcher = Watcher(directory_to_watch)
     watcher.run()
+
+
