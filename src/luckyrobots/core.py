@@ -32,7 +32,7 @@ class Handler(FileSystemEventHandler):
         if event.is_directory:
             return None
         else:
-            print(f"Received created event - {event.src_path}")
+            # print(f"Received created event - {event.src_path}")
             file = Handler.get_file_name(event.src_path)
             current_file_num = int(file.split('_')[0]) if file.split('_')[0].isdigit() else Handler.file_num
             file_bytes = Handler._read_file_with_retry(event.src_path)
@@ -53,14 +53,16 @@ class Handler(FileSystemEventHandler):
         if event.is_directory:
             return None
         else:
-            print(f"Received modified event - {event.src_path}")
+            # print(f"Received modified event - {event.src_path}")
+            pass
 
     @staticmethod
     def on_deleted(event):
         if event.is_directory:
             return None
         else:
-            print(f"Received deleted event - {event.src_path}")
+            # print(f"Received deleted event - {event.src_path}")
+            pass
 
     @staticmethod
     def _read_file_with_retry(file_path, retries=5, delay=1):
