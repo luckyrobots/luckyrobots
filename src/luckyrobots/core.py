@@ -1,7 +1,6 @@
 import os
 import time
 
-from luckyrobots import event_emitter
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -32,6 +31,7 @@ class Handler(FileSystemEventHandler):
 
     @staticmethod
     def on_created(event):
+        from .events import event_emitter
         if event.is_directory:
             return None
         else:
