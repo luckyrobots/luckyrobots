@@ -5,14 +5,15 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="luckyrobots",
-    version="0.1.0",
+    version="0.1.6",
     description="Robotics-AI Training in Hyperrealistic Game Environments",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Devrim Yashar",
-    author_email="dvrmysr@gmail.com",
+    author="Devrim Yasar",
+    author_email="braces.verbose03@icloud.com",
     url="https://github.com/lucky-robots/lucky-robots",
-    packages=find_packages(),
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
     install_requires=[
         "watchdog", "pyee", "Flask==2.3.2"
     ],
