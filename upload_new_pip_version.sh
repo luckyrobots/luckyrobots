@@ -2,7 +2,7 @@
 
 rm -rf dist
 rm -rf build
-rm -rf luckyrobots.egg-info
+rm -rf src/luckyrobots.egg-info
 
 # Read the current version from setup.py
 current_version=$(grep -E 'version="[^"]+"' setup.py | sed 's/.*version="\([^"]*\)".*/\1/')
