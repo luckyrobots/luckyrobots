@@ -1,0 +1,39 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyCompatibilityInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ourVersions">
+        <value>
+          <list size="2">
+            <item index="0" class="java.lang.String" itemvalue="3.13" />
+            <item index="1" class="java.lang.String" itemvalue="3.9" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="15">
+            <item index="0" class="java.lang.String" itemvalue="django-anymail" />
+            <item index="1" class="java.lang.String" itemvalue="django-storages" />
+            <item index="2" class="java.lang.String" itemvalue="whitenoise" />
+            <item index="3" class="java.lang.String" itemvalue="en-core-web-md" />
+            <item index="4" class="java.lang.String" itemvalue="gunicorn" />
+            <item index="5" class="java.lang.String" itemvalue="Collectfast" />
+            <item index="6" class="java.lang.String" itemvalue="hiredis" />
+            <item index="7" class="java.lang.String" itemvalue="pydantic_core" />
+            <item index="8" class="java.lang.String" itemvalue="typing_extensions" />
+            <item index="9" class="java.lang.String" itemvalue="factory_boy" />
+            <item index="10" class="java.lang.String" itemvalue="sentry_sdk" />
+            <item index="11" class="java.lang.String" itemvalue="slack_sdk" />
+            <item index="12" class="java.lang.String" itemvalue="tiktoken" />
+            <item index="13" class="java.lang.String" itemvalue="google_auth_oauthlib" />
+            <item index="14" class="java.lang.String" itemvalue="uvloop" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
