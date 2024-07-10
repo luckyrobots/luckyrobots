@@ -54,7 +54,7 @@ class Handler(FileSystemEventHandler):
             return None
         else:
             # print(f"Received modified event - {event.src_path}")
-            pass
+            pas s
 
     @staticmethod
     def on_deleted(event):
@@ -86,6 +86,9 @@ def start(binary_path):
         directory_to_watch = os.path.join(binary_path, "Contents", "UE", "LuckEWorld", "CamShots")
     else:  # Windows and other platforms
         directory_to_watch = os.path.join(binary_path, "LuckEWorld", "CamShots")
+    
+    if not os.path.exists(directory_to_watch):
+        raise FileNotFoundError(f"I couldn't find the binary at the path, are you sure it's running and capture mode is on?")
     
     watcher = Watcher(directory_to_watch)
     watcher.run()
