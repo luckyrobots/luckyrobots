@@ -1,8 +1,11 @@
 import os
+import queue
 import time
 import sys
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+
 
 from luckyrobots.events import event_emitter
 
@@ -16,8 +19,8 @@ class Watcher:
         self.observer.schedule(event_handler, self.directory_path, recursive=False)
         self.observer.start()
         try:
-            while True:
-                time.sleep(5)
+            while self.observer.is_alive():
+                self.observer.join(1)
         except KeyboardInterrupt:
             self.observer.stop()
         self.observer.join()
@@ -27,22 +30,13 @@ class Handler(FileSystemEventHandler):
     file_num = 0
     image_stack = []
 
+
     @staticmethod
     def on_created(event):
         if event.is_directory:
             return None
         else:
-            # print(f"Received created event - {event.src_path}")
-            file = Handler.get_file_name(event.src_path)
-            current_file_num = int(file.split('_')[0]) if file.split('_')[0].isdigit() else Handler.file_num
-            file_bytes = Handler._read_file_with_retry(event.src_path)
-
-            if current_file_num == Handler.file_num:
-                Handler.image_stack.append({"file_path": event.src_path, "file_bytes": file_bytes})
-            else:
-                event_emitter.emit("robot_images_created", Handler.image_stack)
-                Handler.file_num = current_file_num
-                Handler.image_stack = [{"file_path": event.src_path, "file_bytes": file_bytes}]
+            pass
 
     @staticmethod
     def get_file_name(file_path):
@@ -53,8 +47,26 @@ class Handler(FileSystemEventHandler):
         if event.is_directory:
             return None
         else:
-            # print(f"Received modified event - {event.src_path}")
-            pas s
+            print(f"Received modified event - {event.src_path}")
+            Handler.process_file(event.src_path, event.event_type)
+
+    @staticmethod
+    def process_file(file_path, event_type):
+        file = Handler.get_file_name(file_path)
+        current_file_num = int(file.split('_')[0]) if file.split('_')[0].isdigit() else Handler.file_num
+        file_bytes = Handler._read_file_with_retry(file_path)
+
+        if file_bytes:
+            if current_file_num == Handler.file_num:
+                if {"file_path": file_path, "file_bytes": file_bytes} not in Handler.image_stack:
+                    Handler.image_stack.append({"file_path": file_path, "file_bytes": file_bytes})
+            else:
+                event_emitter.emit("robot_images_created", Handler.image_stack)
+                Handler.file_num = current_file_num
+                if {"file_path": file_path, "file_bytes": file_bytes} not in Handler.image_stack:
+                    Handler.image_stack = [{"file_path": file_path, "file_bytes": file_bytes}]
+            print(f"Processed file from {event_type} event: {file_path}")
+
 
     @staticmethod
     def on_deleted(event):
