@@ -1,4 +1,6 @@
-
+# Python cache files
+__pycache__/
+*.py[cod]
 /examples/LuckEWorld.app
 .DS_Store
 .DS_Store
