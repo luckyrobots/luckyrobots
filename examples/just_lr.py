@@ -14,6 +14,11 @@ binary_path_linux = "/media/devrim/4gb/Projects/luckeworld-jun10/LuckyRobot/Buil
 @lr.on_message("robot_output")
 def handle_robot_output(message):
     print("robot output",message)
+    
+    # get the image
+    # analyze the image
+    # calculate the angle and distance to the target
+    # send the command to the robot
 
 @lr.on_message("message")
 def handle_message(message):
@@ -25,7 +30,6 @@ def handle_message(message):
 
 @lr.on_message("on_start")
 def on_start():
-    print("on_start")
     
     commands = [
         ["RESET"],
@@ -63,4 +67,4 @@ else:
 print(f"Using binary path: {binary_path}")
 
 
-lr.start(binary_path)
+lr.start(binary_path,False)
