@@ -88,8 +88,41 @@ async def handle_post(request: Request):
                 tasks_index += 1
             else:
                 event_emitter.emit("message", "all tasks complete waiting for new ones...")
-
+    else:
+        
+        event_emitter.emit("message", "no ID in request")
     return "POST request received"
+
+
+# @app.middleware("http")
+# async def log_requests(request: Request, call_next):
+#     print(f"Received request: {request.method} {request.url}")
+#     response = await call_next(request)
+#     return response
+
+
+@app.get("/hit")
+async def handle_hit(request: Request):
+    # Get the query parameters
+    query_params = request.query_params
+    
+    # Get the 'count' parameter, default to 1 if not provided
+    count = query_params.get('count', None)
+    
+
+    # Emit robot_hit event with hit data 
+    event_emitter.emit("hit_count", count)
+
+    # Return a JSON response
+    return JSONResponse(content={"status": "success", "message": "Hit event received", "data": count}, status_code=200)
+    # try:
+    #     json_data = await request.json()
+    #     event_emitter.emit("robot_hit", json_data)
+    #     return JSONResponse(content={"status": "success", "message": "Hit event received"}, status_code=200)
+    # except Exception as e:
+    #     return JSONResponse(content={"status": "error", "message": str(e)}, status_code=400)
+
+
 
 @app.get("/")
 async def handle_get():

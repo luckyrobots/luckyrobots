@@ -7,3 +7,5 @@ __pycache__/
 /src/luckyrobots/__pycache__
 /src/luckyrobots/node_modules
 /src/luckyrobots/__pycache__
+/dist
+/dist

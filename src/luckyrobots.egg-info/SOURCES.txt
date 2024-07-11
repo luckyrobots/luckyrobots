@@ -1,8 +1,12 @@
 README.md
 setup.py
 src/luckyrobots/__init__.py
+src/luckyrobots/builds.py
+src/luckyrobots/comms.py
 src/luckyrobots/core.py
-src/luckyrobots/events.py
+src/luckyrobots/event_emitter.py
+src/luckyrobots/event_handler.py
+src/luckyrobots/test.py
 src/luckyrobots.egg-info/PKG-INFO
 src/luckyrobots.egg-info/SOURCES.txt
 src/luckyrobots.egg-info/dependency_links.txt
