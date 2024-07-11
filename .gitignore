@@ -4,3 +4,6 @@ __pycache__/
 /examples/LuckEWorld.app
 .DS_Store
 .DS_Store
+/src/luckyrobots/__pycache__
+/src/luckyrobots/node_modules
+/src/luckyrobots/__pycache__
