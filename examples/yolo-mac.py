@@ -1,5 +1,4 @@
 import luckyrobots as lr
-from luckyrobots.events import on_message
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -40,30 +39,39 @@ def main():
     gui_process = mp.Process(target=run_gui, args=(image_queue,))
     gui_process.start()
 
-    @on_message("robot_images_created")
-    def handle_file_created(robot_images: list):
+    @lr.on_message("robot_output")
+    def handle_file_created(robot_images: dict):
+        print("robot_images:", robot_images)
         if robot_images:
-            print(f"Processing image: {robot_images[3]['file_path']}")
-            image_path = robot_images[0]["file_path"]
+            if isinstance(robot_images, dict) and 'rgb_cam1' in robot_images:
+                image_path = robot_images['rgb_cam1'].get('file_path')
+                if image_path:
+                    print(f"Processing image: {image_path}")
+                    
+                    results = model(image_path)
+                    image = results[0].plot()
+                    
+                    if isinstance(image, np.ndarray):
+                        img = image
+                    else:
+                        try:
+                            nparr = np.frombuffer(image, np.uint8)
+                            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                        except Exception as e:
+                            print(f"Error decoding image: {str(e)}")
+                            return
 
-            results = model(image_path)
-            image = results[0].plot()
-            
-            if isinstance(image, np.ndarray):
-                img = image
+                    if img is None:
+                        print("Failed to decode image")
+                        return
+                    
+                    image_queue.put(img)
+                else:
+                    print("No file_path found in rgb_cam1")
             else:
-                try:
-                    nparr = np.frombuffer(image, np.uint8)
-                    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                except Exception as e:
-                    print(f"Error decoding image: {str(e)}")
-                    return
-
-            if img is None:
-                print("Failed to decode image")
-                return
-            
-            image_queue.put(img)
+                print("Unexpected structure in robot_images")
+        else:
+            print("No robot_images received")
 
     lr.start(binary_path)
 
