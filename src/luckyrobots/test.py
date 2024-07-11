@@ -32,7 +32,7 @@ def on_start():
         {"commands":[{"id":123456, "code":"w 5650 1"}, {"id":123457, "code":"a 30 1"}], "batchID": "123456"},
         ["A 0 1", "W 18000 1"],
         ["w 2500 1", "d 30 1", "EX1 10", "EX2 10", "G 100 1"],
-        ["w 3000 1", "a 0 1", "u 100"],
+        ["w 30000 1", "a 0 1", "u 100"],
         ["u -200"]
     ]
     lr.send_message(commands)
@@ -49,7 +49,11 @@ def handle_task_complete(id, message):
 @lr.on_message("batch_complete")
 def handle_batch_complete(id, message):
     print("batch complete - id:", id, "message:", message)
-    
+
+@lr.on_message("hit_count")
+def handle_robot_hit(count):
+    print("robot hit count:", count)
+
 # Detect the operating system and choose the appropriate binary path
 if sys.platform.startswith('win'):
     binary_path = binary_path_win

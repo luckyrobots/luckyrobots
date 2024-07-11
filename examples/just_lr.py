@@ -1,16 +1,66 @@
-import luckyrobots as lr
-from luckyrobots.events import on_message
+import sys
+import os
+import json
+# Add the parent directory of 'src' to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from luckyrobots import core as lr
 
 binary_path_win = "./"
-binary_path_mac = "./LuckEWorld.app"
+binary_path_mac = "/Users/d/Projects/lucky-robots/examples/LuckEWorld.app"
 binary_path_linux = "/media/devrim/4gb/Projects/luckeworld-jun10/LuckyRobot/Build/linux/Linux_07_08_2024/"
 
 
-@on_message("robot_images_created")
-def handle_file_created(robot_images: list):
-    print(f"Images created: {len(robot_images)}")
-    for i, image in enumerate(robot_images):
-        print(f"Image {i + 1}: {image['file_path']}")
+@lr.on_message("robot_output")
+def handle_robot_output(message):
+    print("robot output",message)
 
-lr.start(binary_path_linux)
+@lr.on_message("message")
+def handle_message(message):
+    print(f"Received message: {message}", message)
+    
+    
+    # print(robot_images["head_cam"]["contents"]["tx"])
+    
 
+@lr.on_message("on_start")
+def on_start():
+    print("on_start")
+    
+    commands = [
+        ["RESET"],
+        {"commands":[{"id":123456, "code":"w 5650 1"}, {"id":123457, "code":"a 30 1"}], "batchID": "123456"},
+        ["A 0 1", "W 18000 1"],
+        ["w 2500 1", "d 30 1", "EX1 10", "EX2 10", "G 100 1"],
+        ["w 3000 1", "a 0 1", "u 100"],
+        ["u -200"]
+    ]
+    lr.send_message(commands)
+    
+@lr.on_message("tasks")
+def handle_tasks(message):
+    print("tasks:", message)
+
+@lr.on_message("task_complete")
+def handle_task_complete(id, message):
+    print("task complete - id:", id, "message:", message)
+
+
+@lr.on_message("batch_complete")
+def handle_batch_complete(id, message):
+    print("batch complete - id:", id, "message:", message)
+    
+# Detect the operating system and choose the appropriate binary path
+if sys.platform.startswith('win'):
+    binary_path = binary_path_win
+elif sys.platform.startswith('darwin'):
+    binary_path = binary_path_mac
+elif sys.platform.startswith('linux'):
+    binary_path = binary_path_linux
+else:
+    raise OSError("Unsupported operating system")
+
+print(f"Using binary path: {binary_path}")
+
+
+lr.start(binary_path)
