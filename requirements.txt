@@ -1,11 +1,9 @@
-opencv-python
-asyncio
-aiortc
-websockets
-aiohttp
+# opencv-python
+# asyncio
+# aiortc
+# websockets
+# aiohttp
 watchdog
-pyee
-flask
-
-google-api-python-client # this is to automatically download the binary files from the google drive that user chooses to download
-windows-curses # this is to create the UI for the user to select the binary files to download
+# pyee
+fastapi
+uvicorn

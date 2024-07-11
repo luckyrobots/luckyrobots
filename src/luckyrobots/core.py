@@ -2,33 +2,19 @@ import os
 import queue
 import time
 import sys
-import json  # Added this import
+import json
+import threading
+import socket
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from .comms import create_instructions, run_server
+from .event_handler import event_emitter, on_message
 
-
-class EventEmitter:
-    def __init__(self):
-        self.listeners = {}
-
-    def on(self, event, callback):
-        if event not in self.listeners:
-            self.listeners[event] = []
-        self.listeners[event].append(callback)
-
-    def emit(self, event, *args, **kwargs):
-        if event in self.listeners:
-            for callback in self.listeners[event]:
-                callback(*args, **kwargs)
-
-event_emitter = EventEmitter()
-
-def on_message(event):
-    def decorator(callback):
-        event_emitter.on(event, callback)
-        return callback
-    return decorator
+def send_message(commands):
+    # print("send_message", message)
+    for command in commands:
+        create_instructions(command)
 
 
 class Watcher:
@@ -51,7 +37,7 @@ class Watcher:
 class Handler(FileSystemEventHandler):
     file_num = 0
     image_stack = {}
-    send_bytes = False  # Add this line
+    send_bytes = False
     emit_counter = 0
 
     @classmethod
@@ -88,7 +74,7 @@ class Handler(FileSystemEventHandler):
             # emit.counter 5 to give file watcher some warmup time.
             if len(Handler.image_stack) > 0 and Handler.emit_counter > 5:
                 print(Handler.emit_counter)
-                event_emitter.emit("robot_images_created", Handler.image_stack)
+                event_emitter.emit("robot_output", Handler.image_stack)
             Handler.emit_counter += 1
             Handler.file_num = current_file_num
             Handler.add_file(file_path)
@@ -114,8 +100,7 @@ class Handler(FileSystemEventHandler):
                     print(f"Error reading file {file_path}: {e}")
                     file_bytes = {}
             else:
-                    # Check if send_bytes is True
-                if Handler.send_bytes:  # Change this line
+                if Handler.send_bytes:
                     file_bytes = Handler._read_file_with_retry(file_path)
                 else:
                     file_bytes = None
@@ -157,6 +142,31 @@ def start(binary_path, send_bytes=False):
     if not os.path.exists(directory_to_watch):
         raise FileNotFoundError(f"I couldn't find the binary at the path, are you sure it's running and capture mode is on?")
     
-    Handler.set_send_bytes(send_bytes)  # Add this line
+    Handler.set_send_bytes(send_bytes)
+    
+    
+    
+
+    # Run the server in a separate thread
+    server_thread = threading.Thread(target=run_server, daemon=True)
+    server_thread.start()
+    
+    # Wait for the server to start
+    max_wait_time = 10  # Maximum wait time in seconds
+    start_time = time.time()
+    while time.time() - start_time < max_wait_time:
+        try:
+            # Try to connect to the server
+            with socket.create_connection(("localhost", 3000), timeout=1):
+                break
+        except (ConnectionRefusedError, socket.timeout):
+            time.sleep(0.1)
+    else:
+        print("Warning: Server may not have started properly")
+    
+    # Emit the on_start event
+    event_emitter.emit("on_start")
+    
+    
     watcher = Watcher(directory_to_watch)
     watcher.run()
