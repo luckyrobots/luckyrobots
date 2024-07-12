@@ -65,7 +65,7 @@ commands = [["W 3600 1"]]  # This makes the main wheels turn 10 times.
 For multiple commands and to know when a particular one ends, assign an ID field to your command:
 
 ```python
-commands = [{"id": 1234, "code": "W 18000 1"}]
+commands = [[{"id": 1234, "code": "W 18000 1"}]]
 ```
 
 If you want to send a whole set of instructions, add multiple arrays. Each array will wait until the previous array finishes. Commands inside one array are executed simultaneously, allowing smoother movements like the robot lifting its arms while moving forward or turning its head while placing an object. 
