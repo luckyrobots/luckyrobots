@@ -140,8 +140,9 @@ def start(binary_path, send_bytes=False):
         directory_to_watch = os.path.join(binary_path, "LuckEWorld", "CamShots")
     
     if not os.path.exists(directory_to_watch):
-        raise FileNotFoundError(f"I couldn't find the binary at the path, are you sure it's running and capture mode is on?")
-    
+        print(f"I couldn't find the binary at {binary_path}, are you sure it's running and capture mode is on?")
+        os._exit(1)
+        
     Handler.set_send_bytes(send_bytes)
     
     
