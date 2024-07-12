@@ -8,7 +8,7 @@ from luckyrobots import core as lr
 
 binary_path_win = "./"
 binary_path_mac = "/Users/d/Projects/lucky-robots/examples/LuckEWorld.app"
-binary_path_linux = "/media/devrim/4gb/Projects/luckeworld-jun10/LuckyRobot/Build/linux/Linux_07_08_2024/"
+binary_path_linux = "/home/devrim/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
 
 
 @lr.on_message("robot_output")
@@ -30,7 +30,7 @@ def handle_message(message):
 
 @lr.on_message("on_start")
 def on_start():
-    
+    print("on_start")
     commands = [
         ["RESET"],
         {"commands":[{"id":123456, "code":"w 5650 1"}, {"id":123457, "code":"a 30 1"}], "batchID": "123456"},
