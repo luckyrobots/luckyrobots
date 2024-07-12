@@ -1,6 +1,6 @@
 # Lucky Robots: Simulated Robot Control System
 
-Welcome to Lucky Robots, a system for simulating and controlling virtual robots. This README will guide you through the setup process and explain the key components of the `basic_usage.py` file.
+Welcome to Lucky Robots, a system for simulating and controlling virtual robots. This README will guide you through the setup process and explain the key components.
 
 ## Getting Started
 
