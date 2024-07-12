@@ -8,12 +8,18 @@ from luckyrobots import core as lr
 
 binary_path_win = "./"
 binary_path_mac = "/Users/d/Projects/lucky-robots/examples/LuckEWorld.app"
-binary_path_linux = "/media/devrim/4gb/Projects/luckeworld-jun10/LuckyRobot/Build/linux/Linux_07_08_2024/"
+binary_path_linux = "/home/devrim/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
 
 
 @lr.on_message("robot_output")
 def handle_robot_output(message):
-    print("robot output",message)
+    #print("robot output",message)
+    
+    # Pretty print the message
+    if isinstance(message, dict):
+        print(json.dumps(message, indent=4, sort_keys=True))
+    else:
+        print(message)
     
     # get the image
     # analyze the image
@@ -30,7 +36,7 @@ def handle_message(message):
 
 @lr.on_message("on_start")
 def on_start():
-    
+    print("on_start")
     commands = [
         ["RESET"],
         {"commands":[{"id":123456, "code":"w 5650 1"}, {"id":123457, "code":"a 30 1"}], "batchID": "123456"},
@@ -54,6 +60,11 @@ def handle_task_complete(id, message):
 def handle_batch_complete(id, message):
     print("batch complete - id:", id, "message:", message)
     
+    
+@lr.on_message("hit_count")
+def handle_hit_count(id, count):
+    print("hit count:", count)
+
 # Detect the operating system and choose the appropriate binary path
 if sys.platform.startswith('win'):
     binary_path = binary_path_win

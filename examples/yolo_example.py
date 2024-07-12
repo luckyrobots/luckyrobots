@@ -1,16 +1,15 @@
 import luckyrobots as lr
-from luckyrobots.events import on_message
 import cv2
 import numpy as np
 from ultralytics import YOLO
 model = YOLO("YOLOv10n.pt")
 
-binary_path="./LuckEWorld.app"
+binary_path="/home/devrim/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
 
-@on_message("robot_output")
+@lr.on_message("robot_output")
 def handle_file_created(robot_images: list):
     if robot_images:
-        print(f"Processing image: {robot_images[3]['file_path']}")
+        
         if isinstance(robot_images, dict) and 'rgb_cam1' in robot_images:
             image_path = robot_images['rgb_cam1'].get('file_path')
             if image_path:
@@ -45,5 +44,20 @@ def handle_file_created(robot_images: list):
             print("Unexpected structure in robot_images")
     else:
         print("No robot_images received")                
+
+
+@lr.on_message("on_start")
+def on_start():
+    
+    commands = [
+        ["RESET"],
+        {"commands":[{"id":123456, "code":"w 5650 1"}, {"id":123457, "code":"a 30 1"}], "batchID": "123456"},
+        ["A 0 1", "W 1800 1"],
+        ["w 2500 1", "d 30 1", "EX1 10", "EX2 10", "G 100 1"],
+        ["w 3000 1", "a 0 1", "u 100"],
+        ["u -200"]
+    ]
+    lr.send_message(commands)
+
 
 lr.start(binary_path)
