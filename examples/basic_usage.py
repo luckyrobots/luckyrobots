@@ -13,7 +13,13 @@ binary_path_linux = "/home/devrim/Downloads/luckyrobots-linux-070824/Linux_07_08
 
 @lr.on_message("robot_output")
 def handle_robot_output(message):
-    print("robot output",message)
+    #print("robot output",message)
+    
+    # Pretty print the message
+    if isinstance(message, dict):
+        print(json.dumps(message, indent=4, sort_keys=True))
+    else:
+        print(message)
     
     # get the image
     # analyze the image
@@ -54,6 +60,11 @@ def handle_task_complete(id, message):
 def handle_batch_complete(id, message):
     print("batch complete - id:", id, "message:", message)
     
+    
+@lr.on_message("hit_count")
+def handle_hit_count(id, count):
+    print("hit count:", count)
+
 # Detect the operating system and choose the appropriate binary path
 if sys.platform.startswith('win'):
     binary_path = binary_path_win
