@@ -21,8 +21,9 @@ Set your binary path:
 ```python
 # Linux
 binary_path = "/Users/yourname/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
-# macOS
+# macOS - you need to go to system settings, security & privacy and allow this app to run
 binary_path = "/Users/yourname/Downloads/LuckEWorld.app" # don't forget the .app
+
 # Windows
 binary_path = r"C:\...\LuckEWorld" # don't forget the --> r <-- at the beginning 
 ```
