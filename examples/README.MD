@@ -33,7 +33,7 @@ binary_path = r"C:\...\LuckEWorld" # don't forget the --> r <-- at the beginning
 
 Lucky Robots provides several event listeners to interact with the simulated robot and receive updates on its state:
 
-1. **@lr.on_message("robot_output")**: Receives robot output, including RGB and depth images, and coordinates.
+1. **@lr.on("robot_output")**: Receives robot output, including RGB and depth images, and coordinates.
 
    Example output:
    ```python
@@ -48,12 +48,12 @@ Lucky Robots provides several event listeners to interact with the simulated rob
    }
    ```
 
-2. **@lr.on_message("message")**: Decodes messages from the robot to understand its internal state.
-3. **@lr.on_message("on_start")**: Triggered when the robot starts, allowing for initialization tasks.
-4. **@lr.on_message("tasks")**: Manages the robot's task list.
-5. **@lr.on_message("task_complete")**: Triggered when the robot completes a task.
-6. **@lr.on_message("batch_complete")**: Triggered when the robot completes a batch of tasks.
-7. **@lr.on_message("hit_count")**: Tracks the robot's collisions.
+2. **@lr.on("message")**: Decodes messages from the robot to understand its internal state.
+3. **@lr.on("start")**: Triggered when the robot starts, allowing for initialization tasks.
+4. **@lr.on("tasks")**: Manages the robot's task list.
+5. **@lr.on("task_complete")**: Triggered when the robot completes a task.
+6. **@lr.on("batch_complete")**: Triggered when the robot completes a batch of tasks.
+7. **@lr.on("hit_count")**: Tracks the robot's collisions.
 
 ## Controlling the Robot
 
