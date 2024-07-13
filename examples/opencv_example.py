@@ -4,7 +4,7 @@ import numpy as np
 
 binary_path="/home/devrim/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
 
-@lr.on_message("robot_output")
+@lr.on("robot_output")
 def handle_file_created(robot_images: dict):
     if robot_images:
         if isinstance(robot_images, dict) and 'rgb_cam1' in robot_images:

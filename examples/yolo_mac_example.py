@@ -39,7 +39,7 @@ def main():
     gui_process = mp.Process(target=run_gui, args=(image_queue,))
     gui_process.start()
 
-    @lr.on_message("robot_output")
+    @lr.on("robot_output")
     def handle_file_created(robot_images: dict):
         print("robot_images:", robot_images)
         if robot_images:

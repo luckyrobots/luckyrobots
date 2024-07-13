@@ -6,7 +6,7 @@ model = YOLO("YOLOv10n.pt")
 
 binary_path="/home/devrim/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
 
-@lr.on_message("robot_output")
+@lr.on("robot_output")
 def handle_file_created(robot_images: list):
     if robot_images:
         
@@ -46,7 +46,7 @@ def handle_file_created(robot_images: list):
         print("No robot_images received")                
 
 
-@lr.on_message("on_start")
+@lr.on("on_start")
 def on_start():
     
     commands = [
