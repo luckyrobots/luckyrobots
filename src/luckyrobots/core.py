@@ -9,7 +9,7 @@ import socket
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from .comms import create_instructions, run_server
-from .event_handler import event_emitter, on_message
+from .event_handler import event_emitter, on
 
 def send_message(commands):
     # print("send_message", message)
@@ -166,7 +166,7 @@ def start(binary_path, send_bytes=False):
         print("Warning: Server may not have started properly")
     
     # Emit the on_start event
-    event_emitter.emit("on_start")
+    event_emitter.emit("start")
     
     
     watcher = Watcher(directory_to_watch)

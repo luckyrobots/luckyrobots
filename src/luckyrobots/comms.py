@@ -94,11 +94,17 @@ async def handle_post(request: Request):
     return "POST request received"
 
 
-# @app.middleware("http")
-# async def log_requests(request: Request, call_next):
-#     print(f"Received request: {request.method} {request.url}")
-#     response = await call_next(request)
-#     return response
+@app.middleware("http")
+async def log_requests(request: Request, call_next):    
+    if request.method == "GET":
+        query_params = dict(request.query_params)
+        event_emitter.emit("firehose", {"params": query_params, "type": "GET", "url": request.url})
+    elif request.method == "POST":
+        body = await request.body()
+        event_emitter.emit("firehose", {"body": body.decode(), "type": "POST", "url": request.url})
+    
+    response = await call_next(request)
+    return response
 
 
 @app.get("/hit")
