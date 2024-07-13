@@ -75,22 +75,26 @@ def mark_task_as_complete(task_id):
 @app.post("/")
 async def handle_post(request: Request):
     global tasks_index
-    json_data = await request.json()
-
-    if "ID" in json_data:
-        event_emitter.emit("task_complete", json_data["ID"], "task complete.")
-        mark_task_as_complete(json_data["ID"])
-
-        if check_if_batch_is_complete(json_data["ID"]):
-            if tasks_index < len(tasks) - 1:
-                event_emitter.emit("message", "batch is complete increasing index")
-                # print("batch is complete increasing index")
-                tasks_index += 1
-            else:
-                event_emitter.emit("message", "all tasks complete waiting for new ones...")
-    else:
+    ID=None
+    try:
+        json_data = await request.json()
+        ID = json_data.get("ID")
+    except:
+        json_data = {}
+        ID = request.query_params.get("ID")
         
-        event_emitter.emit("message", "no ID in request")
+
+    event_emitter.emit("task_complete", ID)
+    mark_task_as_complete(ID)
+
+    if check_if_batch_is_complete(ID):
+        if tasks_index < len(tasks) - 1:
+            event_emitter.emit("message", "batch is complete increasing index")
+            # print("batch is complete increasing index")
+            tasks_index += 1
+        else:
+            event_emitter.emit("message", "all tasks complete waiting for new ones...")
+
     return "POST request received"
 
 
