@@ -23,9 +23,9 @@ def handle_message(message):
     # print(robot_images["head_cam"]["contents"]["tx"])
     
 
-@lr.on("on_start")
-def on_start():
-    print("on_start")
+@lr.on("start")
+def start():
+    print("start")
     
     commands = [
         ["RESET"],
@@ -56,7 +56,8 @@ def handle_robot_hit(count):
 
 @lr.on("firehose")
 def handle_firehose(message):
-    print("firehose:", message)
+    #print("firehose:", message)
+    pass
     
 
 # Detect the operating system and choose the appropriate binary path

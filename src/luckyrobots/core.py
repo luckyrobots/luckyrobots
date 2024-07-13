@@ -12,7 +12,7 @@ from .comms import create_instructions, run_server
 from .event_handler import event_emitter, on
 
 def send_message(commands):
-    # print("send_message", message)
+    print("send_message", commands)
     for command in commands:
         create_instructions(command)
 
@@ -165,7 +165,7 @@ def start(binary_path, send_bytes=False):
     else:
         print("Warning: Server may not have started properly")
     
-    # Emit the on_start event
+    # Emit the start event
     event_emitter.emit("start")
     
     

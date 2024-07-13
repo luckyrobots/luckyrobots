@@ -46,8 +46,8 @@ def handle_file_created(robot_images: list):
         print("No robot_images received")                
 
 
-@lr.on("on_start")
-def on_start():
+@lr.on("start")
+def start():
     
     commands = [
         ["RESET"],

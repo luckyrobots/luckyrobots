@@ -34,9 +34,9 @@ def handle_message(message):
     # print(robot_images["head_cam"]["contents"]["tx"])
     
 
-@lr.on("on_start")
-def on_start():
-    print("on_start")
+@lr.on("start")
+def start():
+    print("start")
     commands = [
         ["RESET"],
         {"commands":[{"id":123456, "code":"w 5650 1"}, {"id":123457, "code":"a 30 1"}], "batchID": "123456"},
