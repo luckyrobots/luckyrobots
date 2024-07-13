@@ -7,3 +7,4 @@ watchdog
 # pyee
 fastapi
 uvicorn
+ultralytics
