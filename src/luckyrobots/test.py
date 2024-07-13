@@ -56,7 +56,7 @@ def handle_robot_hit(count):
 
 @lr.on("firehose")
 def handle_firehose(message):
-    #print("firehose:", message)
+    print("firehose:", message)
     pass
     
 

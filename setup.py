@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="luckyrobots",
-    version="0.1.23",
+    version="0.1.27",
     description="Robotics-AI Training in Hyperrealistic Game Environments",
     long_description=long_description,
     long_description_content_type="text/markdown",
