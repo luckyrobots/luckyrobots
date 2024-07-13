@@ -75,25 +75,25 @@ def mark_task_as_complete(task_id):
 @app.post("/")
 async def handle_post(request: Request):
     global tasks_index
-    ID=None
-    try:
+    ID = None
+    if request.query_params.get("ID"):
+        ID = request.query_params.get("ID")
+    else:
         json_data = await request.json()
         ID = json_data.get("ID")
-    except:
-        json_data = {}
-        ID = request.query_params.get("ID")
         
+    if ID is not None:
+        event_emitter.emit("task_complete", ID)
+        mark_task_as_complete(ID)
 
-    event_emitter.emit("task_complete", ID)
-    mark_task_as_complete(ID)
-
-    if check_if_batch_is_complete(ID):
-        if tasks_index < len(tasks) - 1:
-            event_emitter.emit("message", "batch is complete increasing index")
-            # print("batch is complete increasing index")
-            tasks_index += 1
-        else:
-            event_emitter.emit("message", "all tasks complete waiting for new ones...")
+        if check_if_batch_is_complete(ID):
+            if tasks_index < len(tasks) - 1:
+                event_emitter.emit("message", "batch is complete increasing index")
+                tasks_index += 1
+            else:
+                event_emitter.emit("message", "all tasks complete waiting for new ones...")
+    else:
+        event_emitter.emit("error", "No task ID provided")
 
     return "POST request received"
 
