@@ -37,6 +37,7 @@ def handle_file_created(robot_images: list):
                 
                 # Display the image
                 cv2.imshow('Robot Image', img)
+                
                 cv2.waitKey(1)  # Wait for 1ms to allow the image to be displayed
             else:
                 print("No file_path found in rgb_cam1")
@@ -48,16 +49,25 @@ def handle_file_created(robot_images: list):
 
 @lr.on("start")
 def start():
-    
+    print("Starting")
     commands = [
         ["RESET"],
         {"commands":[{"id":123456, "code":"w 5650 1"}, {"id":123457, "code":"a 30 1"}], "batchID": "123456"},
         ["A 0 1", "W 1800 1"],
-        ["w 2500 1", "d 30 1", "EX1 10", "EX2 10", "G 100 1"],
+        ["w 2500 1", "d 30 1", "EX1 10", "EX2 10", "G 100 1", {"id":123458, "code":"g -100 1"}],
         ["w 3000 1", "a 0 1", "u 100"],
         ["u -200"]
     ]
     lr.send_message(commands)
 
+
+
+@lr.on("task_complete")
+def handle_tasks_complete(id):
+    print(f"Task complete: {id}")
+
+@lr.on("firehose")
+def handle_firehose(data):
+    print(f"Firehose: {data}")
 
 lr.start(binary_path)
