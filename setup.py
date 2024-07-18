@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="luckyrobots",
-    version="0.1.27",
+    version="0.1.29",
     description="Robotics-AI Training in Hyperrealistic Game Environments",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -15,7 +15,14 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[
-        "watchdog", "Flask==2.3.2","fastapi"
+        "watchdog",
+        "fastapi",
+        "uvicorn",
+        "requests",
+        "tqdm",
+        "beautifulsoup4",
+        "psutil",
+        "opencv-python",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
