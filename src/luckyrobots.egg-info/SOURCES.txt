@@ -4,8 +4,11 @@ src/luckyrobots/__init__.py
 src/luckyrobots/builds.py
 src/luckyrobots/comms.py
 src/luckyrobots/core.py
+src/luckyrobots/download.py
 src/luckyrobots/event_emitter.py
 src/luckyrobots/event_handler.py
+src/luckyrobots/library_dev.py
+src/luckyrobots/run_executable.py
 src/luckyrobots/test.py
 src/luckyrobots.egg-info/PKG-INFO
 src/luckyrobots.egg-info/SOURCES.txt

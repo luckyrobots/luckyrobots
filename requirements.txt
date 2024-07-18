@@ -3,8 +3,8 @@
 # aiortc
 # websockets
 # aiohttp
-watchdog
 # pyee
+watchdog
 fastapi
 uvicorn
 ultralytics
