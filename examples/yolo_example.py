@@ -66,6 +66,6 @@ def handle_tasks_complete(id):
 
 @lr.on("firehose")
 def handle_firehose(data):
-    print(f"Firehose: {data}")
-
+    # print(f"Firehose: {data}")
+    pass 
 lr.start()
