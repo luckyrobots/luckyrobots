@@ -24,5 +24,5 @@ def handle_file_created(robot_images: dict):
                 cv2.waitKey(1)  # Wait for 1ms to allow the image to be displayed
                 
              
-
-lr.start(binary_path)
+if __name__ == "__main__":
+    lr.start()

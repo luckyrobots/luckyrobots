@@ -4,8 +4,6 @@ import numpy as np
 from ultralytics import YOLO
 model = YOLO("YOLOv10n.pt")
 
-binary_path="/home/devrim/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
-
 @lr.on("robot_output")
 def handle_file_created(robot_images: list):
     if robot_images:
@@ -70,4 +68,4 @@ def handle_tasks_complete(id):
 def handle_firehose(data):
     print(f"Firehose: {data}")
 
-lr.start(binary_path)
+lr.start()

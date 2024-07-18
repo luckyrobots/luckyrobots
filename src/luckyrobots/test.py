@@ -6,11 +6,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from src.luckyrobots import core as lr
 
-binary_path_win = "./"
-binary_path_mac = "/Users/d/Projects/lucky-robots/examples/LuckEWorld.app"
-binary_path_linux = "/media/devrim/4gb/Projects/luckeworld-jun10/LuckyRobot/Build/linux/Linux_07_08_2024/"
-
-
 @lr.on("robot_output")
 def handle_robot_output(message):
     print("robot output",message)
@@ -60,17 +55,6 @@ def handle_firehose(message):
     pass
     
 
-# Detect the operating system and choose the appropriate binary path
-if sys.platform.startswith('win'):
-    binary_path = binary_path_win
-elif sys.platform.startswith('darwin'):
-    binary_path = binary_path_mac
-elif sys.platform.startswith('linux'):
-    binary_path = binary_path_linux
-else:
-    raise OSError("Unsupported operating system")
-
-print(f"Using binary path: {binary_path}")
 
 
-lr.start(binary_path)
+lr.start()

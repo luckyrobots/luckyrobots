@@ -9,8 +9,6 @@ import queue
 
 model = YOLO("YOLOv10n.pt")
 
-binary_path = "./LuckEWorld.app"
-
 def run_gui(image_queue):
     root = tk.Tk()
     root.title("YOLO Detection")
@@ -73,7 +71,7 @@ def main():
         else:
             print("No robot_images received")
 
-    lr.start(binary_path)
+    lr.start()
 
 if __name__ == "__main__":
     main()

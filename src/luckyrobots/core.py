@@ -1,21 +1,81 @@
 import os
-import queue
 import time
 import sys
 import json
 import threading
 import socket
+import multiprocessing
+import psutil
+import tempfile
+import atexit
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from .comms import create_instructions, run_server
 from .event_handler import event_emitter, on
+from .download import check_binary
+from .library_dev import library_dev
+from .run_executable import is_luckeworld_running, run_luckeworld_executable
+
+LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckeworld_lock')
 
 def send_message(commands):
     print("send_message", commands)
     for command in commands:
         create_instructions(command)
 
+def start(binary_path=None, send_bytes=False):
+    if binary_path is None:
+        binary_path = check_binary()    
+    if sys.platform == "darwin":  # macOS
+        directory_to_watch0 = os.path.join(binary_path, "LuckEWorld.app", "Contents", "UE", "LuckEWorld", "CamShots")
+        directory_to_watch1 = os.path.join(binary_path, "luckyrobots.app", "Contents", "UE", "luckyrobots", "robotdata")
+        directory_to_watch = directory_to_watch0 if os.path.exists(directory_to_watch0) else directory_to_watch1
+    else:  # Windows and other platforms
+        directory_to_watch0 = os.path.join(binary_path, "LuckEWorld", "CamShots")
+        directory_to_watch1 = os.path.join(binary_path, "luckyrobots", "robotdata")
+        directory_to_watch = directory_to_watch0 if os.path.exists(directory_to_watch0) else directory_to_watch1
+    
+    if not os.path.exists(directory_to_watch):
+        print(f"I couldn't find the binary at {binary_path}, are you sure it's running and capture mode is on?")
+        os._exit(1)
+        
+    Handler.set_send_bytes(send_bytes)
+    
+    if is_luckeworld_running():
+        print("LuckyRobots is already running. Skipping launch.")
+    else:
+        # Start the LuckEWorld executable
+        run_luckeworld_executable(directory_to_watch)
+
+    library_dev()
+
+    # Run the server in a separate thread
+    server_thread = threading.Thread(target=run_server, daemon=True)
+    server_thread.start()
+    
+    # Wait for the server to start
+    max_wait_time = 10  # Maximum wait time in seconds
+    start_time = time.time()
+    while time.time() - start_time < max_wait_time:
+        try:
+            # Try to connect to the server
+            with socket.create_connection(("localhost", 3000), timeout=1):
+                break
+        except (ConnectionRefusedError, socket.timeout):
+            time.sleep(0.1)
+    else:
+        print("Warning: Server may not have started properly")
+    
+    # Emit the start event
+    event_emitter.emit("start")
+    
+    watcher = Watcher(directory_to_watch)
+    watcher.run()
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    start()
 
 class Watcher:
     def __init__(self, directory_path):
@@ -129,45 +189,5 @@ class Handler(FileSystemEventHandler):
         else:
             print(f"Failed to read {file_path} after {retries} attempts")
 
-
-def start(binary_path, send_bytes=False):
-    if binary_path is None:
-        raise ValueError("binary_path is not set.")
-    
-    if sys.platform == "darwin":  # macOS
-        directory_to_watch = os.path.join(binary_path, "Contents", "UE", "LuckEWorld", "CamShots")
-    else:  # Windows and other platforms
-        directory_to_watch = os.path.join(binary_path, "LuckEWorld", "CamShots")
-    
-    if not os.path.exists(directory_to_watch):
-        print(f"I couldn't find the binary at {binary_path}, are you sure it's running and capture mode is on?")
-        os._exit(1)
-        
-    Handler.set_send_bytes(send_bytes)
-    
-    
-    
-
-    # Run the server in a separate thread
-    server_thread = threading.Thread(target=run_server, daemon=True)
-    server_thread.start()
-    
-    # Wait for the server to start
-    max_wait_time = 10  # Maximum wait time in seconds
-    start_time = time.time()
-    while time.time() - start_time < max_wait_time:
-        try:
-            # Try to connect to the server
-            with socket.create_connection(("localhost", 3000), timeout=1):
-                break
-        except (ConnectionRefusedError, socket.timeout):
-            time.sleep(0.1)
-    else:
-        print("Warning: Server may not have started properly")
-    
-    # Emit the start event
-    event_emitter.emit("start")
-    
-    
-    watcher = Watcher(directory_to_watch)
-    watcher.run()
+# Remove this line if remove_lock_file is not defined or used:
+# atexit.register(remove_lock_file)
