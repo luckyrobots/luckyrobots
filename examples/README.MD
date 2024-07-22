@@ -10,24 +10,8 @@ To begin using Lucky Robots:
    ```
    pip install luckyrobots
    ```
-2. Download the appropriate binary for your operating system: [Binary Download](https://drive.google.com/drive/folders/15iYXzqFNEg1b2E6Ft1ErwynqBMaa0oOa)
 
-## Binary Path Chooser
-
-Download your binary and run it, ensuring HTTP and Capture mode are on.
-
-Set your binary path:
-
-```python
-# Linux
-binary_path = "/Users/yourname/Downloads/luckyrobots-linux-070824/Linux_07_08_2024"
-
-# macOS - you need to go to system settings, security & privacy and allow this app to run
-binary_path = "/Users/yourname/Downloads/LuckEWorld.app" # don't forget the .app
-
-# Windows
-binary_path = r"C:\...\LuckEWorld" # don't forget the --> r <-- at the beginning 
-```
+It will download the binary and will run it for you.
 
 ## Event Listeners
 
