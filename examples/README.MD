@@ -24,9 +24,11 @@ To begin using Lucky Robots:
    pip install luckyrobots
 ```
 
-3. Run
+3. Run one of the following
 ```
-   python basic_usage.py
+   python basic_usage.py 
+   python yolo_example.py
+   python yolo_mac_example.py
 ```
 
 It will download the binary and will run it for you.
