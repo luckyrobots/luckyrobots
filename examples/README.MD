@@ -6,10 +6,28 @@ Welcome to Lucky Robots, a system for simulating and controlling virtual robots.
 
 To begin using Lucky Robots:
 
-1. Install the package using pip:
-   ```
+
+1. if you want to run the examples in this repository: (optional)
+
+```
+   git clone git@github.com:luckyrobots/luckyrobots.git
+   cd luckyrobots/examples
+```
+2. Use your fav package manager (optional)
+```
+   conda create -n lr
+   conda activate lr
+```
+
+2. Install the package using pip:
+```
    pip install luckyrobots
-   ```
+```
+
+3. Run
+```
+   python basic_usage.py
+```
 
 It will download the binary and will run it for you.
 
