@@ -10,7 +10,7 @@ To begin using Lucky Robots:
 1. if you want to run the examples in this repository: (optional)
 
 ```
-   git clone git@github.com:luckyrobots/luckyrobots.git
+   git clone https://github.com/luckyrobots/luckyrobots.git
    cd luckyrobots/examples
 ```
 2. Use your fav package manager (optional)
