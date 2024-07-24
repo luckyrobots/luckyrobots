@@ -1,12 +1,12 @@
 import requests
 from tqdm import tqdm
 import platform
-import re
 from datetime import datetime
 import zipfile
 import os
 from bs4 import BeautifulSoup
 import sys 
+import re
 
 def download_latest_build():
     base_url = "https://builds.luckyrobots.xyz"
@@ -15,6 +15,13 @@ def download_latest_build():
     current_os = platform.system().lower()
     if current_os == "darwin":
         current_os = "mac"
+    elif current_os == "windows":
+        current_os = "win"
+    elif current_os == "linux":
+        current_os = "linux"
+    else:
+        print(f"Unsupported operating system: {current_os}")
+        return
     
     # Fetch the list of files from the server
     response = requests.get(base_url)
@@ -23,11 +30,12 @@ def download_latest_build():
         return
 
     # Parse the HTML content to extract file names
-    file_pattern = re.compile(f'href="(luckyrobots-{current_os}-\\d{{6}}\\.\\w+)"')
-    matches = file_pattern.findall(response.text)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    matches = [a['href'] for a in soup.find_all('a') if a['href'].startswith(f'luckyrobots-{current_os}-')]
 
     if not matches:
         print(f"No matching files found for {current_os}")
+        sys.exit()
         return
 
     # Sort files by date (descending)
@@ -41,7 +49,12 @@ def download_latest_build():
     # Ask user to choose a file
     while True:
         try:
-            choice = int(input("Enter the number of the file you want to download (or 0 to cancel): "))
+            choice = input("Enter the number of the file you want to download (1 for latest, or 0 to cancel) [1]: ").strip()
+            if not choice:
+                choice = 1
+            else:
+                choice = int(choice)
+            
             if choice == 0:
                 print("Download cancelled.")
                 return
@@ -95,25 +108,41 @@ def check_binary():
     base_url = "https://builds.luckyrobots.xyz"
     binary_folder = "./Binary"
 
+    # Determine the current OS
+    current_os = platform.system().lower()
+    if current_os == "darwin":
+        current_os = "mac"
+    elif current_os == "windows":
+        current_os = "win"
+    elif current_os == "linux":
+        current_os = "linux"
+    else:
+        print(f"Unsupported operating system: {current_os}")
+        return
+
     # Check if Binary folder exists
     if not os.path.exists(binary_folder):
         print("Binary folder not found. Downloading the latest binary...")
         download_latest_build()
-        return get_newest_binary_path(binary_folder)
+        return get_newest_binary_path(binary_folder, current_os)
 
-    # Get the list of files in the Binary folder
+    # Get the list of files in the Binary folder for the current OS
     date_pattern = re.compile(r'^\d{6}$')
     local_files = [f for f in os.listdir(binary_folder) if os.path.isdir(os.path.join(binary_folder, f)) and date_pattern.match(f)]
 
     if not local_files:
         print("No binaries found in the Binary folder. Downloading the latest binary...")
         download_latest_build()
-        return get_newest_binary_path(binary_folder)
+        return get_newest_binary_path(binary_folder, current_os)
 
-    # Get the list of files from the server
+    # Get the list of files from the server for the current OS
     response = requests.get(base_url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    server_files = [a['href'] for a in soup.find_all('a') if a['href'].startswith('luckyrobots-')]
+    server_files = [a['href'] for a in soup.find_all('a') if a['href'].startswith(f'luckyrobots-{current_os}-')]
+
+    if not server_files:
+        print(f"No matching files found for {current_os} on the server.")
+        return get_newest_binary_path(binary_folder, current_os)
 
     # Find the newest file on the server
     newest_server_file = max(server_files, key=lambda x: x.split('-')[-1])
@@ -126,19 +155,18 @@ def check_binary():
     # Compare dates
     if newest_server_date > newest_local_date:
         print(f"A newer binary ({newest_server_file}) is available on the server.")
-        # Check if --lr-update argument is present
         if '--lr-update' in sys.argv:
             print("Updating to the latest binary...")
             download_latest_build()
             print("Update complete. Rechecking binary...")
-            return check_binary()  # This won't cause an infinite loop as --lr-update is not checked in the recursive call
+            return check_binary()
         print("To update to the latest binary, run with --lr-update argument.")
     else:
         print("You have the latest binary.")
 
     return os.path.join(binary_folder, newest_local_file)
 
-def get_newest_binary_path(binary_folder):
+def get_newest_binary_path(binary_folder, current_os):
     date_pattern = re.compile(r'^\d{6}$')
     local_files = [f for f in os.listdir(binary_folder) if os.path.isdir(os.path.join(binary_folder, f)) and date_pattern.match(f)]
     if not local_files:

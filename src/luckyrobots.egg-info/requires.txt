@@ -1,6 +1,7 @@
 watchdog
 fastapi
 uvicorn
+ultralytics
 requests
 tqdm
 beautifulsoup4
