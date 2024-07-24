@@ -103,3 +103,21 @@ lr.start(binary_path, sendBinaryData=False)
 Set `sendBinaryData=True` to include file contents in the `robot_output` object.
 
 This launches the robot simulation, allowing you to interact with it using event listeners and control commands.
+
+## Additional CLI Arguments
+
+When running the Lucky Robots binary, you can use the following additional command-line arguments:
+
+1. `--lr-library-dev`: Enables development mode for the Lucky Robots library. Useful for debugging and testing new features. It will symlink ../src/luckyrobots to your current virtual environments site-packages. So you can change the code, and change the behaviour of the library, fix bugs.
+
+2. `--lr-update`: Triggers an update check for the Lucky Robots library and binary. If updates are available, it will prompt for installation.
+
+3. `--lr-verbose`: Enables verbose logging, providing more detailed output about the robot's operations and internal processes.
+
+Example usage:
+
+```bash
+python yourfile.py --lr-library-dev --lr-update --lr-verbose
+```
+
+You can combine these arguments as needed. These options provide more control over the simulation environment and can be particularly useful for development, troubleshooting, and staying up-to-date with the latest features and improvements.
