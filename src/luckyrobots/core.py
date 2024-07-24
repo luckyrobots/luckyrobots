@@ -27,18 +27,20 @@ def send_message(commands):
 def start(binary_path=None, send_bytes=False):
     if binary_path is None:
         binary_path = check_binary()    
-    if sys.platform == "darwin":  # macOS
-        directory_to_watch0 = os.path.join(binary_path, "LuckEWorld.app", "Contents", "UE", "LuckEWorld", "CamShots")
-        directory_to_watch1 = os.path.join(binary_path, "luckyrobots.app", "Contents", "UE", "luckyrobots", "robotdata")
-        directory_to_watch = directory_to_watch0 if os.path.exists(directory_to_watch0) else directory_to_watch1
-    else:  # Windows and other platforms
-        directory_to_watch0 = os.path.join(binary_path, "LuckEWorld", "CamShots")
-        directory_to_watch1 = os.path.join(binary_path, "luckyrobots", "robotdata")
-        directory_to_watch = directory_to_watch0 if os.path.exists(directory_to_watch0) else directory_to_watch1
-    
-    if not os.path.exists(directory_to_watch):
+    if not os.path.exists(binary_path):
         print(f"I couldn't find the binary at {binary_path}, are you sure it's running and capture mode is on?")
         os._exit(1)
+    
+
+
+
+    if sys.platform == "darwin":  # macOS
+        directory_to_watch = os.path.join(binary_path, "luckyrobots.app", "Contents", "UE", "luckyrobots", "robotdata")
+    else:  # Windows and other platforms
+        directory_to_watch = os.path.join(binary_path, "luckyrobots", "robotdata")
+    
+    # Create the directory if it doesn't exist
+    os.makedirs(directory_to_watch, exist_ok=True)
         
     Handler.set_send_bytes(send_bytes)
     
