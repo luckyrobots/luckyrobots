@@ -71,6 +71,21 @@ def start(binary_path=None, send_bytes=False):
     
     # Emit the start event
     event_emitter.emit("start")
+
+    print("*" * 60)
+    print("                                                                                ")
+    print("                                                                                ")
+    print("▄▄▌  ▄• ▄▌ ▄▄· ▄ •▄  ▄· ▄▌▄▄▄        ▄▄▄▄·       ▄▄▄▄▄.▄▄ · ")
+    print("██•  █▪██▌▐█ ▌▪█▌▄▌▪▐█▪██▌▀▄ █·▪     ▐█ ▀█▪▪     •██  ▐█ ▀. ")
+    print("██▪  █▌▐█▌██ ▄▄▐▀▀▄·▐█▌▐█▪▐▀▀▄  ▄█▀▄ ▐█▀▀█▄ ▄█▀▄  ▐█.▪▄▀▀▀█▄")
+    print("▐█▌▐▌▐█▄█▌▐███▌▐█.█▌ ▐█▀·.▐█•█▌▐█▌.▐▌██▄▪▐█▐█▌.▐▌ ▐█▌·▐█▄▪▐█")
+    print(".▀▀▀  ▀▀▀ ·▀▀▀ ·▀  ▀  ▀ • .▀  ▀ ▀█▄▀▪·▀▀▀▀  ▀█▄▀▪ ▀▀▀  ▀▀▀▀ ")
+    print("                                                                                ")
+    print("                                                                                ")
+    print("Lucky Robots application started successfully.")
+    print("To move the robot from your python code, choose a level on the game, and tick the HTTP checkbox.")
+    print("To receive the camera feed from your python code, choose a level on the game, and tick the Capture checkbox.")    
+    print("*" * 60)
     
     watcher = Watcher(directory_to_watch)
     watcher.run()
