@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="luckyrobots",
-    version="0.1.33",
+    version="0.1.34",
     description="Robotics-AI Training in Hyperrealistic Game Environments",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -24,6 +24,7 @@ setup(
         "beautifulsoup4",
         "psutil",
         "opencv-python",
+        "packaging",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

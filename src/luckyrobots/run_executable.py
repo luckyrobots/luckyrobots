@@ -44,27 +44,22 @@ def remove_lock_file():
 def run_luckeworld_executable(directory_to_watch):
     # Determine the correct path based on the operating system
     if platform.system() == "Darwin":  # macOS
-        executable_path0 = os.path.join(directory_to_watch, "..","..","..","..","..", "LuckEWorld.app", "Contents", "MacOS", "LuckEWorld")
-        executable_path1 = os.path.join(directory_to_watch, "..","..","..","..","..", "luckyrobots.app", "Contents", "MacOS", "luckyrobots")
-        executable_path = executable_path0 if os.path.exists(executable_path0) else executable_path1
+        executable_path = os.path.join(directory_to_watch, "..","..","..","MacOS", "luckyrobots")
     elif platform.system() == "Linux":  # Linux
-        executable_path0 = os.path.join(directory_to_watch, "..","..","LuckEWorld.sh")
-        executable_path1 = os.path.join(directory_to_watch, "..","..","luckyrobots.sh")
-        executable_path = executable_path0 if os.path.exists(executable_path0) else executable_path1
+        executable_path = os.path.join(directory_to_watch, "..","..","luckyrobots.sh")
     else:  # Windows or other platforms
-        executable_path0 = os.path.join(directory_to_watch, "..","..","LuckEWorld.exe")
-        executable_path1 = os.path.join(directory_to_watch, "..","..","luckyrobots.exe")        
-        executable_path = executable_path0 if os.path.exists(executable_path0) else executable_path1
+        executable_path = os.path.join(directory_to_watch, "..","..","luckyrobots.exe")        
 
     # Check if the executable exists
     if not os.path.exists(executable_path):
         print(f"Error: Executable not found at {executable_path}")
+        sys.exit(1)
         return
 
     try:
         # Set execute permissions
         os.chmod(executable_path, 0o755)
-        
+        print("running executable at:", executable_path)
         # Check if --lr-verbose flag is used
         verbose = "--lr-verbose" in sys.argv
 
@@ -90,6 +85,20 @@ def run_luckeworld_executable(directory_to_watch):
         
         # Create lock file with the new process ID
         create_lock_file(process.pid)
+        
+        print("░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░▒▓████████▓▒░▒▓███████▓▒░ ")
+        print("░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░  ░▒▓█▓▒░        ")
+        print("░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░  ░▒▓█▓▒░        ")
+        print("░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓███████▓▒░ ░▒▓██████▓▒░       ░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   ░▒▓██████▓▒░  ")
+        print("░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░         ░▒▓█▓▒░ ")
+        print("░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░         ░▒▓█▓▒░ ")
+        print("░▒▓████████▓▒░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          ░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░  ░▒▓█▓▒░  ░▒▓███████▓▒░  ")
+        print("                                                                                                                                                     ")
+        print("                                                                                                                                                     ")
+        print("Lucky Robots application started successfully as an independent process.")
+        print("To move the robot from your python code, choose a level on the game, and tick the HTTP checkbox.")
+        print("To receive the camera feed from your python code, choose a level on the game, and tick the Capture checkbox.")
+        
         if verbose:
             print("LuckEWorld application started successfully as an independent process.")
     except subprocess.CalledProcessError as e:

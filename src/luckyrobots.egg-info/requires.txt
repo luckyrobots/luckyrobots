@@ -7,3 +7,4 @@ tqdm
 beautifulsoup4
 psutil
 opencv-python
+packaging

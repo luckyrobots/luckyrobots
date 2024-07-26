@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: luckyrobots
-Version: 0.1.33
+Version: 0.1.34
 Summary: Robotics-AI Training in Hyperrealistic Game Environments
 Home-page: https://github.com/lucky-robots/lucky-robots
 Author: Devrim Yasar
@@ -19,6 +19,7 @@ Requires-Dist: tqdm
 Requires-Dist: beautifulsoup4
 Requires-Dist: psutil
 Requires-Dist: opencv-python
+Requires-Dist: packaging
 
 # Lucky Robots
 ## Robotics-AI Training in Hyperrealistic Game Environments (sound on!)
