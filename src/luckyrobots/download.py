@@ -8,8 +8,33 @@ from bs4 import BeautifulSoup
 import sys 
 import re
 
+def get_base_url():
+    
+    import requests
+    from requests.exceptions import RequestException
+
+    def is_server_active(url):
+        try:
+            response = requests.get(url, timeout=2)
+            return response.status_code == 200
+        except RequestException:
+            return False
+
+    local_url = "http://192.168.1.148/builds"
+    remote_url = "https://builds.luckyrobots.xyz"
+
+    if is_server_active(local_url):
+        print("Using local server:", local_url)
+        return local_url
+    else:
+        print("Using remote server:", remote_url)
+        return remote_url
+    
+
+
+
 def download_latest_build():
-    base_url = "https://builds.luckyrobots.xyz"
+    base_url = get_base_url()
     
     # Determine the current OS
     current_os = platform.system().lower()
@@ -49,7 +74,7 @@ def download_latest_build():
     # Ask user to choose a file
     while True:
         try:
-            choice = input("Enter the number of the file you want to download (1 for latest, or 0 to cancel) [1]: ").strip()
+            choice = input("Enter the number of the file you want to download (Hit Enter for latest, or 0 to cancel) [1]: ").strip()
             if not choice:
                 choice = 1
             else:
@@ -105,7 +130,7 @@ def download_latest_build():
         print(f"File {file_path} is not a zip file. Skipping unzip.")
 
 def check_binary():
-    base_url = "https://builds.luckyrobots.xyz"
+    base_url = get_base_url()
     binary_folder = "./Binary"
 
     # Determine the current OS

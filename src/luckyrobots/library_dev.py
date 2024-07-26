@@ -4,6 +4,9 @@ import shutil
 import subprocess
 import sys
 import ast
+import pkg_resources
+import requests
+from packaging import version
 
 def get_source_directory():
     # Start from the directory of the script being run
@@ -30,10 +33,46 @@ def get_source_directory():
     print("Could not find a setup.py file with name='luckyrobots'. This likely means you haven't cloned the repository. To use this feature, please clone the repository and run the command with the --lr-library-dev flag from within the cloned directory.")
     sys.exit(1)
 
+def check_for_newer_version():
+    try:
+        installed_version = pkg_resources.get_distribution("luckyrobots").version
+        response = requests.get("https://pypi.org/pypi/luckyrobots/json")
+        pypi_version = response.json()["info"]["version"]
+        
+        pip_path = site.getsitepackages()[0]
+        luckyrobots_pip_path = os.path.join(pip_path, "luckyrobots")
+        
+        # Check if pip_path is a symlink
+        if os.path.islink(luckyrobots_pip_path):
+            print("*" * 60)
+            print(f"The luckyrobots directory in pip is already a symlink: {luckyrobots_pip_path}")
+            print("This likely means you've already set up library development mode.")
+            print("Please make sure to submit your pull request to the main repository, and pull the latest.")
+            print("*" * 60)
+        else:        
+            if version.parse(pypi_version) > version.parse(installed_version):
+                print(f"A newer version of luckyrobots is available: {pypi_version}")
+                print(f"Your current version is: {installed_version}")
+                response = input("Do you want to install the newer version before continuing? (y/n): ").lower()
+                if response == 'y':
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "luckyrobots"])
+                    print("Newer version installed successfully. Please run the command again.")
+                    sys.exit(1)
+                else:
+                    print("Continuing with the current version.")
+            else:
+                print(f"You have the latest version of luckyrobots installed: {installed_version}")
+    except Exception as e:
+        print(f"Error checking for newer version: {e}")
+
+
+
 def library_dev():
     
     if "--lr-library-dev" not in sys.argv:
         print("If you want to help with developing this library, run with --lr-library-dev argument.")
+        # Check for newer version before proceeding
+        check_for_newer_version()
         return 
     else:
         print("--------------------------------------------------------------------------------")
@@ -43,11 +82,11 @@ def library_dev():
         print("--------------------------------------------------------------------------------")     
         # Discover where pip is installing its modules
         # Ask user for confirmation
+
         pip_path = site.getsitepackages()[0]
         luckyrobots_pip_path = os.path.join(pip_path, "luckyrobots")
         luckyrobots_dev_dir = os.path.join(get_source_directory(), "src", "luckyrobots")
 
-        
 
         # print(f"Absolute path of luckyrobots directory: {luckyrobots_dir}")
         print("Creating symlink between:")
