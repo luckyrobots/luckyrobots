@@ -11,38 +11,142 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. In the meantime, co-founder of Github is working on something at [void.dev](https://void.dev) that should help with this. Hopefully we can try it out soon! If you need access or have ideas to work around this, give me a shout. I'll hook you up with FTP access for now.)
+(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. If you need access or have ideas to work around this, give me a shout. I'll hook you up with FTP access for now.)
+
+## Getting Started
+
+To begin using Lucky Robots:
+
+
+1. if you want to run the examples in this repository: (optional)
+
+```
+   git clone https://github.com/luckyrobots/luckyrobots.git
+   cd luckyrobots/examples
+```
+2. Use your fav package manager (optional)
+```
+   conda create -n lr
+   conda activate lr
+```
+
+2. Install the package using pip:
+```
+   pip install luckyrobots
+```
+
+3. Run one of the following
+```
+   python basic_usage.py 
+   python yolo_example.py
+   python yolo_mac_example.py
+```
+
+It will download the binary and will run it for you.
+
+## Event Listeners
+
+Lucky Robots provides several event listeners to interact with the simulated robot and receive updates on its state:
+
+1. **@lr.on("robot_output")**: Receives robot output, including RGB and depth images, and coordinates.
+
+   Example output:
+   ```python
+   {
+       "body_pos": {"Time": "1720752411", "rx": "-0.745724", "ry": "0.430001", "rz": "0.007442", "tx": "410.410786", "ty": "292.086556", "tz": "0.190011", "file_path": "/.../4_body_pos.txt"},
+       "depth_cam1": {"file_path": "/.../4_depth_cam1.jpg"},
+       "depth_cam2": {"file_path": "/.../4_depth_cam2.jpg"},
+       "hand_cam": {"Time": "1720752411", "rx": "-59.724758", "ry": "-89.132507", "rz": "59.738461", "tx": "425.359645", "ty": "285.063092", "tz": "19.006545", "file_path": "/.../4_hand_cam.txt"},
+       "head_cam": {"Time": "1720752411", "rx": "-0.749195", "ry": "0.433544", "rz": "0.010893", "tx": "419.352843", "ty": "292.814832", "tz": "59.460736", "file_path": "/.../4_head_cam.txt"},
+       "rgb_cam1": {"file_path": "/.../4_rgb_cam1.jpg"},
+       "rgb_cam2": {"file_path": "/.../4_rgb_cam2.jpg"}
+   }
+   ```
+
+2. **@lr.on("message")**: Decodes messages from the robot to understand its internal state.
+3. **@lr.on("start")**: Triggered when the robot starts, allowing for initialization tasks.
+4. **@lr.on("tasks")**: Manages the robot's task list.
+5. **@lr.on("task_complete")**: Triggered when the robot completes a task.
+6. **@lr.on("batch_complete")**: Triggered when the robot completes a batch of tasks.
+7. **@lr.on("hit_count")**: Tracks the robot's collisions.
+
+## Controlling the Robot
+
+To control the robot, send commands using the `lr.send_message()` function. For example, to make the robot's main wheels turn 10 times:
+
+```python
+commands = [["W 3600 1"]]  # This makes the main wheels turn 10 times.
+```
+
+For multiple commands and to know when a particular one ends, assign an ID field to your command:
+
+```python
+commands = [[{"id": 1234, "code": "W 18000 1"}]]
+```
+
+If you want to send a whole set of instructions, add multiple arrays. Each array will wait until the previous array finishes. Commands inside one array are executed simultaneously, allowing smoother movements like the robot lifting its arms while moving forward or turning its head while placing an object. 
+
+```python
+commands = [["W 1800 1","a 30"],["a 0", "W 1800 1"]]
+```
+
+Commands in one list will override previous commands if they conflict. For instance, if you instruct your robot to turn its wheels 20 times, and on the 5th turn, you instruct it again to turn 3 times, the robot will travel a total of 8 revolutions and stop.
+
+To know when a particular batch finishes, give it an ID and listen for that ID:
+
+```python
+commands = [
+    ["RESET"],
+    {"commands": [{"id": 123456, "code": "W 5650 1"}, {"id": 123457, "code": "a 30 1"}], "batchID": "123456"},
+    ["A 0 1", "W 18000 1"]
+]
+lr.send_message(commands)
+```
+
+## Starting the Robot
+
+To start the robot simulation, use:
+
+```python
+lr.start(binary_path, sendBinaryData=False)
+```
 
 ### ** WHAT WE ARE WORKING ON NEXT **
 
-*   [DONE] Camera Poses coming from Unreal (to have faster AI training)
-*   [DONE] Depth map provided by Unreal (We tried [MiDAS](https://github.com/isl-org/MiDaS) and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) they work great but not 100%. We're certain this problem will be solved soon and we will simulate this in the meanwhile)
-*   [WIP] Fully integrate with [ConceptGraphs](https://concept-graphs.github.io/) [Ali](https://github.com/alik-git) Welcome to our team! 🚀🚀🚀
-*   Adding a simple map (eg. VoxelNExt) to our stack so we can navigate while mapping
-*   Real-time ConceptGraph'ing...  
+*   Releasing our first basic end to end model
+*   Drone!!!
+*   Scan your own room
+*   Import URDFs
+*   (your idea?)
 
-** UPDATE 3/19 FIRST LUCKY WORLD UBUNTU BUILD IS COMPLETE: https://drive.google.com/drive/folders/15iYXzqFNEg1b2E6Ft1ErwynqBMaa0oOa
 
-** UPDATE 3/6 **
+
+
+### history of the project ###
+------------------------------
+
+** UPDATE 3/19/24 FIRST LUCKY WORLD UBUNTU BUILD IS COMPLETE: https://drive.google.com/drive/folders/15iYXzqFNEg1b2E6Ft1ErwynqBMaa0oOa
+
+** UPDATE 3/6/24 **
 
 We have designed [Stretch 3 Robot](https://hello-robot.com/stretch-3-product) and working on adding this robot to our world
 
 <img width="504" alt="image" src="https://github.com/lucky-robots/lucky-robots/assets/203507/54b1bbbc-67e0-4add-a58f-84b08d14e680">
 
 
-** UPDATE 1/6 **
+** UPDATE 1/6/24 **
 
 WE GOT OUR FIRST TEST LINUX BUILD (NOT THE ACTUAL WORLD, THAT'S BEING BUILT) (TESTED ON UBUNTU 22.04)
 
 https://drive.google.com/file/d/1_OCMwn8awKZHBfCfc9op00y6TvetI18U/view?usp=sharing
 
 
-** UPDATE 2/15 **
+** UPDATE 2/15/24 **
 
 [Luck-e World second release is out (Windows only - we're working on Linux build next)!](https://drive.google.com/drive/folders/10sVx5eCcx7d9ZR6tn0zqeQCaOF84MIQt)
 
 
-** UPDATE 2/8 **
+** UPDATE 2/8/24 **
 
 We are now writing prompts against the 3d environment we have reconstructed using point clouds...
 
@@ -52,20 +156,20 @@ https://github.com/lucky-robots/lucky-robots/assets/203507/a93c9f19-2891-40e1-85
 
 
 
-** UPDATE 2/6 **
+** UPDATE 2/6/24 **
 
 Lucky first release: https://drive.google.com/file/d/1qIbkez1VGU1WcIpqk8UuXTbSTMV7VC3R/view?amp;usp=embed_facebook
 
 Now you can run the simulation on your Windows Machine, and run your AI models against it. If you run into issues, please submit an issue.
 
-** UPDATE 1/15 **
+** UPDATE 1/15/24 **
 
 Luck-e is starting to understand the world around us and navigate accordingly!
 
 https://github.com/lucky-robots/lucky-robots/assets/203507/4e56bbc5-92da-4754-92f4-989b9cb86b6f
 
 
-** UPDATE 1/13 **
+** UPDATE 1/13/24 **
 
 We are able to construct a 3d world using single camera @niconielsen32 (This is not a 3d room generated by a game engine, this is what we generate from what we're seeing through a camera in the game!)
 
@@ -73,7 +177,7 @@ https://github.com/lucky-robots/lucky-robots/assets/203507/f2fd19ee-b40a-4fef-bd
 
 
 
-** UPDATE 12/29 **
+** UPDATE 12/29/23 **
 We are now flying! Look at these environments, can you tell they're not real?
 
 ![Screenshot_18](https://github.com/lucky-robots/lucky-robots/assets/203507/f988a18e-9dc3-484e-9d9f-eb7ad57180b2)
@@ -87,17 +191,15 @@ We are now flying! Look at these environments, can you tell they're not real?
 ![Screenshot_7](https://github.com/lucky-robots/lucky-robots/assets/203507/e43e25b0-b68d-4c1e-9a7d-800b9cf5312b)
 
 
-** UPDATE 12/27 **
+** UPDATE 12/27/23 **
 
 Lucky now has a drone  - like the Mars Rover! When it's activated camera feed switches to it automatically!
-
 
 
 https://github.com/lucky-robots/lucky-robots/assets/203507/29103a5a-a209-4d49-acd1-adad88e5b590
 
 
-
-** UPDATE 5/12 **
+** UPDATE 12/5/23 **
 
 Completed our first depth map using Midas monocular depth estimation model
 
@@ -105,15 +207,11 @@ Completed our first depth map using Midas monocular depth estimation model
 https://github.com/lucky-robots/lucky-robots/assets/203507/647a5c32-297a-4157-b72b-afeacdaae48a
 
 
-
 https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6a0-ef3e2ea7a31c.mp4
 
 ## Table of Contents
 
 - [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
 - [Support](#support)
 - [Contributing](#contributing)
 - [Join Our Team](#join-our-team)
@@ -126,58 +224,6 @@ https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6
 3. **Safety First**: No physical wear and tear on robots during training. Virtual training ensures that our robotic friends remain in tip-top condition.
 4. **Modular Design**: Easily extend and modify the framework to suit your specific requirements or add new training environments.
 
-## Requirements
-
-- Unreal Engine 5.2
-- Python 3.10
-- Modern GPU and CPU for optimal performance
-
-## Installation
-
-1. **Clone the Repository**
-
-   ```bash
-   git clone https://github.com/lucky-robots/lucky-robots.git
-   cd lucky-robots
-   ```
-
-2. **Setup Python Environment**
-
-   Ensure you have Python 3.10 installed. Set up a virtual environment:
-
-   ```
-   # Windows Powershell
-   python -m venv lr_venv
-   .\lr_venv\Scripts\activate.ps1
-   pip install -r requirements.txt
-   ```
-
-3. **Setup PixelStreaming**
-
-   - Run `setup.bat` located in `Resources\SignalingWebServer\platform_scripts\cmd`
-
-4. **Launch Unreal Project**
-
-   Open the provided `controllable_pawn.uproject` file in Unreal Engine 5.2 and let it compile the necessary assets and plugins.
-
-
-## Usage
-
-1. **Start Unreal Simulation**
-
-   - Run `.\run_pixel_streaming_server.ps1`
-   - Inside Unreal Editor you have a big green Play button. before you click that, there is a three dot icon next to it that says "Change Play Mode and Play Settings"
-   - Click that and then tick "Standalone Game" 
-   - Launch the game by clicking that Play button and play the simulation scenario you wish to train your robot in.
-   - Then you can browse to http://127.0.0.1/?StreamerId=LeftCamera and to http://127.0.0.1/?StreamerId=RightCamera to see what your robot is seeing (optional).
-
-2. **Run Python Training Script**
-
-   With the simulation running, execute your Python script to interface with the Unreal simulation and start training your robot.
-
-   ```bash
-   python main.py
-   ```
 
 ## Support
 
@@ -189,7 +235,7 @@ We welcome contributions! Please read our [contributing guide](CONTRIBUTING.md) 
 
 ## Join our team?
 
-Absolutely! Ideally contribute a few PRs and let us know!
+Absolutely! Show us a few cool things and/or contribute a few PRs -- let us know!
 
 ## License
 
