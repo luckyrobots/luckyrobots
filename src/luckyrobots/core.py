@@ -8,6 +8,7 @@ import multiprocessing
 import psutil
 import tempfile
 import atexit
+import platform
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -82,11 +83,22 @@ def start(binary_path=None, send_bytes=False):
     print(".▀▀▀  ▀▀▀ ·▀▀▀ ·▀  ▀  ▀ • .▀  ▀ ▀█▄▀▪·▀▀▀▀  ▀█▄▀▪ ▀▀▀  ▀▀▀▀ ")
     print("                                                                                ")
     print("                                                                                ")
+    if platform.system() == "Darwin":
+        print("*" * 60)
+        print("For macOS users:")
+        print("Please be patient. The application may take up to a minute to open on its first launch.")
+        print("If the application doesn't appear, please follow these steps:")
+        print("1. Open System Settings")
+        print("2. Navigate to Privacy & Security")
+        print("3. Scroll down and click 'Allow' next to the 'luckyrobots' app")
+        print("*" * 60)    
     print("Lucky Robots application started successfully.")
     print("To move the robot from your python code, choose a level on the game, and tick the HTTP checkbox.")
     print("To receive the camera feed from your python code, choose a level on the game, and tick the Capture checkbox.")    
     print("*" * 60)
     
+    # Check if the system is macOS
+
     watcher = Watcher(directory_to_watch)
     watcher.run()
 
