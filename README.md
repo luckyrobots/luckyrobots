@@ -103,7 +103,7 @@ commands = [
 lr.send_message(commands)
 ```
 
-## MOVING THE ROBOTS
+## FULL LIST OF CONTROLS
 
 ### FORWARD - BACKWARD
 - `[DIRECTION] [DISTANCE] [SPEED]` Example: `W 50 1`
