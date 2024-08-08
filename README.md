@@ -117,7 +117,7 @@ lr.send_message(commands)
   - `[DIRECTION]`: A is left, D is right
   - `[DEGREE]`: Spin Rotation in degrees
   - Or: `lr.send_message([["A 30"]])`
-  - Remember, the back wheel only requires an angle adjustment. To turn the robot, set this angle and then command it to move forward.
+  - Remember, the back wheel only requires an angle adjustment. To turn the robot, set this angle and then command it to move forward. When you want robot to stop turning, set it back to `A 0`
     
 ### RESET
 - `RESET`: Resets all positions and rotations to the zero pose
