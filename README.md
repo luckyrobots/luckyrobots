@@ -108,16 +108,17 @@ lr.send_message(commands)
 ### FORWARD - BACKWARD
 - `[DIRECTION] [DISTANCE] [SPEED]` Example: `W 50 1`
   - `[DIRECTION]`: W is forward, S is backward
-  - `[DISTANCE]`: Travel distance in centimeters
+  - `[DISTANCE]`: Travel distance, 360 is full revolution of the wheels. 3600 is 10 revolutions.
   - `[SPEED]`: Speed at which motor will react - km/h
-  - Send via API: `lr.send_message([["W 50 1"]])`
+  - Send via API: `lr.send_message([["W 360 1"]])`
 
 ### LEFT - RIGHT
 - `[DIRECTION] [DEGREE]` Example: `A 30`
   - `[DIRECTION]`: A is left, D is right
   - `[DEGREE]`: Spin Rotation in degrees
   - Or: `lr.send_message([["A 30"]])`
-
+  - Remember, the back wheel only requires an angle adjustment. To turn the robot, set this angle and then command it to move forward.
+    
 ### RESET
 - `RESET`: Resets all positions and rotations to the zero pose
 - Or: `lr.send_message([["RESET"]])`
