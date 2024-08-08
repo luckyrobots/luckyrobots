@@ -103,6 +103,59 @@ commands = [
 lr.send_message(commands)
 ```
 
+## MOVING THE ROBOTS
+
+### FORWARD - BACKWARD
+- `[DIRECTION] [DISTANCE] [SPEED]` Example: `W 50 1`
+  - `[DIRECTION]`: W is forward, S is backward
+  - `[DISTANCE]`: Travel distance in centimeters
+  - `[SPEED]`: Speed at which motor will react - km/h
+  - Send via API: `lr.send_message([["W 50 1"]])`
+
+### LEFT - RIGHT
+- `[DIRECTION] [DEGREE]` Example: `A 30`
+  - `[DIRECTION]`: A is left, D is right
+  - `[DEGREE]`: Spin Rotation in degrees
+  - Or: `lr.send_message([["A 30"]])`
+
+### RESET
+- `RESET`: Resets all positions and rotations to the zero pose
+- Or: `lr.send_message([["RESET"]])`
+
+### STRETCH-3 
+
+- `[JOINT][DISTANCE]` Example: `EX1 30`
+  - `EX1 10`  (extend 1st joint 10cm outwards)
+  - `EX2 -10` (extend 2nd joint 10cm inwards)
+  - `EX3 10`  (extend 3rd joint 10cm outwards)
+  - `EX4 10`  (extend 4th joint 10cm outwards)
+  - Or: `lr.send_message([["EX1 10"]])`, `lr.send_message([["EX2 -10"]])`, etc.
+
+- `U 10` (Up) - Or: `lr.send_message([["U 10"]])`
+- `U -10` (Down) - Or: `lr.send_message([["U -10"]])`
+
+- Gripper: `G 5` or `G -10` - Or: `lr.send_message([["G 5"]])` or `lr.send_message([["G -10"]])`
+
+- Hand Cam Angle:
+  - `R1 10` - Or: `lr.send_message([["R1 10"]])`
+  - `R2 -30` (turn cam) - Or: `lr.send_message([["R2 -30"]])`
+
+### LUCKY ROBOT-3 
+
+- `[JOINT][DEGREE]` Example: `EX1 30`
+  - `EX1 20`  (1st rotate the joint 20 degrees)
+  - `EX2 -10` (2nd rotate the joint -10 degrees)
+  - `EX3 10`  (3rd rotate the joint 10 degrees)
+  - `EX4 10`  (4th rotate the joint 10 degrees)
+  - Or: `lr.send_message([["EX1 20"]])`, `lr.send_message([["EX2 -10"]])`, etc.
+
+- `U 10` (Up) - Or: `lr.send_message([["U 10"]])`
+- `U -10` (Down) - Or: `lr.send_message([["U -10"]])`
+
+- Gripper: `G 5` or `G -10` - Or: `lr.send_message([["G 5"]])` or `lr.send_message([["G -10"]])`
+
+- Hand Cam Angle: `R 10` - Or: `lr.send_message([["R 10"]])`
+
 ## Starting the Robot
 
 To start the robot simulation, use:
@@ -122,7 +175,7 @@ lr.start(binary_path, sendBinaryData=False)
 
 
 
-### history of the project ###
+### brief history of the project ###
 ------------------------------
 
 ** UPDATE 3/19/24 FIRST LUCKY WORLD UBUNTU BUILD IS COMPLETE: https://drive.google.com/drive/folders/15iYXzqFNEg1b2E6Ft1ErwynqBMaa0oOa
