@@ -1,7 +1,7 @@
 # Lucky Robots
-## Robotics-AI Training in Hyperrealistic Game Environments (sound on!)
+## Robotics-AI Training in Hyperrealistic Game Environments
 
-https://github.com/lucky-robots/lucky-robots/assets/203507/6c29b881-2ff6-4734-ad33-71c09ad75b62
+https://github.com/user-attachments/assets/f500287b-b785-42bb-92d8-6d90b5602d6b
 
 Lucky Robots: Where robots come for a boot camp, like going to a spa day! 🤖💆‍♂️ We use the fancy Unreal Engine 5.3, Open3D and YoloV8 to create a lavish, virtual 5-star resort experience for our metal buddies so they're absolutely pumped before they meet the real world. Our training framework? More like a robotic paradise with zero robot mishaps. "Gentle" methods? We're practically the robot whisperers here, you won't see humans with metal sticks around. That's why it's "Lucky Robots" because every robot leaves our sessions feeling like they just won the jackpot – all without a scratch! 🎰🤣
 
