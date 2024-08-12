@@ -1,5 +1,5 @@
 # Lucky Robots
-## Robotics-AI Training in Hyperrealistic Game Environments
+## A simulation platform for deploying end-to-end AI models for robotics
 
 https://github.com/user-attachments/assets/f500287b-b785-42bb-92d8-6d90b5602d6b
 
