@@ -3,15 +3,11 @@
 
 https://github.com/user-attachments/assets/f500287b-b785-42bb-92d8-6d90b5602d6b
 
-Lucky Robots: Where robots come for a boot camp, like going to a spa day! 🤖💆‍♂️ We use the fancy Unreal Engine 5.3, Open3D and YoloV8 to create a lavish, virtual 5-star resort experience for our metal buddies so they're absolutely pumped before they meet the real world. Our training framework? More like a robotic paradise with zero robot mishaps. "Gentle" methods? We're practically the robot whisperers here, you won't see humans with metal sticks around. That's why it's "Lucky Robots" because every robot leaves our sessions feeling like they just won the jackpot – all without a scratch! 🎰🤣
+Whether you're an AI/ML Developer, aspiring to design the next Roomba, or interested in delving into robotics, there's no need to invest thousands of dollars in a physical robot and attempt to train it in your living space. With Lucky, you can master the art of training your robot, simulate its behavior with up to 90% accuracy, and then reach out to the robot's manufacturer to launch your new company.
 
-Joking aside, whether you're an AI/ML Developer, aspiring to design the next Roomba, or interested in delving into robotics, there's no need to invest thousands of dollars in a physical robot and attempt to train it in your living space. With Lucky, you can master the art of training your robot, simulate its behavior with up to 90% accuracy, and then reach out to the robot's manufacturer to launch your new company.
+Lucky Robots will feed robot's cameras to your Python application, and you can control the robot using your end to end AI Models. Details below.
 
-Remember, no robots were emotionally or physically harmed in our ultra-luxurious training process. Thus, Lucky Robots!
-
-Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
-
-(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. If you need access or have ideas to work around this, give me a shout. I'll hook you up with FTP access for now.)
+(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab. We're setting up read-only FTP access to the files. If you need access or have ideas to work around this, give us a shout. I'll hook you up with FTP access for now.)
 
 ## Getting Started
 
