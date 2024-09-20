@@ -1,26 +1,21 @@
-from .core import start, send_message
-from .event_handler import on
-from .comms import create_instructions, run_server
+import luckyrobots as lr
 
-__all__ = ['start', 'send_message', 'on', 'create_instructions', 'run_server']
-
-# New event listeners for the Lucky Robots
-@on("object_detected")
+@lr.on("object_detected")
 def on_object_detected(data):
     print(f"Robot detected object: {data.object_type}")
 
-@on("movement_completed")
+@lr.on("movement_completed")
 def on_movement_completed(data):
     print(f"Robot completed movement: {data.movement_type}, distance: {data.distance}")
 
-@on("battery_low")
+@lr.on("battery_low")
 def on_battery_low(data):
     print(f"Robot battery low: {data.battery_level}%")
 
-@on("error_occurred")
+@lr.on("error_occurred")
 def on_error_occurred(data):
     print(f"Error occurred: {data.error_message}")
 
-@on("task_completed")
+@lr.on("task_completed")
 def on_task_completed(data):
     print(f"Task completed: {data.task_name}")
