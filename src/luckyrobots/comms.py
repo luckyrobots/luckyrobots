@@ -1,168 +1,137 @@
-from fastapi import FastAPI, Request
+import asyncio
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse
 import random
 import time
 import json
 import uvicorn
 import logging
-from .event_handler import event_emitter  # Import the event_emitter from event_handler.py
+from .event_handler import event_emitter
 
 app = FastAPI()
 port = 3000
-tasks = []
-tasks_index = 0
+ws = None
+application_already_started = False
 
 def get_random_int(min=0, max=1000):
     return random.randint(min, max)
 
+async def emit_start():
+    print("emitting start event")
+    event_emitter.emit("start")
+    
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    global ws, application_already_started
+
+    try:
+        await websocket.accept()
+        print("WebSocket connection established")
+        ws = websocket
+        event_emitter.emit("start")
+        
+    except Exception as e:
+        print(f"Failed to establish WebSocket connection: {e}")
+        return
+
+    
+
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            handle_event(data)
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+    finally:
+        ws = None
+        print("WebSocket connection closed")
+
+async def send_text_async(data):
+    global ws
+    if ws is None:
+        print("No WebSocket connection")
+        return
+    try:
+        await ws.send_text(json.dumps(data))
+    except Exception as e:
+        print(f"Error sending WebSocket message: {e}")
+        ws = None
 
 def create_instructions(commands=[], callback=None):
     
-    instructions = {"LuckyCode": []}
+    if isinstance(commands, list):
+        instructions = {"LuckyCode": []}
     
-    if isinstance(commands, dict) and 'batchID' in commands:
-        batch_id = commands['batchID']
-        commands = commands['commands']
+        for command in commands:
+            instructions["LuckyCode"].append({
+                "ID": str(command["id"]) if isinstance(command, dict) and 'id' in command else str(get_random_int()),
+                "code": str(command["code"]) if isinstance(command, dict) and 'code' in command else str(command),
+                "time": str(int(time.time() * 1000)),
+                "callback": "off"
+            })
     else:
-        batch_id = get_random_int()
-
+        instructions = commands 
+    # print("instructions", instructions)
     
-    for command in commands:
-        instructions["LuckyCode"].append({
-            "ID": str(command["id"]) if isinstance(command, dict) and 'id' in command else str(get_random_int()),
-            "batchID": batch_id,
-            "code": str(command["code"]) if isinstance(command, dict) and 'code' in command else str(command),
-            "time": str(int(time.time() * 1000)),
-            "callback": "on"
-        })
-    
-    instructions["status"] = "queued"
-    tasks.append(instructions)
-
-def check_if_batch_is_complete(task_id):
-    batch_id = None
-    for task_array in tasks:
-        for task in task_array["LuckyCode"]:
-            if task["ID"] == task_id:
-                batch_id = task["batchID"]
-                # print(f"Batch ID matching task ID {task_id} is {batch_id}")
-                break
-        if batch_id:
-            break
-
-    is_complete = False
-    for task_array in tasks:
-        for task in task_array["LuckyCode"]:
-            if task["batchID"] == batch_id:
-                all_completed = all(t.get("status") == "completed" for t in task_array["LuckyCode"])
-                if all_completed:
-                    # print(f"Batch {batch_id} is complete")
-                    event_emitter.emit("batch_complete",batch_id, f"Batch {batch_id} is complete")
-                    is_complete = True
-                break
-        if is_complete:
-            break
-
-    return is_complete
-
-def mark_task_as_complete(task_id):
-    for task_array in tasks:
-        for task in task_array["LuckyCode"]:
-            if task["ID"] == task_id:
-                task["status"] = "completed"
-                break
-
-@app.post("/")
-async def handle_post(request: Request):
-    global tasks_index
-    ID = None
-    if request.query_params.get("ID"):
-        ID = request.query_params.get("ID")
-    else:
-        json_data = await request.json()
-        ID = json_data.get("ID")
-        
-    if ID is not None:
-        event_emitter.emit("task_complete", ID)
-        mark_task_as_complete(ID)
-
-        if check_if_batch_is_complete(ID):
-            if tasks_index < len(tasks) - 1:
-                event_emitter.emit("message", "batch is complete increasing index")
-                tasks_index += 1
-            else:
-                event_emitter.emit("message", "all tasks complete waiting for new ones...")
-    else:
-        event_emitter.emit("error", "No task ID provided")
-
-    return "POST request received"
-
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):    
-    if request.method == "GET":
-        query_params = dict(request.query_params)
-        event_emitter.emit("firehose", {"params": query_params, "type": "GET", "url": request.url})
-    elif request.method == "POST":
-        body = await request.body()
-        event_emitter.emit("firehose", {"body": body.decode(), "type": "POST", "url": request.url})
-    
-    response = await call_next(request)
-    return response
-
-
-@app.get("/hit")
-async def handle_hit(request: Request):
-    # Get the query parameters
-    query_params = request.query_params
-    
-    # Get the 'count' parameter, default to 1 if not provided
-    count = query_params.get('count', None)
-    
-
-    # Emit robot_hit event with hit data 
-    event_emitter.emit("hit_count", count)
-
-    # Return a JSON response
-    return JSONResponse(content={"status": "success", "message": "Hit event received", "data": count}, status_code=200)
-    # try:
-    #     json_data = await request.json()
-    #     event_emitter.emit("robot_hit", json_data)
-    #     return JSONResponse(content={"status": "success", "message": "Hit event received"}, status_code=200)
-    # except Exception as e:
-    #     return JSONResponse(content={"status": "error", "message": str(e)}, status_code=400)
-
-
+    try:
+        print("sending instructions", instructions)
+        loop = asyncio.get_event_loop_policy().get_event_loop()
+        if loop.is_running():
+            asyncio.run_coroutine_threadsafe(send_text_async(instructions), loop)
+        else:
+            loop.run_until_complete(send_text_async(instructions))
+    except RuntimeError:
+        print("No running event loop. Unable to send instructions.")
 
 @app.get("/")
 async def handle_get():
-    global tasks_index
-    if tasks_index >= len(tasks):
-        return JSONResponse(content={"LuckyCode": []})
-    next_command = tasks[tasks_index]
+    return "Hello, World!"
 
-    if tasks_index < len(tasks):
-        next_command = tasks[tasks_index]
-    else:
-        return JSONResponse(content={"LuckyCode": []})
+def handle_event(message):
     
-    if next_command["status"] == "queued":
-        next_command["status"] = "in-progress"
-        return JSONResponse(content=next_command)
-    else:
-        return JSONResponse(content={"LuckyCode": []})
+    print("--> message: ", message)
+    try:
+        json_data = json.loads(message)
+        ID = json_data.get("id")
+
+        if ID is not None:
+            # print("task complete", ID)
+            event_emitter.emit("task_complete", ID)
+            pass
+        
+            
+        match (json_data.get("name")):
+            case "hit":
+                event_emitter.emit("hit_count", json_data.get("count"))                
+            case "start":
+                event_emitter.emit("start")                
+            case "reconnected":
+                event_emitter.emit("reconnected")
+            case "ready":
+                event_emitter.emit("ready")
+            case "level_is_loaded":
+                event_emitter.emit("level_is_loaded")   
+            case "game_is_loaded":
+                event_emitter.emit("game_is_loaded")
+            case "game_is_starting":
+                event_emitter.emit("game_is_starting")
+            case "game_is_finished":
+                event_emitter.emit("game_is_finished")
+            case "game_is_paused":
+                event_emitter.emit("game_is_paused")
+            case "game_is_resumed":
+                event_emitter.emit("game_is_resumed")
+
+        
+    except json.JSONDecodeError:
+        print(f"Invalid JSON received: {message}")
+    except Exception as e:
+        print(f"Error handling event: {e}")
 
 def run_server():
-    # commands = [
-    #     ["W 1 1"]
-    # ]
-
-    # for command in commands:
-    #     create_instructions(command)
-
-    # print("tasks", json.dumps(tasks, indent=2))
-    event_emitter.emit("message", "running server on port 3000")
-    
+    # event_emitter.emit("message", "running server on port 3000")
+    # asyncio.get_event_loop().run_until_complete(event_emitter.emit("message", "running server on port 3000"))
     # Configure logging
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
     

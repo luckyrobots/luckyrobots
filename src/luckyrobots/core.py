@@ -1,3 +1,4 @@
+import asyncio
 import os
 import time
 import sys
@@ -20,10 +21,27 @@ from .run_executable import is_luckeworld_running, run_luckeworld_executable
 
 LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckeworld_lock')
 
+class LuckyRobots:
+    def __init__(self):
+        self.server_thread = None
+
+    def send_message(self, commands):
+        create_instructions(commands)
+
+    def start(self):
+        if not self.server_thread or not self.server_thread.is_alive():
+            self.server_thread = threading.Thread(target=run_server)
+            self.server_thread.start()
+        event_emitter.emit("start")
+
+    def stop(self):
+        event_emitter.emit("stop")
+        if self.server_thread and self.server_thread.is_alive():
+            # Implement a way to stop the server gracefully
+            pass
+
 def send_message(commands):
-    print("send_message", commands)
-    for command in commands:
-        create_instructions(command)
+    create_instructions(commands)
 
 def start(binary_path=None, send_bytes=False):
     if binary_path is None:
@@ -49,7 +67,8 @@ def start(binary_path=None, send_bytes=False):
         print("LuckyRobots is already running. Skipping launch.")
     else:
         # Start the LuckEWorld executable
-        run_luckeworld_executable(directory_to_watch)
+        if "--lr-no-executable" not in sys.argv:
+            run_luckeworld_executable(directory_to_watch)
 
     library_dev()
 
@@ -58,20 +77,18 @@ def start(binary_path=None, send_bytes=False):
     server_thread.start()
     
     # Wait for the server to start
-    max_wait_time = 10  # Maximum wait time in seconds
-    start_time = time.time()
-    while time.time() - start_time < max_wait_time:
-        try:
-            # Try to connect to the server
-            with socket.create_connection(("localhost", 3000), timeout=1):
-                break
-        except (ConnectionRefusedError, socket.timeout):
-            time.sleep(0.1)
-    else:
-        print("Warning: Server may not have started properly")
+    # max_wait_time = 10  # Maximum wait time in seconds
+    # start_time = time.time()
+    # while time.time() - start_time < max_wait_time:
+    #     try:
+    #         # Try to connect to the server
+    #         with socket.create_connection(("localhost", 3000), timeout=1):
+    #             break
+    #     except (ConnectionRefusedError, socket.timeout):
+    #         time.sleep(0.1)
+    # else:
+    #     print("Warning: Server may not have started properly")
     
-    # Emit the start event
-    event_emitter.emit("start")
 
     print("*" * 60)
     print("                                                                                ")
@@ -104,7 +121,7 @@ def start(binary_path=None, send_bytes=False):
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    start()
+    asyncio.run(start())
 
 class Watcher:
     def __init__(self, directory_path):
@@ -162,8 +179,8 @@ class Handler(FileSystemEventHandler):
         else:
             # emit.counter 5 to give file watcher some warmup time.
             if len(Handler.image_stack) > 0 and Handler.emit_counter > 5:
-                print(Handler.emit_counter)
-                event_emitter.emit("robot_output", Handler.image_stack)
+                # print(Handler.emit_counter)
+                asyncio.run(event_emitter.emit("robot_output", Handler.image_stack))
             Handler.emit_counter += 1
             Handler.file_num = current_file_num
             Handler.add_file(file_path)
@@ -220,3 +237,6 @@ class Handler(FileSystemEventHandler):
 
 # Remove this line if remove_lock_file is not defined or used:
 # atexit.register(remove_lock_file)
+
+# Export the necessary functions and classes
+__all__ = ['LuckyRobots', 'start', 'send_message']

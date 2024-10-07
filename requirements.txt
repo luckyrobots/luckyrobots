@@ -1,5 +1,5 @@
 # opencv-python
-# asyncio
+asyncio
 # aiortc
 # websockets
 # aiohttp
