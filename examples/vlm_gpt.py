@@ -16,11 +16,11 @@ api_key = os.getenv('OPENAI_API_KEY')
 @lr.receiver
 async def receiver(message, data: list = None):
     if message == "robot_output":
-        await handle_file_created(data)
+        await robot_control(data)
     else:
         print("Received message:", message)
 
-async def handle_file_created(robot_images: list):
+async def robot_control(robot_images: list):
 
 
     if int(time.time() * 1000) % 10 == 0:
