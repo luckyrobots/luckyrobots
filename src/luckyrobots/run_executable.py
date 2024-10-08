@@ -8,7 +8,7 @@ import sys
 
 LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckeworld_lock')
 
-def is_luckeworld_running():
+def is_luckyworld_running():
     # Check for the lock file
     if os.path.exists(LOCK_FILE):
         with open(LOCK_FILE, 'r') as f:
@@ -41,7 +41,7 @@ def remove_lock_file():
     if os.path.exists(LOCK_FILE):
         os.remove(LOCK_FILE)
 
-def run_luckeworld_executable(directory_to_watch):
+def run_luckyworld_executable(directory_to_watch):
     # Determine the correct path based on the operating system
     if platform.system() == "Darwin":  # macOS
         executable_path = os.path.join(directory_to_watch, "..","..","..","MacOS", "luckyrobots")
