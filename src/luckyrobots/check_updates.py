@@ -6,6 +6,9 @@ import platform
 import requests
 from urllib.parse import urljoin
 import sys
+from deepdiff import DeepDiff
+import re
+import mimetypes
 
 root_path = os.path.join(os.path.dirname(__file__), "..", "..", "examples/Binary/mac")
 json_file = os.path.join(root_path, "file_structure.json")
@@ -22,28 +25,39 @@ def calculate_crc32(file_path):
     return crc32 & 0xFFFFFFFF  # Ensure unsigned 32-bit integer
 
 def scan_directory(root_path):
-    file_structure = {}
+    file_structure = []
     
     for dirpath, dirnames, filenames in os.walk(root_path):
-        current_dict = file_structure
-        path_parts = os.path.relpath(dirpath, root_path).split(os.sep)
+        # Add directories
+        for dirname in dirnames:
+            dir_path = os.path.join(dirpath, dirname)
+            relative_path = os.path.relpath(dir_path, root_path)
+            file_structure.append({
+                "path": relative_path,
+                "type": "directory",
+                "size": 0,  # Directories don't have a size in this context
+                "mtime": os.path.getmtime(dir_path)
+            })
         
-        for part in path_parts:
-            if part == '.':
-                continue
-            if part not in current_dict:
-                current_dict[part] = {"type": "directory", "children": {}}
-            current_dict = current_dict[part]["children"]
-        
+        # Add files
         for filename in filenames:
             file_path = os.path.join(dirpath, filename)
+            relative_path = os.path.relpath(file_path, root_path)
             file_stat = os.stat(file_path)
-            current_dict[filename] = {
-                "type": "file",
+            
+            # Guess the file type using mimetypes
+            file_type, encoding = mimetypes.guess_type(file_path)
+            if file_type is None:
+                file_type = "application/octet-stream"  # Default to binary if type can't be guessed
+            
+            file_structure.append({
+                "path": relative_path,
+                "crc32": calculate_crc32(file_path),
                 "size": file_stat.st_size,
                 "mtime": file_stat.st_mtime,
-                "crc32": calculate_crc32(file_path)
-            }
+                "type": "file",
+                "mime_type": file_type
+            })
     
     return file_structure
 
@@ -55,6 +69,15 @@ def load_json(filename):
     with open(filename, 'r') as f:
         return json.load(f)
 
+def clean_path(path):
+    # Remove ['children'] and quotes, replace '][' with '/'
+    cleaned = re.sub(r"\['children'\]", "", path).replace("']['", "/").strip("[]'")
+    # Replace remaining single quotes with nothing
+    cleaned = cleaned.replace("'", "")
+    # Split the path and the attribute that changed
+    parts = cleaned.rsplit('/', 1)
+    return parts[0], parts[1] if len(parts) > 1 else None
+
 def compare_structures(old_structure, new_structure):
     changes = {
         'new_files': [],
@@ -62,24 +85,17 @@ def compare_structures(old_structure, new_structure):
         'deleted_files': []
     }
 
-    for path in new_structure:
-        if path not in old_structure:
-            changes['new_files'].append(path)
-        else:
-            for filename, new_file_info in new_structure[path]['children'].items():
-                old_file_info = old_structure[path]['children'].get(filename)
-                if not old_file_info:
-                    changes['new_files'].append(os.path.join(path, filename))
-                elif new_file_info['crc32'] != old_file_info['crc32']:
-                    changes['modified_files'].append(os.path.join(path, filename))
-
-    for path in old_structure:
-        if path not in new_structure:
-            changes['deleted_files'].extend([os.path.join(path, f) for f in old_structure[path]['children']])
-        else:
-            for filename in old_structure[path]['children']:
-                if filename not in new_structure[path]['children']:
-                    changes['deleted_files'].append(os.path.join(path, filename))
+    diff = DeepDiff(old_structure, new_structure, ignore_order=True, verbose_level=2)
+    
+    for change_type, items in diff.items():
+        if change_type == 'dictionary_item_added':
+            changes['new_files'].extend(clean_path(key)[0] for key in items.keys())
+        elif change_type == 'dictionary_item_removed':
+            changes['deleted_files'].extend(clean_path(key)[0] for key in items.keys())
+        elif change_type in ['values_changed', 'type_changes']:
+            for key in items.keys():
+                path, attribute = clean_path(key)
+                changes['modified_files'].append([path, attribute])
 
     return changes
 
@@ -98,9 +114,6 @@ def scan_server(server_path):
     save_json(linux_structure, os.path.join(server_path, "linux/hashmap.json"))
 
 def check_updates(root_path):
-
-
-
     # Determine the operating system
     os_type = platform.system().lower()
 
@@ -121,44 +134,60 @@ def check_updates(root_path):
     try:
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception for HTTP errors
-        server_json = response.json()
+        server_structure = response.json()
     except requests.RequestException as e:
         print(f"Error downloading JSON file: {e}")
-        server_json = None
+        server_structure = None
 
-    if json_file is None:
+    if server_structure is None:
         print("Using local scan as no remote file could be downloaded.")
+        server_structure = {}
 
     # Scan the directory and create a new file structure
     client_structure = scan_directory(root_path)
 
     # If a previous scan exists, compare and show changes
-    if os.path.exists(json_file):
-        server_structure = load_json(server_json)
+    if server_structure:
         changes = compare_structures(client_structure, server_structure)
         
-        print("Changes detected:")
+        # Create a flat JSON structure for changes
+        flat_changes = []
         for change_type, files in changes.items():
-            if files:
-                print(f"{change_type.replace('_', ' ').capitalize()}:")
-                for file in files:
-                    print(f"  - {file}")
+            for file in sorted(files):
+                if isinstance(file, list):
+                    path = file[0].replace('root[', '', 1)  # Remove 'root[' prefix
+                    flat_changes.append({
+                        "path": path,
+                        "changeType": change_type,
+                        "attribute": file[1]
+                    })
+                else:
+                    path = file.replace('root[', '', 1)  # Remove 'root[' prefix
+                    flat_changes.append({
+                        "path": path,
+                        "changeType": change_type
+                    })
+        
+        # Write the flat JSON to a file
+        with open('changes.json', 'w') as f:
+            json.dump(flat_changes, f, indent=2)
+        
+        print(f"Changes have been written to changes.json")
     else:
-        print("Initial scan completed.")
+        print("No server structure available for comparison.")
 
     # Save the new structure
-    save_json(client_structure, json_file)
+    save_json(client_structure, "./client_structure.json")
 
 if __name__ == "__main__":
     lr_server_root = None
-    print(sys.argv)
+    
     for arg in sys.argv:
         if arg.startswith('--lr-server-root='):
             lr_server_root = arg.split('=', 1)[1]
             break
 
     if lr_server_root:
+        # this is being used as a cron job on the main server to keep the client file structures up to date
         print(f"Scanning server at {lr_server_root}")
         scan_server(lr_server_root)
-    else:
-        print("No server root specified. Use --lr-server-root=/path/to/server/root")

@@ -1,0 +1,554 @@
+[
+  {
+    "path": "luckyrobots.app",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4214764
+  },
+  {
+    "path": ".DS_Store",
+    "crc32": 1216130061,
+    "size": 6148,
+    "mtime": 1728595602.7109904,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4269917
+  },
+  {
+    "path": "luckyrobots.app/Contents/_CodeSignature",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4270616
+  },
+  {
+    "path": "luckyrobots.app/Contents/MacOS",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4216816
+  },
+  {
+    "path": "luckyrobots.app/Contents/Resources",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4220312
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.423599
+  },
+  {
+    "path": "luckyrobots.app/Contents/Info.plist",
+    "crc32": 4163133178,
+    "size": 1870,
+    "mtime": 1728580730.5777063,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/PkgInfo",
+    "crc32": 1535771721,
+    "size": 8,
+    "mtime": 1728580732.4960735,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/_CodeSignature/CodeResources",
+    "crc32": 1695062255,
+    "size": 7096,
+    "mtime": 1728580826.860642,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/MacOS/luckyrobots",
+    "crc32": 391975282,
+    "size": 337169080,
+    "mtime": 1728580732.4954615,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/Resources/LaunchScreen.storyboardc",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4222376
+  },
+  {
+    "path": "luckyrobots.app/Contents/Resources/AppIcon.icns",
+    "crc32": 45096961,
+    "size": 14382,
+    "mtime": 1728580732.4966633,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/Resources/Assets.car",
+    "crc32": 3233508740,
+    "size": 519160,
+    "mtime": 1728580732.5015142,
+    "type": "file",
+    "mime_type": "application/vnd.curl.car"
+  },
+  {
+    "path": "luckyrobots.app/Contents/Resources/LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib",
+    "crc32": 128780343,
+    "size": 1551,
+    "mtime": 1728580732.5020292,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/Resources/LaunchScreen.storyboardc/LaunchScreen.nib",
+    "crc32": 1192524797,
+    "size": 973,
+    "mtime": 1728580732.5022576,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/Resources/LaunchScreen.storyboardc/Info.plist",
+    "crc32": 3478358299,
+    "size": 193,
+    "mtime": 1728580732.5021524,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728595661.064582
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4232419
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/UECommandLine.txt",
+    "crc32": 514698010,
+    "size": 52,
+    "mtime": 1728580732.5695748,
+    "type": "file",
+    "mime_type": "text/plain"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728595661.0645719
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4269195
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4250002
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Splash",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4251335
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Movies",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4237182
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk0_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 3910874717,
+    "size": 102886749,
+    "mtime": 1728580825.2039106,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk0_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 74038795,
+    "size": 133769745,
+    "mtime": 1728580826.3116317,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk2_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 2064710026,
+    "size": 9642916,
+    "mtime": 1728580826.5902238,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk2_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 3547741515,
+    "size": 5941190,
+    "mtime": 1728580826.5076761,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk1_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 3645223550,
+    "size": 4646437,
+    "mtime": 1728580826.3863344,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk1_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 687880864,
+    "size": 8698819,
+    "mtime": 1728580826.460713,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk3_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 2872380185,
+    "size": 4231553,
+    "mtime": 1728580826.6608207,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk3_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 261387639,
+    "size": 4191483,
+    "mtime": 1728580826.6255496,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk10_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 221040769,
+    "size": 2253746,
+    "mtime": 1728580826.3493598,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk5_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 3229670375,
+    "size": 2051239,
+    "mtime": 1728580826.7480159,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk5_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 3229670375,
+    "size": 2051239,
+    "mtime": 1728580826.7656798,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk10_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 742284035,
+    "size": 2200767,
+    "mtime": 1728580826.3301735,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk4_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 437018724,
+    "size": 4468947,
+    "mtime": 1728580826.695228,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk4_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 1167933965,
+    "size": 4509017,
+    "mtime": 1728580826.730166,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/global_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 1976905517,
+    "size": 57444482,
+    "mtime": 1728580824.374732,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk6_sf_metal_sm6-metal_sm6.0.metallib",
+    "crc32": 185004425,
+    "size": 7742126,
+    "mtime": 1728580826.858049,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk6_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 3303241284,
+    "size": 4045311,
+    "mtime": 1728580826.7970755,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/global_sf_metal_sm5-metal_sm5.0.metallib",
+    "crc32": 824390458,
+    "size": 44898709,
+    "mtime": 1728580823.914456,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk2-Mac.pak",
+    "crc32": 2331912261,
+    "size": 242990040,
+    "mtime": 1728580814.3992684,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk3-Mac.pak",
+    "crc32": 737971367,
+    "size": 205967093,
+    "mtime": 1728580817.1603625,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk1-Mac.pak",
+    "crc32": 3245689145,
+    "size": 163871206,
+    "mtime": 1728580811.086504,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk0-Mac.pak",
+    "crc32": 2987840349,
+    "size": 6232489517,
+    "mtime": 1728580809.053325,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk10-Mac.pak",
+    "crc32": 67452629,
+    "size": 24502266,
+    "mtime": 1728580811.3838356,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk5-Mac.pak",
+    "crc32": 347610630,
+    "size": 70572079,
+    "mtime": 1728580821.4212768,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk4-Mac.pak",
+    "crc32": 3747965726,
+    "size": 274972204,
+    "mtime": 1728580820.5508716,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Paks/pakchunk6-Mac.pak",
+    "crc32": 2083662744,
+    "size": 169727000,
+    "mtime": 1728580823.536939,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Splash/Splash.bmp",
+    "crc32": 1928193415,
+    "size": 2268054,
+    "mtime": 1728580823.5514035,
+    "type": "file",
+    "mime_type": "image/bmp"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/Movies/robots_loop_video.mp4",
+    "crc32": 1858488746,
+    "size": 38248134,
+    "mtime": 1728580733.042476,
+    "type": "file",
+    "mime_type": "video/mp4"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Content",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4230034
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4224033
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Extras",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4232748
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Content/SlateDebug",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4230373
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Content/SlateDebug/Fonts",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.423186
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Content/SlateDebug/Fonts/LastResort.tps",
+    "crc32": 2615736900,
+    "size": 916,
+    "mtime": 1728580732.5414217,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Content/SlateDebug/Fonts/LastResort.ttf",
+    "crc32": 1100408863,
+    "size": 5395052,
+    "mtime": 1728580732.5679057,
+    "type": "file",
+    "mime_type": "font/ttf"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4228349
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Intel",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4224682
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Ogg",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4227316
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Vorbis",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4228683
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Intel/TBB",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4224994
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Intel/TBB/Mac",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4226232
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Intel/TBB/Mac/libtbbmalloc.dylib",
+    "crc32": 1440768910,
+    "size": 319872,
+    "mtime": 1728580732.5088081,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Intel/TBB/Mac/libtbb.dylib",
+    "crc32": 3894504676,
+    "size": 547888,
+    "mtime": 1728580732.506292,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Ogg/Mac",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4227843
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Ogg/Mac/libogg.dylib",
+    "crc32": 975140343,
+    "size": 160304,
+    "mtime": 1728580732.5100164,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Vorbis/Mac",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4229207
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Binaries/ThirdParty/Vorbis/Mac/libvorbis.dylib",
+    "crc32": 1449517476,
+    "size": 6684448,
+    "mtime": 1728580732.5393982,
+    "type": "file",
+    "mime_type": "application/octet-stream"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Extras/GPUDumpViewer",
+    "type": "directory",
+    "size": 0,
+    "mtime": 1728582474.4234722
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Extras/GPUDumpViewer/OpenGPUDumpViewer.sh",
+    "crc32": 687875093,
+    "size": 2060,
+    "mtime": 1728580732.5694542,
+    "type": "file",
+    "mime_type": "application/x-sh"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Extras/GPUDumpViewer/OpenGPUDumpViewer.bat",
+    "crc32": 3719445115,
+    "size": 855,
+    "mtime": 1728580732.5693152,
+    "type": "file",
+    "mime_type": "application/x-msdownload"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/Engine/Extras/GPUDumpViewer/GPUDumpViewer.html",
+    "crc32": 4099831308,
+    "size": 174251,
+    "mtime": 1728580732.5690734,
+    "type": "file",
+    "mime_type": "text/html"
+  }
+]
