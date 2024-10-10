@@ -10,7 +10,7 @@ from fastapi import FastAPI, WebSocket
 import uvicorn
 import logging
 import random
-
+import signal
 
 from .watcher import Watcher
 from .handler import Handler
@@ -53,7 +53,23 @@ class LuckyRobots:
         asyncio.run(LuckyRobots.message_received(message,data))
         
     @staticmethod
-    def receiver(func):
+    def message_receiver(func):        
+        # Check if the function is asynchronous
+        if not asyncio.iscoroutinefunction(func):
+            # Get the function's name and try to get its location
+            func_name = func.__name__
+            try:
+                func_location = f" in {func.__code__.co_filename}"
+            except AttributeError:
+                func_location = ""
+            
+            error_message = (
+                f"Error: The message receiver function '{func_name}'{func_location} "
+                "must be asynchronous. Use 'async def' to define the function."
+            )
+            print(error_message)
+            LuckyRobots.run_exit_handler()
+        
         """Decorator to set the receiver function"""
         LuckyRobots.receiver_function = func
         return func
@@ -189,9 +205,47 @@ class LuckyRobots:
         
         # Check if the system is macOS
 
+        # Set up a signal handler for SIGINT (Ctrl+C)
+        
+
+        def sigint_handler(signum, frame):
+            print("\nCtrl+C pressed. Running exit handler...")
+            LuckyRobots.run_exit_handler(ctrlc_pressed=True)
+
+        signal.signal(signal.SIGINT, sigint_handler)
+
+
         watcher = Watcher(directory_to_watch)
         watcher.run()
+            
+    @staticmethod     
+    def run_exit_handler(ctrlc_pressed=False):
 
+        def signal_handler(sig, frame):
+            print("\nExiting gracefully...")
+            # Perform any cleanup if necessary
+            exit(0)
+
+        # Register the signal handler for SIGINT (Ctrl+C)
+        signal.signal(signal.SIGINT, signal_handler)
+
+        # Set up a loop to keep the program running
+        
+        if ctrlc_pressed:
+            print("Exiting...")
+            sys.exit(0)
+        else:
+            print("Press Enter to exit the program")
+            try:
+                while True:
+                    # Use input() to allow the program to be interrupted by Enter key
+                    user_input = input()
+                    if user_input:
+                        print("Exiting...")
+                        break
+            except KeyboardInterrupt:
+                # This block will be executed if Ctrl+C is pressed
+                pass
 
 
 

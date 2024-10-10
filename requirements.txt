@@ -1,9 +1,5 @@
-# opencv-python
 asyncio
-# aiortc
-# websockets
-# aiohttp
-# pyee
+websockets
 watchdog
 fastapi
 uvicorn
