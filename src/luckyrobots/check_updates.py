@@ -6,7 +6,6 @@ import platform
 import requests
 from urllib.parse import urljoin
 import sys
-from deepdiff import DeepDiff
 import re
 import mimetypes
 
@@ -78,26 +77,10 @@ def clean_path(path):
     parts = cleaned.rsplit('/', 1)
     return parts[0], parts[1] if len(parts) > 1 else None
 
-def compare_structures(old_structure, new_structure):
-    changes = {
-        'new_files': [],
-        'modified_files': [],
-        'deleted_files': []
-    }
-
-    diff = DeepDiff(old_structure, new_structure, ignore_order=True, verbose_level=2)
-    
-    for change_type, items in diff.items():
-        if change_type == 'dictionary_item_added':
-            changes['new_files'].extend(clean_path(key)[0] for key in items.keys())
-        elif change_type == 'dictionary_item_removed':
-            changes['deleted_files'].extend(clean_path(key)[0] for key in items.keys())
-        elif change_type in ['values_changed', 'type_changes']:
-            for key in items.keys():
-                path, attribute = clean_path(key)
-                changes['modified_files'].append([path, attribute])
-
-    return changes
+def compare_structures(json1, json2):
+    abc = json.dumps(json1, sort_keys=True) == json.dumps(json2, sort_keys=True)
+    print(abc)
+    return abc
 
 def scan_server(server_path):
     
