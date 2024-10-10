@@ -5,6 +5,7 @@ import time
 import platform
 import requests
 from urllib.parse import urljoin
+import sys
 
 root_path = os.path.join(os.path.dirname(__file__), "..", "..", "examples/Binary/mac")
 json_file = os.path.join(root_path, "file_structure.json")
@@ -82,6 +83,20 @@ def compare_structures(old_structure, new_structure):
 
     return changes
 
+def scan_server(server_path):
+    
+    mac_path = os.path.join(server_path, "mac")
+    win_path = os.path.join(server_path, "win")
+    linux_path = os.path.join(server_path, "linux")
+    
+    mac_structure = scan_directory(mac_path)
+    win_structure = scan_directory(win_path)
+    linux_structure = scan_directory(linux_path)
+    
+    save_json(mac_structure, os.path.join(server_path, "mac/hashmap.json"))
+    save_json(win_structure, os.path.join(server_path, "win/hashmap.json"))
+    save_json(linux_structure, os.path.join(server_path, "linux/hashmap.json"))
+
 def check_updates(root_path):
 
 
@@ -135,4 +150,15 @@ def check_updates(root_path):
     save_json(client_structure, json_file)
 
 if __name__ == "__main__":
-    check_updates(root_path, json_file)
+    lr_server_root = None
+    print(sys.argv)
+    for arg in sys.argv:
+        if arg.startswith('--lr-server-root='):
+            lr_server_root = arg.split('=', 1)[1]
+            break
+
+    if lr_server_root:
+        print(f"Scanning server at {lr_server_root}")
+        scan_server(lr_server_root)
+    else:
+        print("No server root specified. Use --lr-server-root=/path/to/server/root")
