@@ -1,45 +1,9 @@
 [
   {
-    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk3_sf_metal_sm6-metal_sm6.0.metallib",
-    "crc32": 2872380185,
-    "size": 4231553,
-    "mtime": 1728921172.0,
-    "type": "file",
-    "mime_type": "application/octet-stream",
-    "change_type": "new_file"
-  },
-  {
-    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk4_sf_metal_sm6-metal_sm6.0.metallib",
-    "crc32": 1655314411,
-    "size": 4509017,
-    "mtime": 1728921173.0,
-    "type": "file",
-    "mime_type": "application/octet-stream",
-    "change_type": "new_file"
-  },
-  {
-    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk4_sf_metal_sm5-metal_sm5.0.metallib",
-    "crc32": 2803705202,
-    "size": 4468947,
-    "mtime": 1728921173.0,
-    "type": "file",
-    "mime_type": "application/octet-stream",
-    "change_type": "new_file"
-  },
-  {
-    "path": "luckyrobots.app/Contents/UE/luckyrobots/Content/luckyrobots_chunk3_sf_metal_sm5-metal_sm5.0.metallib",
-    "crc32": 3867563042,
-    "size": 4191483,
-    "mtime": 1728921171.0,
-    "type": "file",
-    "mime_type": "application/octet-stream",
-    "change_type": "new_file"
-  },
-  {
     "path": ".DS_Store",
-    "crc32": 4271615112,
+    "crc32": 1994510242,
     "size": 6148,
-    "mtime": 1728933223.8823838,
+    "mtime": 1728944829.7614758,
     "type": "file",
     "mime_type": "application/octet-stream",
     "change_type": "deleted"
@@ -48,9 +12,6309 @@
     "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata",
     "type": "directory",
     "size": 0,
-    "mtime": 1728932502.4953437,
+    "mtime": 1728944826.8973176,
     "crc32": 0,
     "mime_type": "directory",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/55_Body_pos.txt",
+    "crc32": 1735367401,
+    "size": 122,
+    "mtime": 1728944806.7943072,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/68_depth_cam2.jpg",
+    "crc32": 423522579,
+    "size": 16103,
+    "mtime": 1728944809.4927084,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/50_Head_pos.txt",
+    "crc32": 3722136302,
+    "size": 124,
+    "mtime": 1728944826.2070336,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/52_Body_pos.txt",
+    "crc32": 341805680,
+    "size": 122,
+    "mtime": 1728944826.612652,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/9_Hand_pos.txt",
+    "crc32": 2048240119,
+    "size": 127,
+    "mtime": 1728944818.0069144,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/57_Head_pos.txt",
+    "crc32": 1782725457,
+    "size": 124,
+    "mtime": 1728944807.1973627,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/19_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944820.096281,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/96_rgb_cam1.jpg",
+    "crc32": 2105686260,
+    "size": 42196,
+    "mtime": 1728944815.5030892,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/85_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944812.8477957,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/69_rgb_cam1.jpg",
+    "crc32": 2565670496,
+    "size": 42303,
+    "mtime": 1728944809.6807792,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/90_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944813.847454,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/94_Hand_pos.txt",
+    "crc32": 1926052516,
+    "size": 127,
+    "mtime": 1728944815.0697005,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/91_rgb_cam1.jpg",
+    "crc32": 592726284,
+    "size": 47650,
+    "mtime": 1728944814.0455925,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/93_Hand_pos.txt",
+    "crc32": 1926052516,
+    "size": 127,
+    "mtime": 1728944815.0690973,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/39_Hand_pos.txt",
+    "crc32": 1639645053,
+    "size": 127,
+    "mtime": 1728944824.0045142,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/97_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944815.7016354,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/82_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944812.250525,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/18_rgb_cam2.jpg",
+    "crc32": 2323552592,
+    "size": 35739,
+    "mtime": 1728944819.8982458,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/16_depth_cam1.jpg",
+    "crc32": 545719066,
+    "size": 20919,
+    "mtime": 1728944819.4960158,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/42_Head_pos.txt",
+    "crc32": 3730808448,
+    "size": 124,
+    "mtime": 1728944824.6078436,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/17_Head_pos.txt",
+    "crc32": 3291652669,
+    "size": 124,
+    "mtime": 1728944819.6054056,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/47_Body_pos.txt",
+    "crc32": 370750505,
+    "size": 122,
+    "mtime": 1728944825.6053534,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/12_Body_pos.txt",
+    "crc32": 208930964,
+    "size": 122,
+    "mtime": 1728944818.6064286,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/45_Head_pos.txt",
+    "crc32": 3751670967,
+    "size": 124,
+    "mtime": 1728944825.2059968,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/10_Head_pos.txt",
+    "crc32": 3320891402,
+    "size": 124,
+    "mtime": 1728944818.2090719,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/98_depth_cam1.jpg",
+    "crc32": 3945368188,
+    "size": 20913,
+    "mtime": 1728944815.9016078,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/11_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944818.50213,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/40_Body_pos.txt",
+    "crc32": 400252446,
+    "size": 122,
+    "mtime": 1728944824.2133768,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/15_Body_pos.txt",
+    "crc32": 230056611,
+    "size": 122,
+    "mtime": 1728944819.2074728,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/58_rgb_cam2.jpg",
+    "crc32": 1173035921,
+    "size": 35938,
+    "mtime": 1728944807.4855747,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/72_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944810.2420347,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/67_depth_cam1.jpg",
+    "crc32": 889687826,
+    "size": 20920,
+    "mtime": 1728944809.2830083,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/86_Hand_pos.txt",
+    "crc32": 2005019681,
+    "size": 127,
+    "mtime": 1728944812.9940948,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/79_Hand_pos.txt",
+    "crc32": 1975816824,
+    "size": 127,
+    "mtime": 1728944811.5936,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/84_rgb_cam1.jpg",
+    "crc32": 281780997,
+    "size": 47640,
+    "mtime": 1728944812.6465836,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/81_Hand_pos.txt",
+    "crc32": 1975816824,
+    "size": 127,
+    "mtime": 1728944811.9945824,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/83_rgb_cam1.jpg",
+    "crc32": 592726284,
+    "size": 47650,
+    "mtime": 1728944812.444823,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/29_rgb_cam1.jpg",
+    "crc32": 1885139770,
+    "size": 42257,
+    "mtime": 1728944822.092419,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/60_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944807.8867588,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/75_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944810.8504374,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/68_depth_cam1.jpg",
+    "crc32": 3619509647,
+    "size": 20922,
+    "mtime": 1728944809.4898057,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/73_Head_pos.txt",
+    "crc32": 3420690866,
+    "size": 124,
+    "mtime": 1728944810.393847,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/26_Head_pos.txt",
+    "crc32": 3633601643,
+    "size": 124,
+    "mtime": 1728944821.4061725,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/89_Body_pos.txt",
+    "crc32": 2221941,
+    "size": 122,
+    "mtime": 1728944813.5931742,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/76_Body_pos.txt",
+    "crc32": 40327468,
+    "size": 122,
+    "mtime": 1728944810.992985,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/23_Body_pos.txt",
+    "crc32": 282261186,
+    "size": 122,
+    "mtime": 1728944820.8032117,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/74_Head_pos.txt",
+    "crc32": 3420690866,
+    "size": 124,
+    "mtime": 1728944810.594144,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/21_Head_pos.txt",
+    "crc32": 3646305884,
+    "size": 124,
+    "mtime": 1728944820.4073362,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/71_Body_pos.txt",
+    "crc32": 40327468,
+    "size": 122,
+    "mtime": 1728944810.0012586,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/24_Body_pos.txt",
+    "crc32": 286301429,
+    "size": 122,
+    "mtime": 1728944821.0122924,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/19_depth_cam1.jpg",
+    "crc32": 3541941036,
+    "size": 20909,
+    "mtime": 1728944820.0926633,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/48_Hand_pos.txt",
+    "crc32": 1618515274,
+    "size": 127,
+    "mtime": 1728944825.8226357,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/69_rgb_cam2.jpg",
+    "crc32": 1084742039,
+    "size": 35894,
+    "mtime": 1728944809.6840909,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/85_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944812.8508253,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/90_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944813.8505714,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/96_rgb_cam2.jpg",
+    "crc32": 3297768699,
+    "size": 35980,
+    "mtime": 1728944815.5062242,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/91_rgb_cam2.jpg",
+    "crc32": 3189101193,
+    "size": 36819,
+    "mtime": 1728944814.0486,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/97_depth_cam1.jpg",
+    "crc32": 3558032912,
+    "size": 20915,
+    "mtime": 1728944815.6989148,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/82_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944812.2476044,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/18_rgb_cam1.jpg",
+    "crc32": 3599801341,
+    "size": 42224,
+    "mtime": 1728944819.8983464,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/16_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944819.498917,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/64_Body_pos.txt",
+    "crc32": 1844557795,
+    "size": 122,
+    "mtime": 1728944808.5939434,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/31_Body_pos.txt",
+    "crc32": 324412076,
+    "size": 122,
+    "mtime": 1728944822.4065673,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/61_Head_pos.txt",
+    "crc32": 1782725457,
+    "size": 124,
+    "mtime": 1728944807.9938488,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/34_Head_pos.txt",
+    "crc32": 3675293701,
+    "size": 124,
+    "mtime": 1728944823.0114162,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/63_Body_pos.txt",
+    "crc32": 1844557795,
+    "size": 122,
+    "mtime": 1728944808.3943245,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/36_Body_pos.txt",
+    "crc32": 311707803,
+    "size": 122,
+    "mtime": 1728944823.4105175,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/98_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944815.904114,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/99_Head_pos.txt",
+    "crc32": 3480151296,
+    "size": 124,
+    "mtime": 1728944816.0134485,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/66_Head_pos.txt",
+    "crc32": 2102177647,
+    "size": 124,
+    "mtime": 1728944808.9945464,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/33_Head_pos.txt",
+    "crc32": 3671253554,
+    "size": 124,
+    "mtime": 1728944822.8140645,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/11_depth_cam1.jpg",
+    "crc32": 3692342857,
+    "size": 20909,
+    "mtime": 1728944818.4995399,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/72_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944810.2451148,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/67_depth_cam2.jpg",
+    "crc32": 4077752496,
+    "size": 16103,
+    "mtime": 1728944809.2859013,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/1_Body_pos.txt",
+    "crc32": 116008350,
+    "size": 122,
+    "mtime": 1728944816.4115765,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/58_rgb_cam1.jpg",
+    "crc32": 2125237700,
+    "size": 42251,
+    "mtime": 1728944807.482592,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/84_rgb_cam2.jpg",
+    "crc32": 2722701632,
+    "size": 36845,
+    "mtime": 1728944812.6493804,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/4_Head_pos.txt",
+    "crc32": 3467415351,
+    "size": 124,
+    "mtime": 1728944817.0125883,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/6_Body_pos.txt",
+    "crc32": 120082345,
+    "size": 122,
+    "mtime": 1728944817.405325,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/29_rgb_cam2.jpg",
+    "crc32": 3355430134,
+    "size": 35810,
+    "mtime": 1728944822.0958338,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/83_rgb_cam2.jpg",
+    "crc32": 4282931818,
+    "size": 36808,
+    "mtime": 1728944812.4482021,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/3_Head_pos.txt",
+    "crc32": 3480151296,
+    "size": 124,
+    "mtime": 1728944816.8123083,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/60_depth_cam1.jpg",
+    "crc32": 1237667508,
+    "size": 20920,
+    "mtime": 1728944807.8839023,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/75_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944810.8473902,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/10_depth_cam1.jpg",
+    "crc32": 2466803173,
+    "size": 20910,
+    "mtime": 1728944818.2952092,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/14_Body_pos.txt",
+    "crc32": 230056611,
+    "size": 122,
+    "mtime": 1728944819.0060985,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/99_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944816.106709,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/41_Body_pos.txt",
+    "crc32": 400252446,
+    "size": 122,
+    "mtime": 1728944824.4057517,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/11_Head_pos.txt",
+    "crc32": 3320891402,
+    "size": 124,
+    "mtime": 1728944818.4124181,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/44_Head_pos.txt",
+    "crc32": 3751670967,
+    "size": 124,
+    "mtime": 1728944825.0083323,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/13_Body_pos.txt",
+    "crc32": 208930964,
+    "size": 122,
+    "mtime": 1728944818.8054707,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/46_Body_pos.txt",
+    "crc32": 370750505,
+    "size": 122,
+    "mtime": 1728944825.4125807,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/16_Head_pos.txt",
+    "crc32": 3291652669,
+    "size": 124,
+    "mtime": 1728944819.4137688,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/43_Head_pos.txt",
+    "crc32": 3730808448,
+    "size": 124,
+    "mtime": 1728944824.8128972,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/17_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944819.6945434,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/28_rgb_cam1.jpg",
+    "crc32": 3499130219,
+    "size": 42228,
+    "mtime": 1728944821.8950744,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/74_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944810.6472366,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/82_rgb_cam1.jpg",
+    "crc32": 1351017815,
+    "size": 47641,
+    "mtime": 1728944812.2462957,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/61_depth_cam1.jpg",
+    "crc32": 2511660452,
+    "size": 20920,
+    "mtime": 1728944808.082593,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/80_Hand_pos.txt",
+    "crc32": 1975816824,
+    "size": 127,
+    "mtime": 1728944811.794288,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/85_rgb_cam1.jpg",
+    "crc32": 36710338,
+    "size": 47651,
+    "mtime": 1728944812.845982,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/59_rgb_cam2.jpg",
+    "crc32": 378315862,
+    "size": 35957,
+    "mtime": 1728944807.685964,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/66_depth_cam2.jpg",
+    "crc32": 423522579,
+    "size": 16103,
+    "mtime": 1728944809.0851939,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/73_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944810.4505718,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/78_Hand_pos.txt",
+    "crc32": 1975816824,
+    "size": 127,
+    "mtime": 1728944811.394005,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/87_Hand_pos.txt",
+    "crc32": 1983923734,
+    "size": 127,
+    "mtime": 1728944813.1943054,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/56_Head_pos.txt",
+    "crc32": 1803571558,
+    "size": 124,
+    "mtime": 1728944806.995064,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/8_Hand_pos.txt",
+    "crc32": 1900670666,
+    "size": 127,
+    "mtime": 1728944817.8048248,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/53_Body_pos.txt",
+    "crc32": 341805680,
+    "size": 122,
+    "mtime": 1728944826.8127956,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/51_Head_pos.txt",
+    "crc32": 3722136302,
+    "size": 124,
+    "mtime": 1728944826.4067886,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/54_Body_pos.txt",
+    "crc32": 1735367401,
+    "size": 122,
+    "mtime": 1728944806.5941162,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/69_depth_cam1.jpg",
+    "crc32": 1810506894,
+    "size": 20922,
+    "mtime": 1728944809.6825945,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/38_Hand_pos.txt",
+    "crc32": 1693837816,
+    "size": 127,
+    "mtime": 1728944823.8120048,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/92_Hand_pos.txt",
+    "crc32": 1930383507,
+    "size": 127,
+    "mtime": 1728944814.1940048,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/19_rgb_cam2.jpg",
+    "crc32": 3645606863,
+    "size": 35824,
+    "mtime": 1728944820.0947127,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/83_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944812.4464562,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/96_depth_cam1.jpg",
+    "crc32": 4260492296,
+    "size": 20909,
+    "mtime": 1728944815.5046127,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/90_rgb_cam1.jpg",
+    "crc32": 1351017815,
+    "size": 47641,
+    "mtime": 1728944813.846115,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/95_Hand_pos.txt",
+    "crc32": 1926052516,
+    "size": 127,
+    "mtime": 1728944815.3277402,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/91_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944814.0499518,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/84_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944812.6509452,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/68_rgb_cam1.jpg",
+    "crc32": 3092551025,
+    "size": 42297,
+    "mtime": 1728944809.4881842,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/97_rgb_cam1.jpg",
+    "crc32": 342662984,
+    "size": 42094,
+    "mtime": 1728944815.6971629,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/18_depth_cam1.jpg",
+    "crc32": 189000858,
+    "size": 20909,
+    "mtime": 1728944819.8974483,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/10_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944818.2982006,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/32_Head_pos.txt",
+    "crc32": 3671253554,
+    "size": 124,
+    "mtime": 1728944822.6093144,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/67_Head_pos.txt",
+    "crc32": 2089731416,
+    "size": 124,
+    "mtime": 1728944809.1940875,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/98_Head_pos.txt",
+    "crc32": 3441974105,
+    "size": 124,
+    "mtime": 1728944815.8117254,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/99_depth_cam1.jpg",
+    "crc32": 4223729229,
+    "size": 20911,
+    "mtime": 1728944816.1038306,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/37_Body_pos.txt",
+    "crc32": 311707803,
+    "size": 122,
+    "mtime": 1728944823.6038458,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/62_Body_pos.txt",
+    "crc32": 1844557795,
+    "size": 122,
+    "mtime": 1728944808.193586,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/35_Head_pos.txt",
+    "crc32": 3675293701,
+    "size": 124,
+    "mtime": 1728944823.2089791,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/60_Head_pos.txt",
+    "crc32": 1782725457,
+    "size": 124,
+    "mtime": 1728944807.7948508,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/17_depth_cam1.jpg",
+    "crc32": 2113407387,
+    "size": 20915,
+    "mtime": 1728944819.6913645,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/30_Body_pos.txt",
+    "crc32": 324412076,
+    "size": 122,
+    "mtime": 1728944822.2045872,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/65_Body_pos.txt",
+    "crc32": 3033034737,
+    "size": 122,
+    "mtime": 1728944808.7944915,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/82_rgb_cam2.jpg",
+    "crc32": 1635965152,
+    "size": 36804,
+    "mtime": 1728944812.2490876,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/74_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944810.6507852,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/61_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944808.0858943,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/28_rgb_cam2.jpg",
+    "crc32": 3310540192,
+    "size": 35801,
+    "mtime": 1728944821.8987787,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/2_Head_pos.txt",
+    "crc32": 3480151296,
+    "size": 124,
+    "mtime": 1728944816.6119297,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/7_Body_pos.txt",
+    "crc32": 120082345,
+    "size": 122,
+    "mtime": 1728944817.608447,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/85_rgb_cam2.jpg",
+    "crc32": 356916988,
+    "size": 36823,
+    "mtime": 1728944812.8492665,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/5_Head_pos.txt",
+    "crc32": 3467415351,
+    "size": 124,
+    "mtime": 1728944817.2044208,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/59_rgb_cam1.jpg",
+    "crc32": 1351140600,
+    "size": 42281,
+    "mtime": 1728944807.6828144,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/0_Body_pos.txt",
+    "crc32": 116008350,
+    "size": 122,
+    "mtime": 1728944816.2050245,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/66_depth_cam1.jpg",
+    "crc32": 697398300,
+    "size": 20916,
+    "mtime": 1728944809.0823436,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/73_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944810.4474525,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/25_Body_pos.txt",
+    "crc32": 286301429,
+    "size": 122,
+    "mtime": 1728944821.2054973,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/70_Body_pos.txt",
+    "crc32": 40327468,
+    "size": 122,
+    "mtime": 1728944810.0006793,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/20_Head_pos.txt",
+    "crc32": 3646305884,
+    "size": 124,
+    "mtime": 1728944820.2136562,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/75_Head_pos.txt",
+    "crc32": 3420690866,
+    "size": 124,
+    "mtime": 1728944810.7941914,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/22_Body_pos.txt",
+    "crc32": 282261186,
+    "size": 122,
+    "mtime": 1728944820.6085436,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/77_Body_pos.txt",
+    "crc32": 61158171,
+    "size": 122,
+    "mtime": 1728944811.1933827,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/88_Body_pos.txt",
+    "crc32": 2221941,
+    "size": 122,
+    "mtime": 1728944813.3928196,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/69_depth_cam2.jpg",
+    "crc32": 423522579,
+    "size": 16103,
+    "mtime": 1728944809.685759,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/27_Head_pos.txt",
+    "crc32": 3633601643,
+    "size": 124,
+    "mtime": 1728944821.6084602,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/72_Head_pos.txt",
+    "crc32": 3420690866,
+    "size": 124,
+    "mtime": 1728944810.1936917,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/19_rgb_cam1.jpg",
+    "crc32": 2566428558,
+    "size": 42130,
+    "mtime": 1728944820.0921235,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/83_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944812.4498599,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/96_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944815.5072145,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/90_rgb_cam2.jpg",
+    "crc32": 768276163,
+    "size": 36802,
+    "mtime": 1728944813.849166,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/49_Hand_pos.txt",
+    "crc32": 1648241427,
+    "size": 127,
+    "mtime": 1728944826.0144086,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/91_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944814.0470088,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/84_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944812.6477144,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/18_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944819.9025662,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/97_rgb_cam2.jpg",
+    "crc32": 2174488556,
+    "size": 35986,
+    "mtime": 1728944815.7002425,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/68_rgb_cam2.jpg",
+    "crc32": 4230165990,
+    "size": 35906,
+    "mtime": 1728944809.4912832,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/87_Head_pos.txt",
+    "crc32": 3383044075,
+    "size": 124,
+    "mtime": 1728944813.1941526,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/78_Head_pos.txt",
+    "crc32": 3391222661,
+    "size": 124,
+    "mtime": 1728944811.3938296,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/7_rgb_cam2.jpg",
+    "crc32": 3795745597,
+    "size": 35849,
+    "mtime": 1728944817.6942384,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/64_depth_cam1.jpg",
+    "crc32": 3750056215,
+    "size": 20914,
+    "mtime": 1728944808.68328,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/71_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944810.167951,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/82_Body_pos.txt",
+    "crc32": 31690050,
+    "size": 122,
+    "mtime": 1728944812.193205,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/28_Body_pos.txt",
+    "crc32": 286301429,
+    "size": 122,
+    "mtime": 1728944821.8120997,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/80_Head_pos.txt",
+    "crc32": 3391222661,
+    "size": 124,
+    "mtime": 1728944811.7941294,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/0_rgb_cam2.jpg",
+    "crc32": 4203320111,
+    "size": 35868,
+    "mtime": 1728944816.2886572,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/76_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944811.049379,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/63_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944808.4853811,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/85_Body_pos.txt",
+    "crc32": 31690050,
+    "size": 122,
+    "mtime": 1728944812.793616,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/37_rgb_cam2.jpg",
+    "crc32": 1447876275,
+    "size": 35799,
+    "mtime": 1728944823.691952,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/62_rgb_cam2.jpg",
+    "crc32": 1085567122,
+    "size": 35917,
+    "mtime": 1728944808.291655,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/89_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944813.6499023,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/43_Hand_pos.txt",
+    "crc32": 1639645053,
+    "size": 127,
+    "mtime": 1728944824.8130774,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/16_Hand_pos.txt",
+    "crc32": 2077737920,
+    "size": 127,
+    "mtime": 1728944819.4139447,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/15_depth_cam1.jpg",
+    "crc32": 4261217330,
+    "size": 20914,
+    "mtime": 1728944819.2932718,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/14_rgb_cam1.jpg",
+    "crc32": 574908252,
+    "size": 42295,
+    "mtime": 1728944819.0918803,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/41_rgb_cam1.jpg",
+    "crc32": 1217130819,
+    "size": 42256,
+    "mtime": 1728944824.4848478,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/30_rgb_cam2.jpg",
+    "crc32": 1334457389,
+    "size": 35820,
+    "mtime": 1728944822.2886333,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/65_rgb_cam2.jpg",
+    "crc32": 1258126831,
+    "size": 35892,
+    "mtime": 1728944808.8860528,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/44_Hand_pos.txt",
+    "crc32": 1618515274,
+    "size": 127,
+    "mtime": 1728944825.008481,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/11_Hand_pos.txt",
+    "crc32": 2048240119,
+    "size": 127,
+    "mtime": 1728944818.4125738,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/13_rgb_cam1.jpg",
+    "crc32": 1605279088,
+    "size": 42156,
+    "mtime": 1728944818.8894663,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/46_rgb_cam1.jpg",
+    "crc32": 581896259,
+    "size": 42244,
+    "mtime": 1728944825.4922395,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/12_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944818.697604,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/93_depth_cam1.jpg",
+    "crc32": 4229309338,
+    "size": 20911,
+    "mtime": 1728944815.242854,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/86_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944813.0471573,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/90_Body_pos.txt",
+    "crc32": 2221941,
+    "size": 122,
+    "mtime": 1728944813.793644,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/95_Head_pos.txt",
+    "crc32": 3441974105,
+    "size": 124,
+    "mtime": 1728944815.327578,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/97_Body_pos.txt",
+    "crc32": 78420935,
+    "size": 122,
+    "mtime": 1728944815.6097674,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/68_Body_pos.txt",
+    "crc32": 3037332934,
+    "size": 122,
+    "mtime": 1728944809.3937788,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/92_Head_pos.txt",
+    "crc32": 3437900142,
+    "size": 124,
+    "mtime": 1728944814.1938384,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/38_Head_pos.txt",
+    "crc32": 3675293701,
+    "size": 124,
+    "mtime": 1728944823.811841,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/81_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944812.0497696,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/94_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944815.3201978,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/53_rgb_cam1.jpg",
+    "crc32": 1609900833,
+    "size": 42344,
+    "mtime": 1728944826.892456,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/51_Hand_pos.txt",
+    "crc32": 1648241427,
+    "size": 127,
+    "mtime": 1728944826.406943,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/25_rgb_cam2.jpg",
+    "crc32": 1329423679,
+    "size": 35804,
+    "mtime": 1728944821.2882993,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/70_rgb_cam2.jpg",
+    "crc32": 1431174269,
+    "size": 36834,
+    "mtime": 1728944810.1517973,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/54_rgb_cam1.jpg",
+    "crc32": 401403817,
+    "size": 42293,
+    "mtime": 1728944806.6808553,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/8_Head_pos.txt",
+    "crc32": 3467415351,
+    "size": 124,
+    "mtime": 1728944817.8046443,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/79_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944811.646755,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/56_Hand_pos.txt",
+    "crc32": 513471936,
+    "size": 127,
+    "mtime": 1728944806.9953077,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/22_rgb_cam2.jpg",
+    "crc32": 1055643925,
+    "size": 35793,
+    "mtime": 1728944820.6908839,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/77_rgb_cam2.jpg",
+    "crc32": 482533179,
+    "size": 36800,
+    "mtime": 1728944811.2487497,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/88_rgb_cam2.jpg",
+    "crc32": 75194149,
+    "size": 36799,
+    "mtime": 1728944813.4475594,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/7_rgb_cam1.jpg",
+    "crc32": 3504585619,
+    "size": 42168,
+    "mtime": 1728944817.6906536,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/64_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944808.6862626,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/71_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944810.1715283,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/5_Hand_pos.txt",
+    "crc32": 1900670666,
+    "size": 127,
+    "mtime": 1728944817.2045891,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/0_rgb_cam1.jpg",
+    "crc32": 2148602483,
+    "size": 42110,
+    "mtime": 1728944816.285467,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/59_Body_pos.txt",
+    "crc32": 1722675422,
+    "size": 122,
+    "mtime": 1728944807.5941606,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/2_Hand_pos.txt",
+    "crc32": 1888191741,
+    "size": 127,
+    "mtime": 1728944816.6122093,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/76_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944811.0461388,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/63_depth_cam1.jpg",
+    "crc32": 3399270007,
+    "size": 20915,
+    "mtime": 1728944808.4824328,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/89_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944813.6466694,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/37_rgb_cam1.jpg",
+    "crc32": 3139601454,
+    "size": 42331,
+    "mtime": 1728944823.6884167,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/62_rgb_cam1.jpg",
+    "crc32": 1465550915,
+    "size": 42155,
+    "mtime": 1728944808.288472,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/15_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944819.29656,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/14_rgb_cam2.jpg",
+    "crc32": 1918139416,
+    "size": 35816,
+    "mtime": 1728944819.095202,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/41_rgb_cam2.jpg",
+    "crc32": 1422803597,
+    "size": 35834,
+    "mtime": 1728944824.4882917,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/60_Hand_pos.txt",
+    "crc32": 525901815,
+    "size": 127,
+    "mtime": 1728944807.795151,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/35_Hand_pos.txt",
+    "crc32": 1693837816,
+    "size": 127,
+    "mtime": 1728944823.2091374,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/30_rgb_cam1.jpg",
+    "crc32": 404937940,
+    "size": 42245,
+    "mtime": 1728944822.2851882,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/65_rgb_cam1.jpg",
+    "crc32": 2556583470,
+    "size": 42356,
+    "mtime": 1728944808.8829272,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/12_depth_cam1.jpg",
+    "crc32": 3085638050,
+    "size": 20912,
+    "mtime": 1728944818.6946259,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/13_rgb_cam2.jpg",
+    "crc32": 1698397822,
+    "size": 35814,
+    "mtime": 1728944818.8929045,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/46_rgb_cam2.jpg",
+    "crc32": 1209211453,
+    "size": 35829,
+    "mtime": 1728944825.4956632,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/98_Hand_pos.txt",
+    "crc32": 1926052516,
+    "size": 127,
+    "mtime": 1728944815.8119335,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/67_Hand_pos.txt",
+    "crc32": 3278611621,
+    "size": 127,
+    "mtime": 1728944809.1942654,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/32_Hand_pos.txt",
+    "crc32": 1698137039,
+    "size": 127,
+    "mtime": 1728944822.6095226,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/93_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944815.2455773,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/86_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944813.050461,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/49_Head_pos.txt",
+    "crc32": 3722136302,
+    "size": 124,
+    "mtime": 1728944826.0142252,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/19_Body_pos.txt",
+    "crc32": 282261186,
+    "size": 122,
+    "mtime": 1728944820.0123878,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/81_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944812.0467231,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/94_depth_cam1.jpg",
+    "crc32": 4000925426,
+    "size": 20911,
+    "mtime": 1728944815.3172338,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/72_Hand_pos.txt",
+    "crc32": 1946613839,
+    "size": 127,
+    "mtime": 1728944810.1938763,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/27_Hand_pos.txt",
+    "crc32": 1735474582,
+    "size": 127,
+    "mtime": 1728944821.6086245,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/53_rgb_cam2.jpg",
+    "crc32": 4032537166,
+    "size": 35815,
+    "mtime": 1728944826.895868,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/25_rgb_cam1.jpg",
+    "crc32": 4245469844,
+    "size": 42200,
+    "mtime": 1728944821.284925,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/70_rgb_cam1.jpg",
+    "crc32": 3436446995,
+    "size": 47663,
+    "mtime": 1728944810.148775,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/75_Hand_pos.txt",
+    "crc32": 1946613839,
+    "size": 127,
+    "mtime": 1728944810.7943754,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/20_Hand_pos.txt",
+    "crc32": 1723029409,
+    "size": 127,
+    "mtime": 1728944820.2138097,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/54_rgb_cam2.jpg",
+    "crc32": 2550597048,
+    "size": 35861,
+    "mtime": 1728944806.6839466,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/79_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944811.6498444,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/88_rgb_cam1.jpg",
+    "crc32": 281780997,
+    "size": 47640,
+    "mtime": 1728944813.44466,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/22_rgb_cam1.jpg",
+    "crc32": 3625732565,
+    "size": 42159,
+    "mtime": 1728944820.6875703,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/77_rgb_cam1.jpg",
+    "crc32": 36710338,
+    "size": 47651,
+    "mtime": 1728944811.245715,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/95_depth_cam1.jpg",
+    "crc32": 3837413288,
+    "size": 20910,
+    "mtime": 1728944815.4172425,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/80_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944811.8469205,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/39_Head_pos.txt",
+    "crc32": 3730808448,
+    "size": 124,
+    "mtime": 1728944824.0043814,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/93_Head_pos.txt",
+    "crc32": 3441974105,
+    "size": 124,
+    "mtime": 1728944815.0689275,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/69_Body_pos.txt",
+    "crc32": 3037332934,
+    "size": 122,
+    "mtime": 1728944809.5937436,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/96_Body_pos.txt",
+    "crc32": 78420935,
+    "size": 122,
+    "mtime": 1728944815.4253023,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/94_Head_pos.txt",
+    "crc32": 3441974105,
+    "size": 124,
+    "mtime": 1728944815.0695102,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/91_Body_pos.txt",
+    "crc32": 2221941,
+    "size": 122,
+    "mtime": 1728944813.9932315,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/87_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944813.2511444,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/92_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944814.251154,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/57_Hand_pos.txt",
+    "crc32": 525901815,
+    "size": 127,
+    "mtime": 1728944807.197517,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/9_Head_pos.txt",
+    "crc32": 3320891402,
+    "size": 124,
+    "mtime": 1728944818.0066497,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/89_rgb_cam2.jpg",
+    "crc32": 448383864,
+    "size": 36798,
+    "mtime": 1728944813.6482894,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/76_rgb_cam2.jpg",
+    "crc32": 596110391,
+    "size": 36821,
+    "mtime": 1728944811.0479004,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/78_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944811.4516544,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/23_rgb_cam2.jpg",
+    "crc32": 3646284601,
+    "size": 35849,
+    "mtime": 1728944820.8891826,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/55_rgb_cam1.jpg",
+    "crc32": 2393856042,
+    "size": 42199,
+    "mtime": 1728944806.9253273,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/50_Hand_pos.txt",
+    "crc32": 1648241427,
+    "size": 127,
+    "mtime": 1728944826.2071712,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/71_rgb_cam2.jpg",
+    "crc32": 3201128981,
+    "size": 36829,
+    "mtime": 1728944810.169852,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/24_rgb_cam2.jpg",
+    "crc32": 2385026089,
+    "size": 35835,
+    "mtime": 1728944821.0960176,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/52_rgb_cam1.jpg",
+    "crc32": 2712518151,
+    "size": 42322,
+    "mtime": 1728944826.6913233,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/84_Body_pos.txt",
+    "crc32": 31690050,
+    "size": 122,
+    "mtime": 1728944812.5932086,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/62_depth_cam1.jpg",
+    "crc32": 2872618364,
+    "size": 20914,
+    "mtime": 1728944808.2901607,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/77_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944811.247152,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/81_Head_pos.txt",
+    "crc32": 3391222661,
+    "size": 124,
+    "mtime": 1728944811.9943674,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/1_rgb_cam2.jpg",
+    "crc32": 290610622,
+    "size": 35844,
+    "mtime": 1728944816.498488,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/29_Body_pos.txt",
+    "crc32": 324412076,
+    "size": 122,
+    "mtime": 1728944822.0098293,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/83_Body_pos.txt",
+    "crc32": 31690050,
+    "size": 122,
+    "mtime": 1728944812.392797,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/79_Head_pos.txt",
+    "crc32": 3391222661,
+    "size": 124,
+    "mtime": 1728944811.593406,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/70_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944810.15305,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/65_depth_cam2.jpg",
+    "crc32": 423522579,
+    "size": 16103,
+    "mtime": 1728944808.8876963,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/86_Head_pos.txt",
+    "crc32": 3362213340,
+    "size": 124,
+    "mtime": 1728944812.9939015,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/6_rgb_cam2.jpg",
+    "crc32": 1437247179,
+    "size": 35823,
+    "mtime": 1728944817.4976904,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/47_rgb_cam1.jpg",
+    "crc32": 815648510,
+    "size": 42358,
+    "mtime": 1728944825.6842775,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/12_rgb_cam1.jpg",
+    "crc32": 1587277958,
+    "size": 42211,
+    "mtime": 1728944818.6930304,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/13_depth_cam1.jpg",
+    "crc32": 3915408085,
+    "size": 20914,
+    "mtime": 1728944818.8913493,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/64_rgb_cam2.jpg",
+    "crc32": 2111820257,
+    "size": 35945,
+    "mtime": 1728944808.6848488,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/31_rgb_cam2.jpg",
+    "crc32": 4259234607,
+    "size": 35849,
+    "mtime": 1728944822.4956317,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/10_Hand_pos.txt",
+    "crc32": 2048240119,
+    "size": 127,
+    "mtime": 1728944818.2092476,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/45_Hand_pos.txt",
+    "crc32": 1618515274,
+    "size": 127,
+    "mtime": 1728944825.2062283,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/40_rgb_cam1.jpg",
+    "crc32": 3578518574,
+    "size": 42303,
+    "mtime": 1728944824.2937596,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/15_rgb_cam1.jpg",
+    "crc32": 740360545,
+    "size": 42219,
+    "mtime": 1728944819.2918036,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/14_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944819.0965698,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/63_rgb_cam2.jpg",
+    "crc32": 2283166803,
+    "size": 36008,
+    "mtime": 1728944808.4840245,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/36_rgb_cam2.jpg",
+    "crc32": 410719886,
+    "size": 35848,
+    "mtime": 1728944823.4989235,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/17_Hand_pos.txt",
+    "crc32": 2077737920,
+    "size": 127,
+    "mtime": 1728944819.6055832,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/42_Hand_pos.txt",
+    "crc32": 1639645053,
+    "size": 127,
+    "mtime": 1728944824.6080294,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/88_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944813.4459884,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/95_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944815.4199212,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/80_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944811.8501666,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/18_Body_pos.txt",
+    "crc32": 230056611,
+    "size": 122,
+    "mtime": 1728944819.804279,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/48_Head_pos.txt",
+    "crc32": 3751670967,
+    "size": 124,
+    "mtime": 1728944825.8224325,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/87_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944813.2479596,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/92_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944814.247795,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/76_rgb_cam1.jpg",
+    "crc32": 281780997,
+    "size": 47640,
+    "mtime": 1728944811.0446067,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/78_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944811.4486465,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/23_rgb_cam1.jpg",
+    "crc32": 4160520458,
+    "size": 42247,
+    "mtime": 1728944820.8852346,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/89_rgb_cam1.jpg",
+    "crc32": 36710338,
+    "size": 47651,
+    "mtime": 1728944813.6447475,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/21_Hand_pos.txt",
+    "crc32": 1723029409,
+    "size": 127,
+    "mtime": 1728944820.407502,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/74_Hand_pos.txt",
+    "crc32": 1946613839,
+    "size": 127,
+    "mtime": 1728944810.594339,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/55_rgb_cam2.jpg",
+    "crc32": 2141309932,
+    "size": 35944,
+    "mtime": 1728944806.928784,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/71_rgb_cam1.jpg",
+    "crc32": 2563206095,
+    "size": 47647,
+    "mtime": 1728944810.1663804,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/24_rgb_cam1.jpg",
+    "crc32": 2666534871,
+    "size": 42241,
+    "mtime": 1728944821.0927348,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/26_Hand_pos.txt",
+    "crc32": 1735474582,
+    "size": 127,
+    "mtime": 1728944821.4063332,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/73_Hand_pos.txt",
+    "crc32": 1946613839,
+    "size": 127,
+    "mtime": 1728944810.3940444,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/52_rgb_cam2.jpg",
+    "crc32": 2444990793,
+    "size": 35915,
+    "mtime": 1728944826.6947658,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/3_Hand_pos.txt",
+    "crc32": 1888191741,
+    "size": 127,
+    "mtime": 1728944816.8124719,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/62_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944808.293142,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/77_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944811.250372,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/58_Body_pos.txt",
+    "crc32": 1722675422,
+    "size": 122,
+    "mtime": 1728944807.3940442,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/1_rgb_cam1.jpg",
+    "crc32": 2371368455,
+    "size": 42173,
+    "mtime": 1728944816.4947782,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/4_Hand_pos.txt",
+    "crc32": 1900670666,
+    "size": 127,
+    "mtime": 1728944817.0127592,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/70_depth_cam1.jpg",
+    "crc32": 124877157,
+    "size": 20501,
+    "mtime": 1728944810.1505363,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/65_depth_cam1.jpg",
+    "crc32": 834813382,
+    "size": 20915,
+    "mtime": 1728944808.8843825,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/6_rgb_cam1.jpg",
+    "crc32": 289097216,
+    "size": 42115,
+    "mtime": 1728944817.494176,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/47_rgb_cam2.jpg",
+    "crc32": 306630699,
+    "size": 35785,
+    "mtime": 1728944825.6879635,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/12_rgb_cam2.jpg",
+    "crc32": 318158878,
+    "size": 35852,
+    "mtime": 1728944818.6961958,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/13_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944818.894674,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/33_Hand_pos.txt",
+    "crc32": 1698137039,
+    "size": 127,
+    "mtime": 1728944822.814283,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/66_Hand_pos.txt",
+    "crc32": 3265908370,
+    "size": 127,
+    "mtime": 1728944808.994783,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/99_Hand_pos.txt",
+    "crc32": 1888191741,
+    "size": 127,
+    "mtime": 1728944816.0137935,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/64_rgb_cam1.jpg",
+    "crc32": 1487717039,
+    "size": 42200,
+    "mtime": 1728944808.6815948,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/31_rgb_cam1.jpg",
+    "crc32": 1815983346,
+    "size": 42289,
+    "mtime": 1728944822.49219,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/40_rgb_cam2.jpg",
+    "crc32": 3746725526,
+    "size": 35831,
+    "mtime": 1728944824.2973788,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/15_rgb_cam2.jpg",
+    "crc32": 2194541767,
+    "size": 35830,
+    "mtime": 1728944819.2949066,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/34_Hand_pos.txt",
+    "crc32": 1693837816,
+    "size": 127,
+    "mtime": 1728944823.0116358,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/61_Hand_pos.txt",
+    "crc32": 525901815,
+    "size": 127,
+    "mtime": 1728944807.9940357,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/63_rgb_cam1.jpg",
+    "crc32": 4212452165,
+    "size": 42272,
+    "mtime": 1728944808.480699,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/36_rgb_cam1.jpg",
+    "crc32": 791977314,
+    "size": 42340,
+    "mtime": 1728944823.4955833,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/14_depth_cam1.jpg",
+    "crc32": 1946218552,
+    "size": 20914,
+    "mtime": 1728944819.093586,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/88_depth_cam2.jpg",
+    "crc32": 1642179711,
+    "size": 15432,
+    "mtime": 1728944813.4488068,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/9_Body_pos.txt",
+    "crc32": 208930964,
+    "size": 122,
+    "mtime": 1728944818.005993,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/50_rgb_cam1.jpg",
+    "crc32": 1513940909,
+    "size": 42328,
+    "mtime": 1728944826.2909176,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/52_Hand_pos.txt",
+    "crc32": 1648241427,
+    "size": 127,
+    "mtime": 1728944826.6133728,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/26_rgb_cam2.jpg",
+    "crc32": 985826943,
+    "size": 35818,
+    "mtime": 1728944821.4892373,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/73_rgb_cam2.jpg",
+    "crc32": 3195260078,
+    "size": 36803,
+    "mtime": 1728944810.4488616,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/28_depth_cam1.jpg",
+    "crc32": 3636504022,
+    "size": 20910,
+    "mtime": 1728944821.8971128,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/57_rgb_cam1.jpg",
+    "crc32": 4144877698,
+    "size": 42331,
+    "mtime": 1728944807.282652,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/55_Hand_pos.txt",
+    "crc32": 513471936,
+    "size": 127,
+    "mtime": 1728944806.795022,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/21_rgb_cam2.jpg",
+    "crc32": 3574337832,
+    "size": 35832,
+    "mtime": 1728944820.4889767,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/74_rgb_cam2.jpg",
+    "crc32": 1656611013,
+    "size": 36838,
+    "mtime": 1728944810.6491866,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/39_Body_pos.txt",
+    "crc32": 400252446,
+    "size": 122,
+    "mtime": 1728944824.003876,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/93_Body_pos.txt",
+    "crc32": 78420935,
+    "size": 122,
+    "mtime": 1728944815.0687206,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/69_Head_pos.txt",
+    "crc32": 2089731416,
+    "size": 124,
+    "mtime": 1728944809.5943747,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/96_Head_pos.txt",
+    "crc32": 3441974105,
+    "size": 124,
+    "mtime": 1728944815.4255412,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/59_depth_cam1.jpg",
+    "crc32": 3224735717,
+    "size": 20920,
+    "mtime": 1728944807.684229,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/94_Body_pos.txt",
+    "crc32": 78420935,
+    "size": 122,
+    "mtime": 1728944815.069347,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/91_Head_pos.txt",
+    "crc32": 3383044075,
+    "size": 124,
+    "mtime": 1728944813.9938421,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/34_rgb_cam2.jpg",
+    "crc32": 4084102589,
+    "size": 35831,
+    "mtime": 1728944823.1038787,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/61_rgb_cam2.jpg",
+    "crc32": 348539368,
+    "size": 35935,
+    "mtime": 1728944808.0842714,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/40_Hand_pos.txt",
+    "crc32": 1639645053,
+    "size": 127,
+    "mtime": 1728944824.2140472,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/15_Hand_pos.txt",
+    "crc32": 2077737920,
+    "size": 127,
+    "mtime": 1728944819.2082655,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/17_rgb_cam1.jpg",
+    "crc32": 3271416344,
+    "size": 42176,
+    "mtime": 1728944819.6895075,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/42_rgb_cam1.jpg",
+    "crc32": 3880784489,
+    "size": 42247,
+    "mtime": 1728944824.6890402,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/44_depth_cam1.jpg",
+    "crc32": 1261264413,
+    "size": 20917,
+    "mtime": 1728944825.0910034,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/51_depth_cam1.jpg",
+    "crc32": 2087105929,
+    "size": 20916,
+    "mtime": 1728944826.4908047,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/56_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944807.0917037,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/43_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944824.8970728,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/99_rgb_cam2.jpg",
+    "crc32": 3044527930,
+    "size": 35861,
+    "mtime": 1728944816.1051269,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/33_rgb_cam2.jpg",
+    "crc32": 3370811216,
+    "size": 35840,
+    "mtime": 1728944822.9033952,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/66_rgb_cam2.jpg",
+    "crc32": 3847884728,
+    "size": 35912,
+    "mtime": 1728944809.0839481,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/47_Hand_pos.txt",
+    "crc32": 1618515274,
+    "size": 127,
+    "mtime": 1728944825.6061268,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/12_Hand_pos.txt",
+    "crc32": 2048240119,
+    "size": 127,
+    "mtime": 1728944818.6072042,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/10_rgb_cam1.jpg",
+    "crc32": 1312415493,
+    "size": 42170,
+    "mtime": 1728944818.2933683,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/45_rgb_cam1.jpg",
+    "crc32": 1911864357,
+    "size": 42259,
+    "mtime": 1728944825.286972,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/84_Head_pos.txt",
+    "crc32": 3362213340,
+    "size": 124,
+    "mtime": 1728944812.5935056,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/4_rgb_cam2.jpg",
+    "crc32": 2331496651,
+    "size": 35803,
+    "mtime": 1728944817.100739,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/81_Body_pos.txt",
+    "crc32": 61158171,
+    "size": 122,
+    "mtime": 1728944811.9937055,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/20_depth_cam1.jpg",
+    "crc32": 606451678,
+    "size": 20917,
+    "mtime": 1728944820.296442,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/35_depth_cam1.jpg",
+    "crc32": 3822880769,
+    "size": 20914,
+    "mtime": 1728944823.2945335,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/2_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944816.693771,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/29_Head_pos.txt",
+    "crc32": 3671253554,
+    "size": 124,
+    "mtime": 1728944822.0100555,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/32_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944822.7002468,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/27_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944821.6943986,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/83_Head_pos.txt",
+    "crc32": 3362213340,
+    "size": 124,
+    "mtime": 1728944812.3930187,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/5_depth_cam1.jpg",
+    "crc32": 2316314440,
+    "size": 20918,
+    "mtime": 1728944817.286503,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/3_rgb_cam2.jpg",
+    "crc32": 3469098902,
+    "size": 35728,
+    "mtime": 1728944816.8936975,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/79_Body_pos.txt",
+    "crc32": 61158171,
+    "size": 122,
+    "mtime": 1728944811.5927956,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/86_Body_pos.txt",
+    "crc32": 31690050,
+    "size": 122,
+    "mtime": 1728944812.9933374,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/71_Hand_pos.txt",
+    "crc32": 1946613839,
+    "size": 127,
+    "mtime": 1728944810.001509,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/24_Hand_pos.txt",
+    "crc32": 1735474582,
+    "size": 127,
+    "mtime": 1728944821.012959,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/50_rgb_cam2.jpg",
+    "crc32": 355868039,
+    "size": 35793,
+    "mtime": 1728944826.2943795,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/26_rgb_cam1.jpg",
+    "crc32": 2672070614,
+    "size": 42118,
+    "mtime": 1728944821.485631,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/73_rgb_cam1.jpg",
+    "crc32": 36710338,
+    "size": 47651,
+    "mtime": 1728944810.4458642,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/28_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944821.9003003,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/76_Hand_pos.txt",
+    "crc32": 1946613839,
+    "size": 127,
+    "mtime": 1728944810.9933448,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/23_Hand_pos.txt",
+    "crc32": 1723029409,
+    "size": 127,
+    "mtime": 1728944820.8039155,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/89_Hand_pos.txt",
+    "crc32": 1983923734,
+    "size": 127,
+    "mtime": 1728944813.5937157,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/57_rgb_cam2.jpg",
+    "crc32": 43275440,
+    "size": 35989,
+    "mtime": 1728944807.2860503,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/21_rgb_cam1.jpg",
+    "crc32": 1186945442,
+    "size": 42205,
+    "mtime": 1728944820.4853704,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/74_rgb_cam1.jpg",
+    "crc32": 1351017815,
+    "size": 47641,
+    "mtime": 1728944810.6460602,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/59_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944807.6872745,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/18_Head_pos.txt",
+    "crc32": 3291652669,
+    "size": 124,
+    "mtime": 1728944819.8048036,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/48_Body_pos.txt",
+    "crc32": 370750505,
+    "size": 122,
+    "mtime": 1728944825.822103,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/34_rgb_cam1.jpg",
+    "crc32": 3801904750,
+    "size": 42329,
+    "mtime": 1728944823.1006007,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/61_rgb_cam1.jpg",
+    "crc32": 1056402948,
+    "size": 42253,
+    "mtime": 1728944808.081015,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/17_rgb_cam2.jpg",
+    "crc32": 604673590,
+    "size": 35821,
+    "mtime": 1728944819.693095,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/42_rgb_cam2.jpg",
+    "crc32": 2721059254,
+    "size": 35837,
+    "mtime": 1728944824.692599,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/63_Hand_pos.txt",
+    "crc32": 335861962,
+    "size": 127,
+    "mtime": 1728944808.3952348,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/36_Hand_pos.txt",
+    "crc32": 1693837816,
+    "size": 127,
+    "mtime": 1728944823.4111826,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/44_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944825.0942276,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/51_depth_cam2.jpg",
+    "crc32": 4094457601,
+    "size": 16102,
+    "mtime": 1728944826.494055,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/33_rgb_cam1.jpg",
+    "crc32": 1733657705,
+    "size": 42322,
+    "mtime": 1728944822.8993146,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/66_rgb_cam1.jpg",
+    "crc32": 436796873,
+    "size": 42296,
+    "mtime": 1728944809.0806231,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/99_rgb_cam1.jpg",
+    "crc32": 2552508726,
+    "size": 42103,
+    "mtime": 1728944816.1020947,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/56_depth_cam1.jpg",
+    "crc32": 3917816654,
+    "size": 20920,
+    "mtime": 1728944807.0885866,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/43_depth_cam1.jpg",
+    "crc32": 2612111220,
+    "size": 20915,
+    "mtime": 1728944824.8934717,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/10_rgb_cam2.jpg",
+    "crc32": 1518237652,
+    "size": 35801,
+    "mtime": 1728944818.2970574,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/45_rgb_cam2.jpg",
+    "crc32": 3485665455,
+    "size": 35844,
+    "mtime": 1728944825.2908742,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/64_Hand_pos.txt",
+    "crc32": 335861962,
+    "size": 127,
+    "mtime": 1728944808.594747,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/31_Hand_pos.txt",
+    "crc32": 1698137039,
+    "size": 127,
+    "mtime": 1728944822.4072301,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/4_rgb_cam1.jpg",
+    "crc32": 4005755934,
+    "size": 42171,
+    "mtime": 1728944817.0974958,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/58_Head_pos.txt",
+    "crc32": 1782725457,
+    "size": 124,
+    "mtime": 1728944807.3946028,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/6_Hand_pos.txt",
+    "crc32": 1900670666,
+    "size": 127,
+    "mtime": 1728944817.4059856,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/2_depth_cam1.jpg",
+    "crc32": 676431226,
+    "size": 20919,
+    "mtime": 1728944816.6906066,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/20_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944820.2996652,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/35_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944823.2980337,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/5_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944817.2898455,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/32_depth_cam1.jpg",
+    "crc32": 2118293932,
+    "size": 20911,
+    "mtime": 1728944822.6967986,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/27_depth_cam1.jpg",
+    "crc32": 2902817190,
+    "size": 20920,
+    "mtime": 1728944821.6912048,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/3_rgb_cam1.jpg",
+    "crc32": 3337383186,
+    "size": 42075,
+    "mtime": 1728944816.8906744,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/1_Hand_pos.txt",
+    "crc32": 1888191741,
+    "size": 127,
+    "mtime": 1728944816.4123268,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/44_rgb_cam1.jpg",
+    "crc32": 3820372497,
+    "size": 42244,
+    "mtime": 1728944825.089191,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/11_rgb_cam1.jpg",
+    "crc32": 3934376128,
+    "size": 42268,
+    "mtime": 1728944818.4974942,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/67_rgb_cam2.jpg",
+    "crc32": 2412935129,
+    "size": 35952,
+    "mtime": 1728944809.2845726,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/32_rgb_cam2.jpg",
+    "crc32": 2022050302,
+    "size": 35919,
+    "mtime": 1728944822.6985536,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/98_rgb_cam2.jpg",
+    "crc32": 3167771512,
+    "size": 35862,
+    "mtime": 1728944815.9028685,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/42_depth_cam1.jpg",
+    "crc32": 1945063409,
+    "size": 20909,
+    "mtime": 1728944824.6906052,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/57_depth_cam1.jpg",
+    "crc32": 3641016442,
+    "size": 20914,
+    "mtime": 1728944807.2845602,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/13_Hand_pos.txt",
+    "crc32": 2048240119,
+    "size": 127,
+    "mtime": 1728944818.80612,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/46_Hand_pos.txt",
+    "crc32": 1618515274,
+    "size": 127,
+    "mtime": 1728944825.4130116,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/43_rgb_cam1.jpg",
+    "crc32": 2429983828,
+    "size": 42214,
+    "mtime": 1728944824.8917038,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/16_rgb_cam1.jpg",
+    "crc32": 121055446,
+    "size": 42187,
+    "mtime": 1728944819.494288,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/50_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944826.2959802,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/45_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944825.2923994,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/60_rgb_cam2.jpg",
+    "crc32": 806352760,
+    "size": 35933,
+    "mtime": 1728944807.8854277,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/35_rgb_cam2.jpg",
+    "crc32": 2202123976,
+    "size": 35795,
+    "mtime": 1728944823.2964256,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/14_Hand_pos.txt",
+    "crc32": 2077737920,
+    "size": 127,
+    "mtime": 1728944819.0069525,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/41_Hand_pos.txt",
+    "crc32": 1639645053,
+    "size": 127,
+    "mtime": 1728944824.4064536,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/87_Body_pos.txt",
+    "crc32": 2221941,
+    "size": 122,
+    "mtime": 1728944813.1936266,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/78_Body_pos.txt",
+    "crc32": 61158171,
+    "size": 122,
+    "mtime": 1728944811.3932946,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/82_Head_pos.txt",
+    "crc32": 3362213340,
+    "size": 124,
+    "mtime": 1728944812.1933868,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/28_Head_pos.txt",
+    "crc32": 3633601643,
+    "size": 124,
+    "mtime": 1728944821.8126364,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/26_depth_cam1.jpg",
+    "crc32": 2377240918,
+    "size": 20915,
+    "mtime": 1728944821.4874308,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/33_depth_cam1.jpg",
+    "crc32": 2914553729,
+    "size": 20916,
+    "mtime": 1728944822.901839,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/4_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944817.1021533,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/2_rgb_cam2.jpg",
+    "crc32": 3881480912,
+    "size": 35820,
+    "mtime": 1728944816.6922977,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/34_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944823.1057084,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/21_depth_cam2.jpg",
+    "crc32": 3427627900,
+    "size": 16103,
+    "mtime": 1728944820.490577,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/3_depth_cam1.jpg",
+    "crc32": 1250329924,
+    "size": 20918,
+    "mtime": 1728944816.892223,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/80_Body_pos.txt",
+    "crc32": 61158171,
+    "size": 122,
+    "mtime": 1728944811.7935622,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/85_Head_pos.txt",
+    "crc32": 3362213340,
+    "size": 124,
+    "mtime": 1728944812.7942083,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/5_rgb_cam2.jpg",
+    "crc32": 3462048389,
+    "size": 35807,
+    "mtime": 1728944817.2881927,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/54_Hand_pos.txt",
+    "crc32": 513471936,
+    "size": 127,
+    "mtime": 1728944806.5948217,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/75_rgb_cam2.jpg",
+    "crc32": 830760429,
+    "size": 36830,
+    "mtime": 1728944810.848946,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/20_rgb_cam2.jpg",
+    "crc32": 2267611138,
+    "size": 35848,
+    "mtime": 1728944820.298054,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/29_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944822.09748,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/56_rgb_cam1.jpg",
+    "crc32": 2468363298,
+    "size": 42320,
+    "mtime": 1728944807.0869708,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/53_Hand_pos.txt",
+    "crc32": 1648241427,
+    "size": 127,
+    "mtime": 1728944826.8135154,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/72_rgb_cam2.jpg",
+    "crc32": 2475953641,
+    "size": 36824,
+    "mtime": 1728944810.2436624,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/27_rgb_cam2.jpg",
+    "crc32": 3813755396,
+    "size": 35891,
+    "mtime": 1728944821.6931272,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/51_rgb_cam1.jpg",
+    "crc32": 2366795925,
+    "size": 42317,
+    "mtime": 1728944826.489012,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/8_Body_pos.txt",
+    "crc32": 120082345,
+    "size": 122,
+    "mtime": 1728944817.804078,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/90_Head_pos.txt",
+    "crc32": 3383044075,
+    "size": 124,
+    "mtime": 1728944813.794191,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/95_Body_pos.txt",
+    "crc32": 78420935,
+    "size": 122,
+    "mtime": 1728944815.3272984,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/58_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944807.4871254,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/97_Head_pos.txt",
+    "crc32": 3441974105,
+    "size": 124,
+    "mtime": 1728944815.6103716,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/68_Head_pos.txt",
+    "crc32": 2089731416,
+    "size": 124,
+    "mtime": 1728944809.3939857,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/92_Body_pos.txt",
+    "crc32": 91156976,
+    "size": 122,
+    "mtime": 1728944814.1932812,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/38_Body_pos.txt",
+    "crc32": 311707803,
+    "size": 122,
+    "mtime": 1728944823.8112721,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/44_rgb_cam2.jpg",
+    "crc32": 2436882222,
+    "size": 35845,
+    "mtime": 1728944825.0926626,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/11_rgb_cam2.jpg",
+    "crc32": 1837015037,
+    "size": 35873,
+    "mtime": 1728944818.5011516,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/30_Hand_pos.txt",
+    "crc32": 1698137039,
+    "size": 127,
+    "mtime": 1728944822.2052941,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/65_Hand_pos.txt",
+    "crc32": 3265908370,
+    "size": 127,
+    "mtime": 1728944808.7953176,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/98_rgb_cam1.jpg",
+    "crc32": 1893162949,
+    "size": 42073,
+    "mtime": 1728944815.8996904,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/67_rgb_cam1.jpg",
+    "crc32": 3930180948,
+    "size": 42280,
+    "mtime": 1728944809.2812505,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/32_rgb_cam1.jpg",
+    "crc32": 3271869171,
+    "size": 42209,
+    "mtime": 1728944822.6949074,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/42_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944824.6939158,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/57_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944807.2874908,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/50_depth_cam1.jpg",
+    "crc32": 2802412750,
+    "size": 20915,
+    "mtime": 1728944826.2925048,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/45_depth_cam1.jpg",
+    "crc32": 1064975944,
+    "size": 20906,
+    "mtime": 1728944825.2889893,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/43_rgb_cam2.jpg",
+    "crc32": 472005608,
+    "size": 35830,
+    "mtime": 1728944824.8954628,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/16_rgb_cam2.jpg",
+    "crc32": 1180785181,
+    "size": 35828,
+    "mtime": 1728944819.4975863,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/37_Hand_pos.txt",
+    "crc32": 1693837816,
+    "size": 127,
+    "mtime": 1728944823.6044972,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/62_Hand_pos.txt",
+    "crc32": 335861962,
+    "size": 127,
+    "mtime": 1728944808.194482,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/60_rgb_cam1.jpg",
+    "crc32": 3118291501,
+    "size": 42226,
+    "mtime": 1728944807.882319,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/35_rgb_cam1.jpg",
+    "crc32": 1610154363,
+    "size": 42249,
+    "mtime": 1728944823.2927794,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/0_Hand_pos.txt",
+    "crc32": 1888191741,
+    "size": 127,
+    "mtime": 1728944816.2056482,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/4_depth_cam1.jpg",
+    "crc32": 2914457178,
+    "size": 20924,
+    "mtime": 1728944817.0991497,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/2_rgb_cam1.jpg",
+    "crc32": 930598716,
+    "size": 42116,
+    "mtime": 1728944816.6885853,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/26_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944821.490769,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/33_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944822.904783,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/7_Hand_pos.txt",
+    "crc32": 1900670666,
+    "size": 127,
+    "mtime": 1728944817.6089687,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/3_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944816.8954148,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/59_Head_pos.txt",
+    "crc32": 1782725457,
+    "size": 124,
+    "mtime": 1728944807.5947475,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/34_depth_cam1.jpg",
+    "crc32": 1076757521,
+    "size": 20917,
+    "mtime": 1728944823.1023035,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/21_depth_cam1.jpg",
+    "crc32": 3655434912,
+    "size": 20918,
+    "mtime": 1728944820.4871125,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/5_rgb_cam1.jpg",
+    "crc32": 922589029,
+    "size": 42144,
+    "mtime": 1728944817.2850032,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/75_rgb_cam1.jpg",
+    "crc32": 592726284,
+    "size": 47650,
+    "mtime": 1728944810.8458643,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/20_rgb_cam1.jpg",
+    "crc32": 1402220606,
+    "size": 42217,
+    "mtime": 1728944820.2946243,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/88_Hand_pos.txt",
+    "crc32": 1983923734,
+    "size": 127,
+    "mtime": 1728944813.3937001,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/22_Hand_pos.txt",
+    "crc32": 1723029409,
+    "size": 127,
+    "mtime": 1728944820.609229,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/77_Hand_pos.txt",
+    "crc32": 1975816824,
+    "size": 127,
+    "mtime": 1728944811.1941257,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/56_rgb_cam2.jpg",
+    "crc32": 2247833056,
+    "size": 35970,
+    "mtime": 1728944807.0899944,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/29_depth_cam1.jpg",
+    "crc32": 3436158615,
+    "size": 20911,
+    "mtime": 1728944822.094089,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/72_rgb_cam1.jpg",
+    "crc32": 281780997,
+    "size": 47640,
+    "mtime": 1728944810.240731,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/27_rgb_cam1.jpg",
+    "crc32": 2097245022,
+    "size": 42161,
+    "mtime": 1728944821.6897078,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/25_Hand_pos.txt",
+    "crc32": 1735474582,
+    "size": 127,
+    "mtime": 1728944821.2061806,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/70_Hand_pos.txt",
+    "crc32": 1946613839,
+    "size": 127,
+    "mtime": 1728944810.0010357,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/51_rgb_cam2.jpg",
+    "crc32": 264713827,
+    "size": 35809,
+    "mtime": 1728944826.4925098,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/49_Body_pos.txt",
+    "crc32": 341805680,
+    "size": 122,
+    "mtime": 1728944826.0140035,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/58_depth_cam1.jpg",
+    "crc32": 679617227,
+    "size": 20920,
+    "mtime": 1728944807.4838557,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/19_Head_pos.txt",
+    "crc32": 3646305884,
+    "size": 124,
+    "mtime": 1728944820.012728,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/85_Hand_pos.txt",
+    "crc32": 2005019681,
+    "size": 127,
+    "mtime": 1728944812.7944853,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/78_rgb_cam1.jpg",
+    "crc32": 1351017815,
+    "size": 47641,
+    "mtime": 1728944811.4470372,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/36_depth_cam1.jpg",
+    "crc32": 3216618163,
+    "size": 20915,
+    "mtime": 1728944823.4972255,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/23_depth_cam1.jpg",
+    "crc32": 1393403831,
+    "size": 20912,
+    "mtime": 1728944820.8872595,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/87_rgb_cam1.jpg",
+    "crc32": 592726284,
+    "size": 47650,
+    "mtime": 1728944813.2463984,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/1_depth_cam2.jpg",
+    "crc32": 734967187,
+    "size": 16103,
+    "mtime": 1728944816.5004559,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/24_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944821.0977962,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/31_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944822.497277,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/6_depth_cam1.jpg",
+    "crc32": 2587823634,
+    "size": 20908,
+    "mtime": 1728944817.495943,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/28_Hand_pos.txt",
+    "crc32": 1735474582,
+    "size": 127,
+    "mtime": 1728944821.8128183,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/82_Hand_pos.txt",
+    "crc32": 2005019681,
+    "size": 127,
+    "mtime": 1728944812.1935256,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/80_rgb_cam1.jpg",
+    "crc32": 281780997,
+    "size": 47640,
+    "mtime": 1728944811.8454547,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/41_Head_pos.txt",
+    "crc32": 3730808448,
+    "size": 124,
+    "mtime": 1728944824.4062676,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/14_Head_pos.txt",
+    "crc32": 3291652669,
+    "size": 124,
+    "mtime": 1728944819.006722,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/52_depth_cam1.jpg",
+    "crc32": 1934379081,
+    "size": 20912,
+    "mtime": 1728944826.692952,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/47_depth_cam1.jpg",
+    "crc32": 355838741,
+    "size": 20909,
+    "mtime": 1728944825.6862617,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/44_Body_pos.txt",
+    "crc32": 370750505,
+    "size": 122,
+    "mtime": 1728944825.0077848,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/11_Body_pos.txt",
+    "crc32": 208930964,
+    "size": 122,
+    "mtime": 1728944818.411895,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/46_Head_pos.txt",
+    "crc32": 3751670967,
+    "size": 124,
+    "mtime": 1728944825.4128335,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/13_Head_pos.txt",
+    "crc32": 3320891402,
+    "size": 124,
+    "mtime": 1728944818.805978,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/40_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944824.2990344,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/55_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944806.9302256,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/43_Body_pos.txt",
+    "crc32": 400252446,
+    "size": 122,
+    "mtime": 1728944824.812347,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/16_Body_pos.txt",
+    "crc32": 230056611,
+    "size": 122,
+    "mtime": 1728944819.4131901,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/95_rgb_cam1.jpg",
+    "crc32": 3283566921,
+    "size": 42464,
+    "mtime": 1728944815.415561,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/68_Hand_pos.txt",
+    "crc32": 3278611621,
+    "size": 127,
+    "mtime": 1728944809.394193,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/48_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944825.9059029,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/97_Hand_pos.txt",
+    "crc32": 1926052516,
+    "size": 127,
+    "mtime": 1728944815.610547,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/49_rgb_cam2.jpg",
+    "crc32": 1899731438,
+    "size": 35785,
+    "mtime": 1728944826.0984344,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/38_rgb_cam1.jpg",
+    "crc32": 151962397,
+    "size": 42253,
+    "mtime": 1728944823.891796,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/92_rgb_cam1.jpg",
+    "crc32": 281780997,
+    "size": 47640,
+    "mtime": 1728944814.2466714,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/90_Hand_pos.txt",
+    "crc32": 1983923734,
+    "size": 127,
+    "mtime": 1728944813.7943866,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/56_Body_pos.txt",
+    "crc32": 1735367401,
+    "size": 122,
+    "mtime": 1728944806.994497,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/39_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944824.0910394,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/53_Head_pos.txt",
+    "crc32": 3722136302,
+    "size": 124,
+    "mtime": 1728944826.8133512,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/8_rgb_cam1.jpg",
+    "crc32": 4036236657,
+    "size": 42207,
+    "mtime": 1728944817.8848798,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/51_Body_pos.txt",
+    "crc32": 341805680,
+    "size": 122,
+    "mtime": 1728944826.4062502,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/9_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944818.0925047,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/54_Head_pos.txt",
+    "crc32": 1803571558,
+    "size": 124,
+    "mtime": 1728944806.594658,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/2_Body_pos.txt",
+    "crc32": 116008350,
+    "size": 122,
+    "mtime": 1728944816.6113877,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/87_rgb_cam2.jpg",
+    "crc32": 1202881013,
+    "size": 36812,
+    "mtime": 1728944813.2496338,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/1_depth_cam1.jpg",
+    "crc32": 1744289278,
+    "size": 20914,
+    "mtime": 1728944816.4965816,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/78_rgb_cam2.jpg",
+    "crc32": 2363872096,
+    "size": 36799,
+    "mtime": 1728944811.450223,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/36_depth_cam2.jpg",
+    "crc32": 3427627900,
+    "size": 16103,
+    "mtime": 1728944823.5004528,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/23_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944820.8905485,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/59_Hand_pos.txt",
+    "crc32": 525901815,
+    "size": 127,
+    "mtime": 1728944807.5951576,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/7_Head_pos.txt",
+    "crc32": 3467415351,
+    "size": 124,
+    "mtime": 1728944817.6087618,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/5_Body_pos.txt",
+    "crc32": 120082345,
+    "size": 122,
+    "mtime": 1728944817.2038682,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/6_depth_cam2.jpg",
+    "crc32": 969248008,
+    "size": 16103,
+    "mtime": 1728944817.4990613,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/24_depth_cam1.jpg",
+    "crc32": 4202106172,
+    "size": 20915,
+    "mtime": 1728944821.0943224,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/31_depth_cam1.jpg",
+    "crc32": 123663076,
+    "size": 20912,
+    "mtime": 1728944822.4940467,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/80_rgb_cam2.jpg",
+    "crc32": 3188487263,
+    "size": 36824,
+    "mtime": 1728944811.8486102,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/0_Head_pos.txt",
+    "crc32": 3480151296,
+    "size": 124,
+    "mtime": 1728944816.2054791,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/67_Body_pos.txt",
+    "crc32": 3037332934,
+    "size": 122,
+    "mtime": 1728944809.1938858,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/32_Body_pos.txt",
+    "crc32": 324412076,
+    "size": 122,
+    "mtime": 1728944822.608794,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/98_Body_pos.txt",
+    "crc32": 78420935,
+    "size": 122,
+    "mtime": 1728944815.8110948,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/52_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944826.6963549,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/47_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944825.6895475,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/62_Head_pos.txt",
+    "crc32": 1629387884,
+    "size": 124,
+    "mtime": 1728944808.194204,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/37_Head_pos.txt",
+    "crc32": 3675293701,
+    "size": 124,
+    "mtime": 1728944823.6043577,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/40_depth_cam1.jpg",
+    "crc32": 757262721,
+    "size": 20911,
+    "mtime": 1728944824.295631,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/55_depth_cam1.jpg",
+    "crc32": 1632428630,
+    "size": 20914,
+    "mtime": 1728944806.9271247,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/60_Body_pos.txt",
+    "crc32": 1722675422,
+    "size": 122,
+    "mtime": 1728944807.7942312,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/35_Body_pos.txt",
+    "crc32": 311707803,
+    "size": 122,
+    "mtime": 1728944823.2084374,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/65_Head_pos.txt",
+    "crc32": 2102177647,
+    "size": 124,
+    "mtime": 1728944808.79504,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/30_Head_pos.txt",
+    "crc32": 3671253554,
+    "size": 124,
+    "mtime": 1728944822.2051296,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/95_rgb_cam2.jpg",
+    "crc32": 4036773338,
+    "size": 36152,
+    "mtime": 1728944815.4184005,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/48_depth_cam1.jpg",
+    "crc32": 279373269,
+    "size": 20915,
+    "mtime": 1728944825.9023354,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/49_rgb_cam1.jpg",
+    "crc32": 1026550785,
+    "size": 42324,
+    "mtime": 1728944826.094891,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/19_Hand_pos.txt",
+    "crc32": 1723029409,
+    "size": 127,
+    "mtime": 1728944820.0129063,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/92_rgb_cam2.jpg",
+    "crc32": 4157211937,
+    "size": 36830,
+    "mtime": 1728944814.2500367,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/38_rgb_cam2.jpg",
+    "crc32": 301832296,
+    "size": 35876,
+    "mtime": 1728944823.8952558,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/70_Head_pos.txt",
+    "crc32": 3420690866,
+    "size": 124,
+    "mtime": 1728944810.0008612,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/25_Head_pos.txt",
+    "crc32": 3633601643,
+    "size": 124,
+    "mtime": 1728944821.2060118,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/75_Body_pos.txt",
+    "crc32": 40327468,
+    "size": 122,
+    "mtime": 1728944810.793947,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/20_Body_pos.txt",
+    "crc32": 282261186,
+    "size": 122,
+    "mtime": 1728944820.2130892,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/39_depth_cam1.jpg",
+    "crc32": 1234242587,
+    "size": 20914,
+    "mtime": 1728944824.0876343,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/8_rgb_cam2.jpg",
+    "crc32": 2252146416,
+    "size": 35818,
+    "mtime": 1728944817.888066,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/77_Head_pos.txt",
+    "crc32": 3391222661,
+    "size": 124,
+    "mtime": 1728944811.193946,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/9_depth_cam1.jpg",
+    "crc32": 2678252995,
+    "size": 20909,
+    "mtime": 1728944818.0891583,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/22_Head_pos.txt",
+    "crc32": 3646305884,
+    "size": 124,
+    "mtime": 1728944820.6090689,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/88_Head_pos.txt",
+    "crc32": 3383044075,
+    "size": 124,
+    "mtime": 1728944813.393451,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/72_Body_pos.txt",
+    "crc32": 40327468,
+    "size": 122,
+    "mtime": 1728944810.1934264,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/27_Body_pos.txt",
+    "crc32": 286301429,
+    "size": 122,
+    "mtime": 1728944821.6079113,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/91_Hand_pos.txt",
+    "crc32": 1983923734,
+    "size": 127,
+    "mtime": 1728944813.9940834,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/93_rgb_cam1.jpg",
+    "crc32": 221764216,
+    "size": 42378,
+    "mtime": 1728944815.2411876,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/39_rgb_cam1.jpg",
+    "crc32": 2977925851,
+    "size": 42333,
+    "mtime": 1728944824.0859492,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/96_Hand_pos.txt",
+    "crc32": 1926052516,
+    "size": 127,
+    "mtime": 1728944815.4257243,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/69_Hand_pos.txt",
+    "crc32": 3278611621,
+    "size": 127,
+    "mtime": 1728944809.5945666,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/49_depth_cam1.jpg",
+    "crc32": 2099857367,
+    "size": 20911,
+    "mtime": 1728944826.0964372,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/48_rgb_cam2.jpg",
+    "crc32": 1557263868,
+    "size": 35808,
+    "mtime": 1728944825.904236,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/94_rgb_cam1.jpg",
+    "crc32": 3776346600,
+    "size": 42967,
+    "mtime": 1728944815.3155084,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/55_Head_pos.txt",
+    "crc32": 1803571558,
+    "size": 124,
+    "mtime": 1728944806.794848,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/50_Body_pos.txt",
+    "crc32": 341805680,
+    "size": 122,
+    "mtime": 1728944826.206819,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/9_rgb_cam1.jpg",
+    "crc32": 3072246687,
+    "size": 42172,
+    "mtime": 1728944818.0875394,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/8_depth_cam1.jpg",
+    "crc32": 426007037,
+    "size": 20915,
+    "mtime": 1728944817.886376,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/38_depth_cam1.jpg",
+    "crc32": 150827616,
+    "size": 20919,
+    "mtime": 1728944823.8933938,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/52_Head_pos.txt",
+    "crc32": 3722136302,
+    "size": 124,
+    "mtime": 1728944826.6131973,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/57_Body_pos.txt",
+    "crc32": 1722675422,
+    "size": 122,
+    "mtime": 1728944807.196837,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/81_rgb_cam1.jpg",
+    "crc32": 36710338,
+    "size": 47651,
+    "mtime": 1728944812.045239,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/30_depth_cam1.jpg",
+    "crc32": 612887174,
+    "size": 20914,
+    "mtime": 1728944822.2868745,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/25_depth_cam1.jpg",
+    "crc32": 2154789702,
+    "size": 20913,
+    "mtime": 1728944821.2864542,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/7_depth_cam2.jpg",
+    "crc32": 969248008,
+    "size": 16103,
+    "mtime": 1728944817.695813,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/83_Hand_pos.txt",
+    "crc32": 2005019681,
+    "size": 127,
+    "mtime": 1728944812.3932629,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/29_Hand_pos.txt",
+    "crc32": 1698137039,
+    "size": 127,
+    "mtime": 1728944822.0102162,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/86_rgb_cam1.jpg",
+    "crc32": 1351017815,
+    "size": 47641,
+    "mtime": 1728944813.0459025,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/79_rgb_cam1.jpg",
+    "crc32": 592726284,
+    "size": 47650,
+    "mtime": 1728944811.6453452,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/22_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944820.692505,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/37_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944823.693566,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/0_depth_cam1.jpg",
+    "crc32": 3151406254,
+    "size": 20917,
+    "mtime": 1728944816.2868965,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/84_Hand_pos.txt",
+    "crc32": 2005019681,
+    "size": 127,
+    "mtime": 1728944812.5937045,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/17_Body_pos.txt",
+    "crc32": 230056611,
+    "size": 122,
+    "mtime": 1728944819.6047797,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/42_Body_pos.txt",
+    "crc32": 400252446,
+    "size": 122,
+    "mtime": 1728944824.6072135,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/54_depth_cam1.jpg",
+    "crc32": 699299905,
+    "size": 20914,
+    "mtime": 1728944806.6824124,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/41_depth_cam1.jpg",
+    "crc32": 3985927974,
+    "size": 20921,
+    "mtime": 1728944824.4864633,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/12_Head_pos.txt",
+    "crc32": 3320891402,
+    "size": 124,
+    "mtime": 1728944818.607053,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/47_Head_pos.txt",
+    "crc32": 3751670967,
+    "size": 124,
+    "mtime": 1728944825.6059523,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/46_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944825.4972825,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/53_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944826.8974063,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/10_Body_pos.txt",
+    "crc32": 208930964,
+    "size": 122,
+    "mtime": 1728944818.2085528,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/45_Body_pos.txt",
+    "crc32": 370750505,
+    "size": 122,
+    "mtime": 1728944825.2054262,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/15_Head_pos.txt",
+    "crc32": 3291652669,
+    "size": 124,
+    "mtime": 1728944819.208038,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/40_Head_pos.txt",
+    "crc32": 3730808448,
+    "size": 124,
+    "mtime": 1728944824.2139008,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/18_Hand_pos.txt",
+    "crc32": 2077737920,
+    "size": 127,
+    "mtime": 1728944819.8049483,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/39_rgb_cam2.jpg",
+    "crc32": 2426368498,
+    "size": 35861,
+    "mtime": 1728944824.0893962,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/93_rgb_cam2.jpg",
+    "crc32": 1440524634,
+    "size": 38117,
+    "mtime": 1728944815.2445595,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/48_rgb_cam1.jpg",
+    "crc32": 1203834967,
+    "size": 42358,
+    "mtime": 1728944825.9005666,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/49_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944826.0999444,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/94_rgb_cam2.jpg",
+    "crc32": 973468412,
+    "size": 37049,
+    "mtime": 1728944815.3188841,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/26_Body_pos.txt",
+    "crc32": 286301429,
+    "size": 122,
+    "mtime": 1728944821.4059656,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/73_Body_pos.txt",
+    "crc32": 40327468,
+    "size": 122,
+    "mtime": 1728944810.3936276,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/8_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944817.8894985,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/9_rgb_cam2.jpg",
+    "crc32": 827387562,
+    "size": 35810,
+    "mtime": 1728944818.0906746,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/89_Head_pos.txt",
+    "crc32": 3383044075,
+    "size": 124,
+    "mtime": 1728944813.5934846,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/23_Head_pos.txt",
+    "crc32": 3646305884,
+    "size": 124,
+    "mtime": 1728944820.8037474,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/76_Head_pos.txt",
+    "crc32": 3420690866,
+    "size": 124,
+    "mtime": 1728944810.9932194,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/21_Body_pos.txt",
+    "crc32": 282261186,
+    "size": 122,
+    "mtime": 1728944820.406776,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/74_Body_pos.txt",
+    "crc32": 40327468,
+    "size": 122,
+    "mtime": 1728944810.5935473,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/38_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944823.8966513,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/24_Head_pos.txt",
+    "crc32": 3633601643,
+    "size": 124,
+    "mtime": 1728944821.012815,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/71_Head_pos.txt",
+    "crc32": 3420690866,
+    "size": 124,
+    "mtime": 1728944810.0013826,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/81_rgb_cam2.jpg",
+    "crc32": 1161669083,
+    "size": 36795,
+    "mtime": 1728944812.0483284,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/1_Head_pos.txt",
+    "crc32": 3480151296,
+    "size": 124,
+    "mtime": 1728944816.4121518,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/7_depth_cam1.jpg",
+    "crc32": 2587823634,
+    "size": 20908,
+    "mtime": 1728944817.6922078,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/30_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944822.2902985,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/25_depth_cam2.jpg",
+    "crc32": 3427627900,
+    "size": 16103,
+    "mtime": 1728944821.2897248,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/4_Body_pos.txt",
+    "crc32": 120082345,
+    "size": 122,
+    "mtime": 1728944817.011988,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/79_rgb_cam2.jpg",
+    "crc32": 1753910030,
+    "size": 36827,
+    "mtime": 1728944811.6483963,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/86_rgb_cam2.jpg",
+    "crc32": 722780446,
+    "size": 36801,
+    "mtime": 1728944813.0491052,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/0_depth_cam2.jpg",
+    "crc32": 3254604848,
+    "size": 16103,
+    "mtime": 1728944816.2903423,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/6_Head_pos.txt",
+    "crc32": 3467415351,
+    "size": 124,
+    "mtime": 1728944817.4058454,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/22_depth_cam1.jpg",
+    "crc32": 1955670709,
+    "size": 20911,
+    "mtime": 1728944820.6891837,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/37_depth_cam1.jpg",
+    "crc32": 1238230471,
+    "size": 20924,
+    "mtime": 1728944823.69034,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/58_Hand_pos.txt",
+    "crc32": 525901815,
+    "size": 127,
+    "mtime": 1728944807.3947875,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/3_Body_pos.txt",
+    "crc32": 116008350,
+    "size": 122,
+    "mtime": 1728944816.8117702,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/31_Head_pos.txt",
+    "crc32": 3671253554,
+    "size": 124,
+    "mtime": 1728944822.407096,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/64_Head_pos.txt",
+    "crc32": 1629387884,
+    "size": 124,
+    "mtime": 1728944808.5945578,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/54_depth_cam2.jpg",
+    "crc32": 3595149035,
+    "size": 16103,
+    "mtime": 1728944806.6853092,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/41_depth_cam2.jpg",
+    "crc32": 3474249877,
+    "size": 16103,
+    "mtime": 1728944824.4899306,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/34_Body_pos.txt",
+    "crc32": 311707803,
+    "size": 122,
+    "mtime": 1728944823.0111437,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/61_Body_pos.txt",
+    "crc32": 1722675422,
+    "size": 122,
+    "mtime": 1728944807.9935713,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/36_Head_pos.txt",
+    "crc32": 3675293701,
+    "size": 124,
+    "mtime": 1728944823.411015,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/63_Head_pos.txt",
+    "crc32": 1629387884,
+    "size": 124,
+    "mtime": 1728944808.3949888,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/46_depth_cam1.jpg",
+    "crc32": 4246400206,
+    "size": 20918,
+    "mtime": 1728944825.4939146,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/53_depth_cam1.jpg",
+    "crc32": 1111284859,
+    "size": 20914,
+    "mtime": 1728944826.8941743,
+    "type": "file",
+    "mime_type": "image/jpeg",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/99_Body_pos.txt",
+    "crc32": 116008350,
+    "size": 122,
+    "mtime": 1728944816.0128977,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/33_Body_pos.txt",
+    "crc32": 324412076,
+    "size": 122,
+    "mtime": 1728944822.8130906,
+    "type": "file",
+    "mime_type": "text/plain",
+    "change_type": "deleted"
+  },
+  {
+    "path": "luckyrobots.app/Contents/UE/luckyrobots/robotdata/66_Body_pos.txt",
+    "crc32": 3033034737,
+    "size": 122,
+    "mtime": 1728944808.993917,
+    "type": "file",
+    "mime_type": "text/plain",
     "change_type": "deleted"
   }
 ]
