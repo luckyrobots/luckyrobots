@@ -11,7 +11,18 @@ import mimetypes
 
 root_path = os.path.join(os.path.dirname(__file__), "..", "..", "examples/Binary/mac")
 json_file = os.path.join(root_path, "file_structure.json")
+base_url = "https://builds.luckyrobots.xyz/"
 
+def get_os_type():
+    os_type = platform.system().lower()
+    if os_type == "darwin":
+        return "mac"
+    elif os_type == "windows":
+        return "win"
+    elif os_type == "linux":
+        return "linux"
+    else:
+        raise ValueError(f"Unsupported operating system: {os_type}")
 
 def calculate_crc32(file_path):
     with open(file_path, 'rb') as file:
@@ -35,7 +46,9 @@ def scan_directory(root_path):
                 "path": relative_path,
                 "type": "directory",
                 "size": 0,  # Directories don't have a size in this context
-                "mtime": os.path.getmtime(dir_path)
+                "mtime": os.path.getmtime(dir_path),
+                "crc32": 0,
+                "mime_type": "directory"
             })
         
         # Add files
@@ -78,9 +91,32 @@ def clean_path(path):
     return parts[0], parts[1] if len(parts) > 1 else None
 
 def compare_structures(json1, json2):
-    abc = json.dumps(json1, sort_keys=True) == json.dumps(json2, sort_keys=True)
-    print(abc)
-    return abc
+    dict1 = {item['path']: item for item in json1}
+    dict2 = {item['path']: item for item in json2}
+
+    result = []
+
+    # Check for new and modified items
+    for path, item in dict2.items():
+        if path not in dict1:
+            item['change_type'] = 'new_file'
+            result.append(item)
+        elif item['type'] == 'file' and item['crc32'] != dict1[path]['crc32']:
+            item['change_type'] = 'modified'
+            result.append(item)
+        # Unchanged items are not added to the result
+
+    # Check for deleted items
+    for path, item in dict1.items():
+        if path not in dict2:
+            item['change_type'] = 'deleted'
+            result.append(item)
+
+    # Remove the item with "path": "hashmap.json" from the result
+    result = [item for item in result if item['path'] != "hashmap.json"]
+    save_json(result, "changes.json")
+    return result
+
 
 def scan_server(server_path):
     
@@ -98,20 +134,13 @@ def scan_server(server_path):
 
 def check_updates(root_path):
     # Determine the operating system
-    os_type = platform.system().lower()
-
+    os_type = get_os_type()
+    global base_url
     # Set the base URL
-    base_url = "https://builds.luckyrobots.xyz/"
 
     # Construct the URL based on the operating system
-    if os_type == "darwin":
-        url = urljoin(base_url, "mac/hashmap.json")
-    elif os_type == "windows":
-        url = urljoin(base_url, "win/hashmap.json")
-    elif os_type == "linux":
-        url = urljoin(base_url, "linux/hashmap.json")
-    else:
-        raise ValueError(f"Unsupported operating system: {os_type}")
+    os_type = get_os_type()
+    url = urljoin(base_url, f"{os_type}/hashmap.json")
 
     # Download the JSON file
     try:
@@ -133,27 +162,10 @@ def check_updates(root_path):
     if server_structure:
         changes = compare_structures(client_structure, server_structure)
         
-        # Create a flat JSON structure for changes
-        flat_changes = []
-        for change_type, files in changes.items():
-            for file in sorted(files):
-                if isinstance(file, list):
-                    path = file[0].replace('root[', '', 1)  # Remove 'root[' prefix
-                    flat_changes.append({
-                        "path": path,
-                        "changeType": change_type,
-                        "attribute": file[1]
-                    })
-                else:
-                    path = file.replace('root[', '', 1)  # Remove 'root[' prefix
-                    flat_changes.append({
-                        "path": path,
-                        "changeType": change_type
-                    })
-        
+
         # Write the flat JSON to a file
         with open('changes.json', 'w') as f:
-            json.dump(flat_changes, f, indent=2)
+            json.dump(changes, f, indent=2)
         
         print(f"Changes have been written to changes.json")
     else:
@@ -161,6 +173,8 @@ def check_updates(root_path):
 
     # Save the new structure
     save_json(client_structure, "./client_structure.json")
+    
+    return changes
 
 if __name__ == "__main__":
     lr_server_root = None

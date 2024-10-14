@@ -173,7 +173,7 @@ class LuckyRobots:
             if "--lr-no-executable" not in sys.argv:
                 run_luckyworld_executable(directory_to_watch)
 
-        library_dev()
+        library_dev() 
 
         # Run the server in a separate thread
         server_thread = threading.Thread(target=LuckyRobots.run_server, daemon=True)
