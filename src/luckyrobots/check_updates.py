@@ -114,7 +114,7 @@ def compare_structures(json1, json2):
 
     # Remove the item with "path": "hashmap.json" from the result
     result = [item for item in result if item['path'] != "hashmap.json"]
-    save_json(result, "changes.json")
+    # save_json(result, "changes.json")
     return result
 
 
