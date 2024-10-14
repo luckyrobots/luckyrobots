@@ -147,7 +147,7 @@ class LuckyRobots:
         
 
         if binary_path is None:
-            binary_path = check_binary()    
+            binary_path = check_binary("./Binary")    
         if not os.path.exists(binary_path):
             print(f"I couldn't find the binary at {binary_path}, are you sure it's running and capture mode is on?")
             os._exit(1)

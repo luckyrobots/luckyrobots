@@ -162,17 +162,18 @@ def check_updates(root_path):
     if server_structure:
         changes = compare_structures(client_structure, server_structure)
         
-
-        # Write the flat JSON to a file
-        with open('changes.json', 'w') as f:
-            json.dump(changes, f, indent=2)
+        # for future debugging
+        # # Write the flat JSON to a file
+        # with open('changes.json', 'w') as f:
+        #     json.dump(changes, f, indent=2)
         
-        print(f"Changes have been written to changes.json")
+        # print(f"Changes have been written to changes.json")
     else:
         print("No server structure available for comparison.")
 
-    # Save the new structure
-    save_json(client_structure, "./client_structure.json")
+    # for future debugging
+    # # Save the new structure
+    # save_json(client_structure, "./client_structure.json")
     
     return changes
 
