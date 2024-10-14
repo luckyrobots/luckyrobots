@@ -8,7 +8,7 @@ import asyncio
 async def main():
     @lr.message_receiver
     async def handle_file_created(message, robot_images: list):
-    
+        print(message)
         if message == "robot_output":
             print("robot_images:", robot_images)
             if robot_images:
