@@ -39,14 +39,14 @@ variable "ssh_private_key_path" {
   default     = "~/.ssh/id_ed25519"
 }
 
-variable "additional_storage_needed" {
-  description = "Whether to provision additional storage volumes"
-  type        = bool
-  default     = false
-}
-
 variable "datacenter" {
   description = "The datacenter to deploy to (more specific than location)"
   type        = string
   default     = null
-} 
+}
+
+variable "gitea_runner_registration_token" {
+  description = "Gitea runner registration token"
+  type        = string
+  sensitive   = true
+}

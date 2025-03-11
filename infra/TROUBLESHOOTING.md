@@ -38,7 +38,7 @@ This means the script execution on the remote server failed. Here's how to debug
 If Terraform can't connect to the server via SSH:
 
 1. **Check your SSH key location**:
-   Ensure the paths in `terraform.tfvars` or `.env` file match your actual SSH key paths.
+   Ensure the paths in `generated.tfvars` or `.env` file match your actual SSH key paths.
 
 2. **Verify server IP**:
    ```bash
@@ -60,12 +60,12 @@ If Gitea installation fails:
 
 2. **Check if Gitea container is running**:
    ```bash
-   docker ps | grep robotea
+   docker ps | grep gitea
    ```
 
 3. **View Gitea logs**:
    ```bash
-   docker logs robotea
+   docker logs gitea-gitea-1
    ```
 
 4. **Check port availability**:
@@ -113,6 +113,13 @@ If variables are not being passed correctly:
 ```
 ssh-keygen -R 167.235.246.115
 ```
+If having problem with push with ssh check the following
+- SSH public key is inside profile/settings/SSH
+- Remote ssh-url is set correctly. For example
+```
+git remote set-url origin ssh://git@app.luckyrobots.ai:2222/goran/luckyrobots.git
+```
+
 
 ## Getting Help
 

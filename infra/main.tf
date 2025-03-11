@@ -27,6 +27,10 @@ resource "hcloud_volume" "gitea_storage" {
     type = "gitea"
     purpose = "storage"
   }
+  
+  #  lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "hcloud_server" "gitea" {
@@ -141,7 +145,7 @@ resource "null_resource" "run_gitea_setup" {
     inline = [
       "echo '#!/bin/bash' > /root/run-setup-background.sh",
       "echo '# This is a wrapper script that runs the setup in background' >> /root/run-setup-background.sh",
-      "echo '# and ensures terraform does not hang' >> /root/run-setup-background.sh",
+      "echo '# and makes sure terraform does not hang' >> /root/run-setup-background.sh",
       "echo '' >> /root/run-setup-background.sh",
       "echo '# Ensure the log directory exists' >> /root/run-setup-background.sh",
       "echo 'mkdir -p /root/logs' >> /root/run-setup-background.sh",
