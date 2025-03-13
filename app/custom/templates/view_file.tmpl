@@ -142,24 +142,11 @@
 
 <!-- Define loading flags -->
 <script>
-  console.log("DEBUG: view_file.tmpl is rendering. FileName = '{{.FileName}}'");
-  
   // Check if the filename has a .parquet extension (case insensitive)
   const fileName = "{{.FileName}}";
   const isParquet = fileName.toLowerCase().endsWith('.parquet');
   const isCSV = fileName.toLowerCase().endsWith('.csv');
   const isJSON = fileName.toLowerCase().endsWith('.json');
-  
-  console.log("DEBUG: File type detection = ", {
-    fileName: fileName,
-    isParquet: isParquet,
-    isCSV: isCSV,
-    isJSON: isJSON
-  });
-  
-  console.log("DEBUG: RawURL = '{{.RawURL}}'");
-  console.log("DEBUG: RawFileLink = '{{$.RawFileLink}}'");
-  
   window.__fileType = isParquet ? 'parquet' : (isCSV ? 'csv' : (isJSON ? 'json' : null));
 </script>
 
@@ -217,7 +204,6 @@
   if (isParquet) {
     // Configure this specific page for Parquet files
     window.__parquetFilePath = "{{$.RawFileLink}}";
-    console.log("Parquet file detected, setting up for binary handling:", window.__parquetFilePath);
   }
 </script>
 
@@ -229,7 +215,6 @@
   document.addEventListener('DOMContentLoaded', function() {
     const previewElement = document.getElementById("dataset-preview");
     if (previewElement && window.__fileType) {
-      console.log("Setting file type:", window.__fileType);
       previewElement.setAttribute("data-file-type", window.__fileType);
     }
   });

@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", async function () {
     const previewElement = document.getElementById("dataset-preview");
-    console.log("Preview element:", previewElement);
     if (!previewElement) {
         return;
     }
@@ -11,12 +10,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     // If file type is not set in the data attribute, check if it's set in the window variable
     if (!fileType && window.__fileType) {
         fileType = window.__fileType;
-        console.log("Using file type from window variable:", fileType);
-        // Update the data attribute for consistency
         previewElement.setAttribute("data-file-type", fileType);
     }
     
-    // As a last resort, try to determine the file type from the URL
     if (!fileType) {
         const urlLower = fileUrl.toLowerCase();
         if (urlLower.endsWith('.parquet')) {
@@ -28,20 +24,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         } else {
             fileType = 'unknown';
         }
-        console.log("Detected file type from URL:", fileType);
         previewElement.setAttribute("data-file-type", fileType);
     }
     
-    console.log("Dataset preview: fileUrl =", fileUrl, "fileType =", fileType);
 
-    // Log available global objects for debugging
-    console.log("Available global objects:", {
-        duckdbLoaded: window.__duckdbLoaded,
-        fileType: window.__fileType,
-        parquetFilePath: window.__parquetFilePath
-    });
-
-            if (fileType === "csv") {
+    if (fileType === "csv") {
         await loadCSV(fileUrl);
             } else if (fileType === "json") {
         // For JSON files, just provide a download link for now
@@ -72,8 +59,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 // Main function to handle Parquet files
 async function loadParquetFile(fileUrl) {
-    console.log("Loading Parquet file from URL:", fileUrl);
-    
+
     // Normalize the URL if needed (change /src/ to /raw/ if necessary)
     let normalizedUrl = fileUrl;
     if (normalizedUrl.includes("/src/")) {
@@ -91,11 +77,9 @@ async function loadParquetFile(fileUrl) {
     try {
         // Extract the filename for display
         const filename = getFilenameFromUrl(normalizedUrl);
-        console.log("Filename extracted:", filename);
         
         // Check if user has defined a specific Parquet file path
         if (window.__parquetFilePath) {
-            console.log("Using predefined Parquet file path:", window.__parquetFilePath);
             normalizedUrl = window.__parquetFilePath;
         }
         
@@ -103,20 +87,16 @@ async function loadParquetFile(fileUrl) {
         
         // Check for the pre-instantiated DuckDB instance
         if (window.__duckdbLoaded && window.duckdbInstance) {
-            console.log("DuckDB instance is available, using it for parsing");
             try {
                 success = await readParquetWithDuckDB(normalizedUrl);
             } catch (err) {
                 console.error("Error using DuckDB instance:", err);
             }
         } else {
-            console.log("DuckDB instance not available - check the console for errors");
-            // Add a small delay to allow DuckDB to load (in case it's still loading)
             await new Promise(resolve => setTimeout(resolve, 500));
             
             // Check again after delay
             if (window.__duckdbLoaded && window.duckdbInstance) {
-                console.log("DuckDB instance became available after delay");
                 try {
                     success = await readParquetWithDuckDB(normalizedUrl);
                 } catch (err) {
@@ -125,30 +105,23 @@ async function loadParquetFile(fileUrl) {
             }
         }
         
-        // If DuckDB failed or is not available, fall back to basic info
         if (!success) {
-            console.log("DuckDB parsing failed, falling back to basic info");
             await displayEnhancedParquetInfo(normalizedUrl);
         }
         
-        // Clean up loading indicator
         loadingDiv.remove();
     } catch (error) {
         console.error("Error loading Parquet file:", error);
         
-        // Show error message
         const errorMessage = error.message || "Unknown error";
         loadingDiv.remove();
         
-        // Create detailed error message
         const errorDiv = document.createElement("div");
         errorDiv.className = "ui negative message";
         
-        // Build a more helpful error message
         let errorDetails = `<div class="header">Error Loading Parquet File</div>
             <p>${escapeHTML(errorMessage)}</p>`;
             
-        // Add troubleshooting info
         errorDetails += `
             <div class="ui segment">
                 <h4>Troubleshooting Information:</h4>
@@ -178,14 +151,11 @@ async function loadParquetFile(fileUrl) {
 // Helper function to read Parquet with the Worker API
 async function readParquetWithWorker(fileUrl) {
     try {
-        console.log("Reading Parquet with DuckDB Worker API");
         
         // Create a worker
         const db = await duckdb.createWorker();
-        console.log("DuckDB worker created");
         
         const conn = await db.connect();
-        console.log("DuckDB connection established");
         
         try {
             // Download the Parquet file
@@ -194,40 +164,28 @@ async function readParquetWithWorker(fileUrl) {
                 throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
             }
             
-            // Get the Parquet data
             const arrayBuffer = await response.arrayBuffer();
-            console.log("Parquet file fetched, size:", arrayBuffer.byteLength);
             
-            // Register the Parquet file as a buffer
             await db.registerFileBuffer('data.parquet', new Uint8Array(arrayBuffer));
-            console.log("Parquet file registered with DuckDB");
             
-            // Get schema information
             const schemaResult = await conn.query(`
                 DESCRIBE SELECT * FROM parquet_scan('data.parquet')
             `);
-            console.log("Schema obtained:", schemaResult);
             
-            // Get data preview (first 100 rows)
             const dataResult = await conn.query(`
                 SELECT * FROM parquet_scan('data.parquet') LIMIT 100
             `);
-            console.log("Data preview obtained:", dataResult);
             
-            // Get row count
             const countResult = await conn.query(`
                 SELECT COUNT(*) as row_count FROM parquet_scan('data.parquet')
             `);
-            console.log("Row count obtained:", countResult);
-            
+        
             const rowCount = countResult.toArray()[0].row_count;
             
-            // Display the results
             await displayDuckDBTable(schemaResult, dataResult, rowCount, fileUrl);
             
             return true;
         } finally {
-            // Clean up
             await conn.close();
             await db.terminate();
         }
@@ -240,22 +198,17 @@ async function readParquetWithWorker(fileUrl) {
 // Function to read Parquet with DuckDB-WASM
 async function readParquetWithDuckDB(fileUrl) {
     try {
-        console.log("Reading Parquet with DuckDB-WASM from:", fileUrl);
         
-        // Check if DuckDB and the instantiated instance are available
         if (!window.__duckdbLoaded || !window.duckdbInstance) {
             throw new Error("DuckDB instance not available");
         }
-        
-        console.log("Using pre-instantiated DuckDB instance");
         
         // Use the global DuckDB instance
         const db = window.duckdbInstance;
         
         // Connect to the database
         const conn = await db.connect();
-        console.log("DuckDB connection established");
-        
+
         try {
             // Download the Parquet file
             const response = await fetch(fileUrl);
@@ -263,35 +216,22 @@ async function readParquetWithDuckDB(fileUrl) {
                 throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
             }
             
-            // Get the Parquet data
             const arrayBuffer = await response.arrayBuffer();
-            console.log("Parquet file fetched, size:", arrayBuffer.byteLength);
-            
-            // Register the Parquet file as a buffer
+        
             await db.registerFileBuffer('data.parquet', new Uint8Array(arrayBuffer));
-            console.log("Parquet file registered with DuckDB");
-            
-            // Get schema information
+           
             const schemaResult = await conn.query(`
                 DESCRIBE SELECT * FROM parquet_scan('data.parquet')
             `);
-            console.log("Schema obtained:", schemaResult);
-            
-            // Get data preview (first 100 rows)
+          
             const dataResult = await conn.query(`
                 SELECT * FROM parquet_scan('data.parquet') LIMIT 100
             `);
-            console.log("Data preview obtained:", dataResult);
-            
-            // Get row count
+         
             const countResult = await conn.query(`
                 SELECT COUNT(*) as row_count FROM parquet_scan('data.parquet')
             `);
-            console.log("Row count obtained:", countResult);
-            
             const rowCount = countResult.toArray()[0].row_count;
-            
-            // Display the results
             await displayDuckDBTable(schemaResult, dataResult, rowCount, fileUrl);
             
             return true;
@@ -435,17 +375,12 @@ async function displayDuckDBTable(schemaResult, dataResult, rowCount, fileUrl) {
 // Function to read Parquet with Apache Arrow
 async function readParquetWithArrow(fileUrl) {
     try {
-        console.log("Reading Parquet with Apache Arrow from:", fileUrl);
-        
-        // Ensure we're using the raw URL to get the binary data directly
+
         let binaryUrl = fileUrl;
         if (binaryUrl.includes("/src/")) {
             binaryUrl = binaryUrl.replace("/src/", "/raw/");
         }
         
-        console.log("Fetching binary data from:", binaryUrl);
-        
-        // Fetch the file with explicit binary type
         const response = await fetch(binaryUrl, {
             headers: {
                 'Accept': 'application/octet-stream'
@@ -458,38 +393,24 @@ async function readParquetWithArrow(fileUrl) {
         
         // Get the array buffer
         const arrayBuffer = await response.arrayBuffer();
-        console.log("File fetched, size:", arrayBuffer.byteLength);
-        
-        // Check if the file starts with PAR1 (Parquet magic number)
         const headerBytes = new Uint8Array(arrayBuffer.slice(0, 4));
         const headerString = new TextDecoder().decode(headerBytes);
         if (headerString !== 'PAR1') {
             throw new Error(`Not a valid Parquet file. Expected 'PAR1' magic number but found '${headerString}'`);
         }
         
-        // Use Arrow to read the Parquet file
         const Arrow = window.Arrow;
         const Parquet = window.Parquet;
-        
-        console.log("Available modules:", {
-            Arrow: Boolean(Arrow),
-            Parquet: Boolean(Parquet),
-            ArrowAPI: Arrow ? Object.keys(Arrow) : null,
-            ParquetAPI: Parquet ? Object.keys(Parquet) : null
-        });
         
         if (!Arrow || !Parquet) {
             throw new Error("Arrow or Parquet module not available");
         }
         
-        // Convert ArrayBuffer to Uint8Array
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        // Try different approach based on what's available in the API
         let table;
         let success = false;
         
-        // Try multiple methods to read the Parquet file
         const methods = [
             {
                 name: 'Parquet.readParquet',
@@ -523,9 +444,7 @@ async function readParquetWithArrow(fileUrl) {
         for (const method of methods) {
             if (method.available()) {
                 try {
-                    console.log(`Trying ${method.name} method`);
                     table = await method.execute();
-                    console.log(`${method.name} succeeded:`, table);
                     success = true;
                     break;
                 } catch (err) {
@@ -538,9 +457,6 @@ async function readParquetWithArrow(fileUrl) {
             throw new Error("No compatible Parquet reading method succeeded");
         }
         
-        console.log("Parquet table successfully read:", table);
-        
-        // Display the table
         await displayParquetTable(table, fileUrl);
         return true;
     } catch (error) {
@@ -779,8 +695,6 @@ async function displayParquetTable(table, fileUrl) {
 
 // Enhanced Parquet file viewer that tries to extract some metadata
 async function displayEnhancedParquetInfo(fileUrl) {
-    console.log("Displaying enhanced Parquet file info");
-    
     try {
         // Get information about the file
         const headResponse = await fetch(fileUrl, { method: 'HEAD' });
@@ -1016,8 +930,6 @@ function renderTable(result, fileUrl) {
   
 // Function for CSV files
 async function loadCSV(fileUrl) {
-    console.log("Loading CSV file from URL:", fileUrl);
-    
     try {
         const response = await fetch(fileUrl);
         if (!response.ok) {

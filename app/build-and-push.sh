@@ -24,6 +24,11 @@ if [ ! -d "custom/templates" ] || [ ! -f "custom/templates/view_file.tmpl" ]; th
   exit 1
 fi
 
+if [ ! -d "custom/templates" ] || [ ! -f "custom/templates/home.tmpl" ]; then
+  echo "Error: Custom templates directory not found or incomplete"
+  exit 1
+fi
+
 if [ ! -d "custom/js" ] || [ ! -f "custom/js/dataset-preview.js" ]; then
   echo "Error: Custom JS directory not found or incomplete"
   exit 1
@@ -80,17 +85,3 @@ fi
 # Start for local testing
 echo "Starting services..."
 docker-compose up -d
-
-echo ""
-echo "Gitea should now be running at http://localhost:3000"
-echo ""
-echo "For server deployment with preserved data:"
-echo "  ./build.sh goranlr/robotea latest yes yes"
-echo ""
-echo "For server deployment with clean data (will erase all repos and users):"
-echo "  ./build.sh goranlr/robotea latest yes no"
-echo ""
-echo "Check the logs with: docker logs -f \$(docker-compose ps -q gitea)"
-echo ""
-echo "Note: This build directly embeds the JavaScript in the view_file.tmpl template"
-echo "You should see a red indicator box saying 'Parquet JS Loaded' if JavaScript is working correctly."

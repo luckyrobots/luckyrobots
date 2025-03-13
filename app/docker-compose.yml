@@ -48,6 +48,14 @@ services:
       - GITEA__server__APP_DATA_PATH=/data/gitea
       - GITEA__repository__ROOT=/data/git/repositories
       - GITEA_WORK_DIR=/data/gitea
+      # Development mode - disable template caching
+      - GITEA__server__OFFLINE_MODE=false
+      - GITEA__cache__ADAPTER=memory
+      - GITEA__cache__ENABLE=false
+      - GITEA__server__DISABLE_ROUTER_LOG=false
+      - GITEA__other__SHOW_FOOTER_VERSION=true
+      - GITEA__other__SHOW_FOOTER_TEMPLATE_LOAD_TIME=true
+      - GITEA__server__ENABLE_PPROF=true
       # SSH settings
       - GITEA__server__DISABLE_SSH=true
       - GITEA__server__START_SSH_SERVER=false

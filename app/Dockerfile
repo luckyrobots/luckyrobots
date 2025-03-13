@@ -3,7 +3,23 @@ FROM gitea/gitea:1.23.4
 # Copy our customized view_file.tmpl and custom JS files
 # Gitea looks for custom templates in /data/gitea/templates first, then /app/gitea/custom/templates
 COPY custom/templates/view_file.tmpl /app/gitea/custom/templates/repo/view_file.tmpl
+COPY custom/templates/home.tmpl /app/gitea/custom/templates/home.tmpl
+COPY custom/templates/base/footer.tmpl /app/gitea/custom/templates/base/footer.tmpl
+COPY custom/templates/base/footer_content.tmpl /app/gitea/custom/templates/base/footer_content.tmpl
+COPY custom/templates/custom/extra_links_footer.tmpl /app/gitea/custom/templates/custom/extra_links_footer.tmpl
 COPY custom/js/dataset-preview.js /app/gitea/custom/public/assets/js/dataset-preview.js
+
+# Copy logo files to override Gitea defaults
+COPY custom/logo/Logo.svg /app/gitea/custom/public/assets/img/logo.svg
+COPY custom/logo/Logo.png /app/gitea/custom/public/assets/img/logo.png
+COPY custom/logo/favicon.svg /app/gitea/custom/public/assets/img/favicon.svg
+COPY custom/logo/favicon.png /app/gitea/custom/public/assets/img/favicon.png
+COPY custom/logo/avatar_default.png /app/gitea/custom/public/assets/img/avatar_default.png
+COPY custom/logo/Logo.png /app/gitea/custom/public/assets/img/apple-touch-icon.png
+
+# Also copy favicon to root public directory with lowercase names for better browser compatibility
+COPY custom/logo/favicon.png /app/gitea/custom/public/favicon.png
+COPY custom/logo/favicon.svg /app/gitea/custom/public/favicon.svg
 
 USER root
 
@@ -56,8 +72,8 @@ RUN mkdir -p /data/gitea/conf && \
     echo 'DOMAIN = localhost' >> /data/gitea/conf/app.ini && \
     echo 'ROOT_URL = http://localhost:3000/' >> /data/gitea/conf/app.ini && \
     echo 'HTTP_PORT = 3000' >> /data/gitea/conf/app.ini && \
-    echo 'DISABLE_SSH = true' >> /data/gitea/conf/app.ini && \
-    echo 'START_SSH_SERVER = false' >> /data/gitea/conf/app.ini && \
+    echo 'DISABLE_SSH = false' >> /data/gitea/conf/app.ini && \
+    echo 'START_SSH_SERVER = true' >> /data/gitea/conf/app.ini && \
     echo 'SSH_DOMAIN = none' >> /data/gitea/conf/app.ini && \
     echo '' >> /data/gitea/conf/app.ini && \
     echo '[repository.mimetype.mapping]' >> /data/gitea/conf/app.ini && \
@@ -92,17 +108,6 @@ RUN mkdir -p /data/gitea/conf && \
     chmod 644 /data/gitea/conf/app.ini && \
     chown -R git:git /data/gitea/conf
 
-# Create custom logo files
-RUN mkdir -p /app/gitea/custom/public/assets/img && \
-    echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">' > /app/gitea/custom/public/assets/img/logo.svg && \
-    echo '  <rect width="100%" height="100%" fill="#2D3748"/>' >> /app/gitea/custom/public/assets/img/logo.svg && \
-    echo '  <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" dominant-baseline="middle">Robotea</text>' >> /app/gitea/custom/public/assets/img/logo.svg && \
-    echo '  <text x="50%" y="70%" font-family="Arial, sans-serif" font-size="12" fill="#4CAF50" text-anchor="middle" dominant-baseline="middle">Parquet Enabled</text>' >> /app/gitea/custom/public/assets/img/logo.svg && \
-    echo '</svg>' >> /app/gitea/custom/public/assets/img/logo.svg && \
-    cp /app/gitea/custom/public/assets/img/logo.svg /app/gitea/custom/public/assets/img/favicon.svg && \
-    chmod -R 755 /app/gitea/custom/public && \
-    chown -R git:git /app/gitea/custom/public
-
 # Create header and footer templates with diagnostic javascript
 RUN mkdir -p /app/gitea/custom/templates/custom && \
     echo '<script>' > /app/gitea/custom/templates/custom/header.tmpl && \
@@ -115,6 +120,13 @@ RUN mkdir -p /app/gitea/custom/templates/custom && \
     echo '    style.textContent = `.ssh-key-section, .ui.ssh.list, .ssh-key-add { display: none !important; }`;' >> /app/gitea/custom/templates/custom/header.tmpl && \
     echo '    document.head.append(style);' >> /app/gitea/custom/templates/custom/header.tmpl && \
     echo '    console.log("SSH key sections hidden");' >> /app/gitea/custom/templates/custom/header.tmpl && \
+    echo '    ' >> /app/gitea/custom/templates/custom/header.tmpl && \
+    echo '    // Force favicon refresh' >> /app/gitea/custom/templates/custom/header.tmpl && \
+    echo '    const faviconLink = document.createElement("link");' >> /app/gitea/custom/templates/custom/header.tmpl && \
+    echo '    faviconLink.rel = "shortcut icon";' >> /app/gitea/custom/templates/custom/header.tmpl && \
+    echo '    faviconLink.href = "/favicon.png?v=" + new Date().getTime();' >> /app/gitea/custom/templates/custom/header.tmpl && \
+    echo '    document.head.appendChild(faviconLink);' >> /app/gitea/custom/templates/custom/header.tmpl && \
+    echo '    console.log("Custom favicon link added");' >> /app/gitea/custom/templates/custom/header.tmpl && \
     echo '  });' >> /app/gitea/custom/templates/custom/header.tmpl && \
     echo '}' >> /app/gitea/custom/templates/custom/header.tmpl && \
     echo '</script>' >> /app/gitea/custom/templates/custom/header.tmpl
@@ -163,31 +175,12 @@ RUN mkdir -p /data/gitea/public/assets/js/ && \
     chmod -R 755 /data/gitea/public && \
     chown -R git:git /data/gitea/public
 
-# Add a visual marker to verify the custom template is being used
-RUN sed -i '1i<!-- CUSTOM TEMPLATE MARKER: THIS IS THE CUSTOM VIEW_FILE.TMPL -->' /app/gitea/custom/templates/repo/view_file.tmpl
-
 # Create a new view_file.tmpl with embedded JavaScript
 RUN cp /app/gitea/custom/templates/repo/view_file.tmpl /app/gitea/custom/templates/repo/view_file.tmpl.orig && \
     grep -v '<script type="application/javascript" src="/assets/js/dataset-preview.js"></script>' /app/gitea/custom/templates/repo/view_file.tmpl.orig > /app/gitea/custom/templates/repo/view_file.tmpl && \
     echo '<script type="text/javascript">' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
     echo '// Embedded dataset-preview.js to avoid 404 errors' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
     cat /app/gitea/custom/public/assets/js/dataset-preview.js >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '</script>' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '<script type="text/javascript">' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo 'console.log("Inline script check - should always run");' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo 'document.addEventListener("DOMContentLoaded", function() {' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  var indicator = document.createElement("div");' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.position = "fixed";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.top = "10px";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.left = "10px";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.backgroundColor = "red";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.color = "white";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.padding = "5px 10px";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.borderRadius = "5px";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.style.zIndex = "9999";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  indicator.textContent = "Parquet JS Loaded";' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '  document.body.appendChild(indicator);' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
-    echo '});' >> /app/gitea/custom/templates/repo/view_file.tmpl && \
     echo '</script>' >> /app/gitea/custom/templates/repo/view_file.tmpl
 
 # Also add a direct HTML marker to verify template loading
@@ -196,6 +189,12 @@ RUN sed -i '/<div class="non-diff-file-content">/ a\<div style="background-color
 # Also place the template in the data directory to ensure it's found
 RUN mkdir -p /data/gitea/templates/repo && \
     cp /app/gitea/custom/templates/repo/view_file.tmpl /data/gitea/templates/repo/ && \
+    mkdir -p /data/gitea/templates/base && \
+    cp /app/gitea/custom/templates/base/footer.tmpl /data/gitea/templates/base/ && \
+    cp /app/gitea/custom/templates/base/footer_content.tmpl /data/gitea/templates/base/ && \
+    mkdir -p /data/gitea/templates/custom && \
+    cp /app/gitea/custom/templates/custom/extra_links_footer.tmpl /data/gitea/templates/custom/ && \
+    cp /app/gitea/custom/templates/home.tmpl /data/gitea/templates/ && \
     chown -R git:git /data/gitea/templates
 
 # Create a default admin user
@@ -212,11 +211,32 @@ RUN echo '#!/bin/bash' > /usr/local/bin/gitea-start.sh && \
     echo 'chmod 777 /data/git/.ssh/authorized_keys' >> /usr/local/bin/gitea-start.sh && \
     echo '# Ensure the template is in both locations' >> /usr/local/bin/gitea-start.sh && \
     echo 'cp -f /app/gitea/custom/templates/repo/view_file.tmpl /data/gitea/templates/repo/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'mkdir -p /data/gitea/templates/base' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/templates/base/footer.tmpl /data/gitea/templates/base/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/templates/base/footer_content.tmpl /data/gitea/templates/base/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'mkdir -p /data/gitea/templates/custom' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/templates/custom/extra_links_footer.tmpl /data/gitea/templates/custom/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/templates/home.tmpl /data/gitea/templates/' >> /usr/local/bin/gitea-start.sh && \
     echo 'chown -R git:git /data/gitea/templates' >> /usr/local/bin/gitea-start.sh && \
     echo '# Ensure the JavaScript file is in the correct location for GITEA_CUSTOM' >> /usr/local/bin/gitea-start.sh && \
     echo 'mkdir -p /data/gitea/public/assets/js/' >> /usr/local/bin/gitea-start.sh && \
     echo 'cp -f /app/gitea/custom/public/assets/js/dataset-preview.js /data/gitea/public/assets/js/' >> /usr/local/bin/gitea-start.sh && \
     echo 'chmod -R 755 /data/gitea/public' >> /usr/local/bin/gitea-start.sh && \
+    echo 'chown -R git:git /data/gitea/public' >> /usr/local/bin/gitea-start.sh && \
+    echo '# Copy logo files to the data directory' >> /usr/local/bin/gitea-start.sh && \
+    echo 'mkdir -p /data/gitea/public/assets/img/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/assets/img/logo.svg /data/gitea/public/assets/img/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/assets/img/logo.png /data/gitea/public/assets/img/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/assets/img/favicon.svg /data/gitea/public/assets/img/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/assets/img/favicon.png /data/gitea/public/assets/img/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/assets/img/avatar_default.png /data/gitea/public/assets/img/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/assets/img/apple-touch-icon.png /data/gitea/public/assets/img/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'chmod -R 755 /data/gitea/public/assets/img' >> /usr/local/bin/gitea-start.sh && \
+    echo 'chown -R git:git /data/gitea/public/assets/img' >> /usr/local/bin/gitea-start.sh && \
+    echo '# Also copy favicon to root public directory for better browser compatibility' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/favicon.png /data/gitea/public/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'cp -f /app/gitea/custom/public/favicon.svg /data/gitea/public/' >> /usr/local/bin/gitea-start.sh && \
+    echo 'chmod 644 /data/gitea/public/favicon.png /data/gitea/public/favicon.svg' >> /usr/local/bin/gitea-start.sh && \
     echo 'chown -R git:git /data/gitea/public' >> /usr/local/bin/gitea-start.sh && \
     echo '' >> /usr/local/bin/gitea-start.sh && \
     echo '# Remove any existing setup_complete flag to force admin user creation' >> /usr/local/bin/gitea-start.sh && \
@@ -293,28 +313,6 @@ mkdir -p /data/gitea/runner\n\
 chown -R git:git /data/gitea/runner\n\
 chmod -R 755 /data/gitea/runner\n\
 \n\
-# Create default workflow if it doesnt exist\n\
-mkdir -p /data/gitea/runner/.gitea/workflows\n\
-cat > /data/gitea/runner/.gitea/workflows/test.yml << EOL\n\
-name: Test\n\
-\n\
-on:\n\
-  push:\n\
-    branches:\n\
-      - main\n\
-  pull_request:\n\
-    branches:\n\
-      - main\n\
-\n\
-jobs:\n\
-  test:\n\
-    runs-on: ubuntu-latest\n\
-    steps:\n\
-      - uses: actions/checkout@v3\n\
-      - name: Test\n\
-        run: |\n\
-          echo "Test successful!"\n\
-EOL\n\
 chown -R git:git /data/gitea/runner/.gitea\n\
 \n\
 # Add retry logic for runner registration\n\
