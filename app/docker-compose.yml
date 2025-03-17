@@ -70,6 +70,8 @@ services:
       # Server and static file serving
       - GITEA__server__STATIC_URL_PREFIX=/
       - GITEA__server__OFFLINE_MODE=false
+      - GITEA__server__LFS_START_SERVER=true
+      - GITEA__lfs__ENABLED=true
       # Crucial networking settings
       - GITEA__server__DOMAIN=gitea
       - GITEA__server__ROOT_URL=http://gitea:3000/
@@ -139,4 +141,7 @@ volumes:
   gitea_data:
     name: gitea_data
   runner_data:
-    name: gitea_runner_data 
+    name: gitea_runner_data
+  lfs_data:
+    name: gitea_lfs_data
+

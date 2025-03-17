@@ -75,6 +75,9 @@ RUN mkdir -p /data/gitea/conf && \
     echo 'DISABLE_SSH = false' >> /data/gitea/conf/app.ini && \
     echo 'START_SSH_SERVER = true' >> /data/gitea/conf/app.ini && \
     echo 'SSH_DOMAIN = none' >> /data/gitea/conf/app.ini && \
+    echo 'LFS_START_SERVER = true' >> /data/gitea/conf/app.ini && \ 
+    echo 'LFS_CONTENT_PATH = /data/gitea/lfs' >> /data/gitea/conf/app.ini && \
+    echo 'LFS_JWT_SECRET = ${HCLOUD_TOKEN}' >> /data/gitea/conf/app.ini && \
     echo '' >> /data/gitea/conf/app.ini && \
     echo '[repository.mimetype.mapping]' >> /data/gitea/conf/app.ini && \
     echo '.parquet=application/vnd.apache.parquet' >> /data/gitea/conf/app.ini && \

@@ -71,7 +71,7 @@ mkdir -p /opt/gitea/caddy/config
 
 # Create the Caddyfile
 cat > /opt/gitea/caddy/Caddyfile << EOF
-app.luckyrobots.ai {
+app.luckyrobots.com {
     reverse_proxy gitea:3000
     tls {
         protocols tls1.2 tls1.3
@@ -109,12 +109,15 @@ TYPE.parquet = application/vnd.apache.parquet
 APP_DATA_PATH = /data/gitea
 STATIC_URL_PREFIX = /
 OFFLINE_MODE = false
-DOMAIN = app.luckyrobots.ai
-ROOT_URL = https://app.luckyrobots.ai/
+DOMAIN = app.luckyrobots.com
+ROOT_URL = https://app.luckyrobots.com/
 HTTP_PORT = 3000
 DISABLE_SSH = false
 START_SSH_SERVER = true
-SSH_DOMAIN = app.luckyrobots.ai
+SSH_DOMAIN = app.luckyrobots.com
+LFS_START_SERVER = true
+LFS_CONTENT_PATH = /data/gitea/lfs
+LFS_JWT_SECRET = ${HCLOUD_TOKEN}
 
 [repository.mimetype.mapping]
 .parquet=application/vnd.apache.parquet
@@ -185,6 +188,7 @@ services:
     volumes:
       - ${HC_VOLUME_PATH}/gitea:/data
       - ${HC_VOLUME_PATH}/repositories:/data/git/repositories
+      - ${HC_VOLUME_PATH}/lfs:/data/gitea/lfs
     networks:
       - gitea
     environment:
@@ -218,9 +222,11 @@ services:
       # Server and static file serving
       - GITEA__server__STATIC_URL_PREFIX=/
       - GITEA__server__OFFLINE_MODE=false
+      - GITEA__server__LFS_START_SERVER=true
+      - GITEA__lfs__ENABLED=true
       # Crucial networking settings
-      - GITEA__server__DOMAIN=app.luckyrobots.ai
-      - GITEA__server__ROOT_URL=https://app.luckyrobots.ai/
+      - GITEA__server__DOMAIN=app.luckyrobots.com
+      - GITEA__server__ROOT_URL=https://app.luckyrobots.com/
       - GITEA__server__OFFLINE_MODE=false
       - GITEA__server__LOCAL_ROOT_URL=http://gitea:3000/
       # Actions settings
