@@ -11,3 +11,6 @@ __pycache__/
 /dist
 /examples/Binary
 /src/luckyrobots/__pycache__
+/playground
+.env
+generated.tfvars
