@@ -14,7 +14,17 @@
 	{{template "base/footer_content" .}}
 
 	<script src="{{AssetUrlPrefix}}/js/index.js?v={{AssetVersion}}" onerror="alert('Failed to load asset files from ' + this.src + '. Please make sure the asset files can be accessed.')"></script>
-
+	<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const helpLink = document.querySelector('#navbar > div.navbar-left > a[href="https://docs.gitea.com"]') || 
+                        document.querySelector('a.item[href="https://docs.gitea.com"]') ||
+                        document.querySelector('#navbar a[target="_blank"][href="https://docs.gitea.com"]');
+        
+        if (helpLink) {
+            helpLink.remove();
+        }
+    });
+	</script>
 	{{template "custom/footer" .}}
 </body>
 </html> 

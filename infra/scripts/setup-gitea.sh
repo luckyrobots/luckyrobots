@@ -71,7 +71,7 @@ mkdir -p /opt/gitea/caddy/config
 
 # Create the Caddyfile
 cat > /opt/gitea/caddy/Caddyfile << EOF
-app.luckyrobots.com {
+luckyrobots.com {
     reverse_proxy gitea:3000
     tls {
         protocols tls1.2 tls1.3
@@ -87,6 +87,8 @@ EOF
 
 # Create the app.ini file based on known settings from the Dockerfile
 cat > ${HC_VOLUME_PATH}/gitea/gitea/conf/app.ini << EOF
+APP_NAME = Lucky Robots
+
 [database]
 DB_TYPE = postgres
 HOST = postgres:5432
@@ -109,12 +111,12 @@ TYPE.parquet = application/vnd.apache.parquet
 APP_DATA_PATH = /data/gitea
 STATIC_URL_PREFIX = /
 OFFLINE_MODE = false
-DOMAIN = app.luckyrobots.com
-ROOT_URL = https://app.luckyrobots.com/
+DOMAIN = luckyrobots.com
+ROOT_URL = https://luckyrobots.com/
 HTTP_PORT = 3000
 DISABLE_SSH = false
 START_SSH_SERVER = true
-SSH_DOMAIN = app.luckyrobots.com
+SSH_DOMAIN = luckyrobots.com
 LFS_START_SERVER = true
 LFS_CONTENT_PATH = /data/gitea/lfs
 LFS_JWT_SECRET = ${HCLOUD_TOKEN}
@@ -126,6 +128,12 @@ LFS_JWT_SECRET = ${HCLOUD_TOKEN}
 DEFAULT_THEME = gitea-auto
 THEMES = gitea,gitea-dark,gitea-auto
 MAX_DISPLAY_FILE_SIZE = 8388608
+META_DESCRIPTION = High-performance Git for AI and robotics development
+META_AUTHOR = Lucky Robots
+
+[ui.meta]
+DESCRIPTION = High-performance Git for AI and robotics development
+AUTHOR = Lucky Robots
 
 [security]
 INSTALL_LOCK = true
@@ -148,6 +156,10 @@ ROOT_PATH = /data/gitea/log
 [indexer]
 ISSUE_INDEXER_PATH = /data/gitea/indexers/issues.bleve
 REPO_INDEXER_PATH = /data/gitea/indexers/repos.bleve
+
+[lfs]
+PATH = /data/gitea/lfs
+
 EOF
 
 # Set proper permissions
@@ -156,8 +168,6 @@ chmod 644 ${HC_VOLUME_PATH}/gitea/gitea/conf/app.ini
 chown -R 1000:1000 ${HC_VOLUME_PATH}/gitea
 
 cat << EOF > /opt/gitea/docker-compose.yml
-version: '3'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -225,8 +235,8 @@ services:
       - GITEA__server__LFS_START_SERVER=true
       - GITEA__lfs__ENABLED=true
       # Crucial networking settings
-      - GITEA__server__DOMAIN=app.luckyrobots.com
-      - GITEA__server__ROOT_URL=https://app.luckyrobots.com/
+      - GITEA__server__DOMAIN=luckyrobots.com
+      - GITEA__server__ROOT_URL=https://luckyrobots.com/
       - GITEA__server__OFFLINE_MODE=false
       - GITEA__server__LOCAL_ROOT_URL=http://gitea:3000/
       # Actions settings

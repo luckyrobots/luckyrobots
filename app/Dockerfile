@@ -7,6 +7,9 @@ COPY custom/templates/home.tmpl /app/gitea/custom/templates/home.tmpl
 COPY custom/templates/base/footer.tmpl /app/gitea/custom/templates/base/footer.tmpl
 COPY custom/templates/base/footer_content.tmpl /app/gitea/custom/templates/base/footer_content.tmpl
 COPY custom/templates/custom/extra_links_footer.tmpl /app/gitea/custom/templates/custom/extra_links_footer.tmpl
+COPY custom/templates/base/meta.tmpl /app/gitea/custom/templates/base/meta.tmpl
+COPY custom/templates/base/meta.tmpl /data/gitea/templates/base/meta.tmpl
+
 COPY custom/js/dataset-preview.js /app/gitea/custom/public/assets/js/dataset-preview.js
 
 # Copy logo files to override Gitea defaults
@@ -47,7 +50,11 @@ RUN mkdir -p /app/gitea/custom/conf && \
 
 # Add MIME type mapping to the server configuration
 RUN mkdir -p /data/gitea/conf && \
-    echo '[database]' > /data/gitea/conf/app.ini && \
+    echo 'APP_NAME = Lucky Robots' > /data/gitea/conf/app.ini && \
+    echo 'DESCRIPTION = High-performance Git for AI and robotics development' >> /data/gitea/conf/app.ini && \
+    echo 'BRAND_NAME = Lucky Robots' >> /data/gitea/conf/app.ini && \
+    echo '' >> /data/gitea/conf/app.ini && \
+    echo '[database]' >> /data/gitea/conf/app.ini && \
     echo 'DB_TYPE = postgres' >> /data/gitea/conf/app.ini && \
     echo 'HOST = postgres:5432' >> /data/gitea/conf/app.ini && \
     echo 'NAME = gitea' >> /data/gitea/conf/app.ini && \
@@ -75,8 +82,7 @@ RUN mkdir -p /data/gitea/conf && \
     echo 'DISABLE_SSH = false' >> /data/gitea/conf/app.ini && \
     echo 'START_SSH_SERVER = true' >> /data/gitea/conf/app.ini && \
     echo 'SSH_DOMAIN = none' >> /data/gitea/conf/app.ini && \
-    echo 'LFS_START_SERVER = true' >> /data/gitea/conf/app.ini && \ 
-    echo 'LFS_CONTENT_PATH = /data/gitea/lfs' >> /data/gitea/conf/app.ini && \
+    echo 'LFS_START_SERVER = true' >> /data/gitea/conf/app.ini && \
     echo 'LFS_JWT_SECRET = ${HCLOUD_TOKEN}' >> /data/gitea/conf/app.ini && \
     echo '' >> /data/gitea/conf/app.ini && \
     echo '[repository.mimetype.mapping]' >> /data/gitea/conf/app.ini && \
@@ -86,6 +92,12 @@ RUN mkdir -p /data/gitea/conf && \
     echo 'DEFAULT_THEME = gitea-auto' >> /data/gitea/conf/app.ini && \
     echo 'THEMES = gitea,gitea-dark,gitea-auto' >> /data/gitea/conf/app.ini && \
     echo 'MAX_DISPLAY_FILE_SIZE = 8388608' >> /data/gitea/conf/app.ini && \
+    echo 'META_DESCRIPTION = High-performance Git for AI and robotics development' >> /data/gitea/conf/app.ini && \
+    echo 'META_AUTHOR = Lucky Robots' >> /data/gitea/conf/app.ini && \
+    echo '' >> /data/gitea/conf/app.ini && \
+    echo '[ui.meta]' >> /data/gitea/conf/app.ini && \
+    echo 'DESCRIPTION = High-performance Git for AI and robotics development' >> /data/gitea/conf/app.ini && \
+    echo 'AUTHOR = Lucky Robots' >> /data/gitea/conf/app.ini && \
     echo '' >> /data/gitea/conf/app.ini && \
     echo '[security]' >> /data/gitea/conf/app.ini && \
     echo 'INSTALL_LOCK = true' >> /data/gitea/conf/app.ini && \
@@ -108,6 +120,8 @@ RUN mkdir -p /data/gitea/conf && \
     echo '[indexer]' >> /data/gitea/conf/app.ini && \
     echo 'ISSUE_INDEXER_PATH = /data/gitea/indexers/issues.bleve' >> /data/gitea/conf/app.ini && \
     echo 'REPO_INDEXER_PATH = /data/gitea/indexers/repos.bleve' >> /data/gitea/conf/app.ini && \
+    echo '[lfs]' >> /data/gitea/conf/app.ini && \
+    echo 'PATH = /data/gitea/lfs' >> /data/gitea/conf/app.ini && \
     chmod 644 /data/gitea/conf/app.ini && \
     chown -R git:git /data/gitea/conf
 
