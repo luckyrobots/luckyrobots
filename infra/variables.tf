@@ -50,3 +50,21 @@ variable "gitea_runner_registration_token" {
   type        = string
   sensitive   = true
 }
+
+variable "hetzner_object_storage_access_key" {
+  description = "Hetzner Object Storage access key"
+  type        = string
+  sensitive   = true
+}
+
+variable "hetzner_object_storage_secret_key" {
+  description = "Hetzner Object Storage secret key"
+  type        = string
+  sensitive   = true
+}
+
+variable "hetzner_object_storage_bucket_name" {
+  description = "Hetzner Object Storage bucket name"
+  type        = string
+  default     = "gitea-lfs"
+}
