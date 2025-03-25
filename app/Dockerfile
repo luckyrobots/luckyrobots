@@ -121,7 +121,18 @@ RUN mkdir -p /data/gitea/conf && \
     echo 'ISSUE_INDEXER_PATH = /data/gitea/indexers/issues.bleve' >> /data/gitea/conf/app.ini && \
     echo 'REPO_INDEXER_PATH = /data/gitea/indexers/repos.bleve' >> /data/gitea/conf/app.ini && \
     echo '[lfs]' >> /data/gitea/conf/app.ini && \
+    echo 'ENABLED = true' >> /data/gitea/conf/app.ini && \
     echo 'PATH = /data/gitea/lfs' >> /data/gitea/conf/app.ini && \
+    echo 'STORAGE_TYPE = minio' >> /data/gitea/conf/app.ini && \
+    echo '[storage.minio]' >> /data/gitea/conf/app.ini && \
+    echo 'MINIO_BASE_PATH = gitea/lfs' >> /data/gitea/conf/app.ini && \
+    echo 'MINIO_ENDPOINT = ${HETZNER_S3_ENDPOINT}' >> /data/gitea/conf/app.ini && \
+    echo 'MINIO_ACCESS_KEY_ID = ${HETZNER_OBJECT_STORAGE_ACCESS_KEY}' >> /data/gitea/conf/app.ini && \
+    echo 'MINIO_SECRET_ACCESS_KEY = ${HETZNER_OBJECT_STORAGE_SECRET_KEY}' >> /data/gitea/conf/app.ini && \
+    echo 'MINIO_BUCKET = ${HETZNER_OBJECT_STORAGE_BUCKET_NAME}' >> /data/gitea/conf/app.ini && \
+    echo 'MINIO_LOCATION = fsn1' >> /data/gitea/conf/app.ini && \
+    echo 'MINIO_USE_SSL = true' >> /data/gitea/conf/app.ini && \
+    echo 'SERVE_DIRECT = true' >> /data/gitea/conf/app.ini && \
     chmod 644 /data/gitea/conf/app.ini && \
     chown -R git:git /data/gitea/conf
 

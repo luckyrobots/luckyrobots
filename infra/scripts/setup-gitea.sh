@@ -94,7 +94,7 @@ DB_TYPE = postgres
 HOST = postgres:5432
 NAME = gitea
 USER = gitea
-PASSWD = gitea
+PASSWD = ${POSTGRES_PASSWORD:-gitea}
 
 [repository]
 ROOT = /data/git/repositories
@@ -158,8 +158,19 @@ ISSUE_INDEXER_PATH = /data/gitea/indexers/issues.bleve
 REPO_INDEXER_PATH = /data/gitea/indexers/repos.bleve
 
 [lfs]
+ENABLED = true
+STORAGE_TYPE = minio
 PATH = /data/gitea/lfs
 
+[storage.minio]
+MINIO_BASE_PATH = gitea/lfs
+MINIO_ENDPOINT = ${HETZNER_S3_ENDPOINT}
+MINIO_ACCESS_KEY_ID = ${HETZNER_OBJECT_STORAGE_ACCESS_KEY}
+MINIO_SECRET_ACCESS_KEY = ${HETZNER_OBJECT_STORAGE_SECRET_KEY}
+MINIO_BUCKET = ${HETZNER_OBJECT_STORAGE_BUCKET_NAME}
+MINIO_LOCATION = fsn1
+MINIO_USE_SSL = true
+SERVE_DIRECT = true
 EOF
 
 # Set proper permissions
@@ -239,6 +250,16 @@ services:
       - GITEA__server__ROOT_URL=https://luckyrobots.com/
       - GITEA__server__OFFLINE_MODE=false
       - GITEA__server__LOCAL_ROOT_URL=http://gitea:3000/
+      # LFS S3 Storage configuration
+      - GITEA__lfs__STORAGE_TYPE=minio
+      - GITEA__lfs__SERVE_DIRECT=true
+      - GITEA__lfs__MINIO_BASE_PATH=gitea/lfs
+      - GITEA__storage.minio__MINIO_ENDPOINT=${HETZNER_S3_ENDPOINT:-fsn1.your-objectstorage.com}
+      - GITEA__storage.minio__MINIO_ACCESS_KEY_ID=${HETZNER_OBJECT_STORAGE_ACCESS_KEY}
+      - GITEA__storage.minio__MINIO_SECRET_ACCESS_KEY=${HETZNER_OBJECT_STORAGE_SECRET_KEY}
+      - GITEA__storage.minio__MINIO_BUCKET=${HETZNER_OBJECT_STORAGE_BUCKET_NAME:-gitea-lfs}
+      - GITEA__storage.minio__MINIO_LOCATION=fsn1
+      - GITEA__storage.minio__MINIO_USE_SSL=true
       # Actions settings
       - GITEA__actions__ENABLED=true
       - GITEA__actions__DEFAULT_ACTIONS_URL=https://github.com
@@ -248,7 +269,6 @@ services:
       - GITEA__actions__CLEANUP_ENABLED=true
       - GITEA__actions__CLEANUP_INTERVAL=24h
       - GITEA__actions__CLEANUP_EXPIRED_ARTIFACTS_AFTER=24h
-      - GITEA__actions__CLEANUP_EXPIRED_RUNS_AFTER=168h
       # Custom configuration for debugging
       - GITEA__log__LEVEL=debug
       - GITEA__log__ROUTER=console
