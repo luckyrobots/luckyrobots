@@ -11,7 +11,7 @@ Remember, no robots were emotionally or physically harmed in our ultra-luxurious
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. If you need access or have ideas to work around this, give me a shout. I'll hook you up with FTP access for now.)
+Our project is fully open source; to access our Unreal Repository where you can build it from the source visit: [https://luckyrobots.com/luckyrobots/luckyworld](https://luckyrobots.com/luckyrobots/luckyworld)
 
 ## Getting Started
 
