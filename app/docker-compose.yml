@@ -1,0 +1,145 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-gitea}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-gitea}
+      - POSTGRES_DB=${POSTGRES_DB:-gitea}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gitea
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gitea"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gitea:
+    image: goranlr/robotea:latest
+    restart: always
+    user: root
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - gitea_data:/data
+    networks:
+      - gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      # Admin user settings
+      - GITEA_ADMIN_USERNAME=${GITEA_ADMIN_USERNAME:-admin}
+      - GITEA_ADMIN_PASSWORD=${GITEA_ADMIN_PASSWORD:-admin123}
+      - GITEA_ADMIN_EMAIL=${GITEA_ADMIN_EMAIL:-admin@example.com}
+      # Database settings
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=postgres:5432
+      - GITEA__database__NAME=${POSTGRES_DB:-gitea}
+      - GITEA__database__USER=${POSTGRES_USER:-gitea}
+      - GITEA__database__PASSWD=${POSTGRES_PASSWORD:-gitea}
+      # Path settings
+      - GITEA__server__APP_DATA_PATH=/data/gitea
+      - GITEA__repository__ROOT=/data/git/repositories
+      - GITEA_WORK_DIR=/data/gitea
+      # Development mode - disable template caching
+      - GITEA__server__OFFLINE_MODE=false
+      - GITEA__cache__ADAPTER=memory
+      - GITEA__cache__ENABLE=false
+      - GITEA__server__DISABLE_ROUTER_LOG=false
+      - GITEA__other__SHOW_FOOTER_VERSION=true
+      - GITEA__other__SHOW_FOOTER_TEMPLATE_LOAD_TIME=true
+      - GITEA__server__ENABLE_PPROF=true
+      # SSH settings
+      - GITEA__server__DISABLE_SSH=true
+      - GITEA__server__START_SSH_SERVER=false
+      - GITEA__ssh__DISABLE_AUTHORIZED_KEYS_BACKUP=true
+      - GITEA__ssh__CREATE_AUTHORIZED_KEYS_FILE=false
+      # MIME type settings for Parquet files
+      - GITEA__repository__PREFER_INTERPRET_MEDIA_AS_TEXT=false
+      - GITEA__repository.mime__ENABLED=true
+      - GITEA__mime__TYPES_ORDER=application/vnd.apache.parquet
+      - GITEA__mime__TYPE.parquet=application/vnd.apache.parquet
+      - GITEA__repository.mimetype.mapping__PARQUET=application/vnd.apache.parquet
+      # Server and static file serving
+      - GITEA__server__STATIC_URL_PREFIX=/
+      - GITEA__server__OFFLINE_MODE=false
+      - GITEA__server__LFS_START_SERVER=true
+      - GITEA__lfs__ENABLED=true
+      # Crucial networking settings
+      - GITEA__server__DOMAIN=gitea
+      - GITEA__server__ROOT_URL=http://gitea:3000/
+      - GITEA__server__LOCAL_ROOT_URL=http://gitea:3000/
+      # Actions settings
+      - GITEA__actions__ENABLED=true
+      - GITEA__actions__DEFAULT_ACTIONS_URL=https://github.com
+      - GITEA__actions__STORAGE_PATH=/data/gitea/actions
+      - GITEA__actions__QUEUE_TYPE=level
+      - GITEA__actions__QUEUE_CONN_STR=/data/gitea/actions_queue
+      - GITEA__actions__CLEANUP_ENABLED=true
+      - GITEA__actions__CLEANUP_INTERVAL=24h
+      - GITEA__actions__CLEANUP_EXPIRED_ARTIFACTS_AFTER=24h
+      - GITEA__actions__CLEANUP_EXPIRED_RUNS_AFTER=168h
+      # Custom configuration for debugging
+      - GITEA__log__LEVEL=debug
+      - GITEA__log__ROUTER=console
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  runner:
+    image: gitea/act_runner:latest
+    restart: unless-stopped
+    init: true
+    depends_on:
+      gitea:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner_data:/data
+    networks:
+      - gitea
+    environment:
+      - GITEA_INSTANCE_URL=http://gitea:3000
+      - GITEA_RUNNER_REGISTRATION_TOKEN=${GITEA_RUNNER_REGISTRATION_TOKEN:-}
+      - GITEA_RUNNER_NAME=docker-runner
+      - GITEA_RUNNER_LABELS=ubuntu-latest:docker://node:16-bullseye,ubuntu-22.04:docker://node:16-bullseye
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "ps", "aux"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+networks:
+  gitea:
+    name: gitea_network
+    # Explicitly use bridge to ensure proper container communication
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: gitea_postgres_data
+  gitea_data:
+    name: gitea_data
+  runner_data:
+    name: gitea_runner_data
+  lfs_data:
+    name: gitea_lfs_data
+

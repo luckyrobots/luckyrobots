@@ -1,0 +1,13 @@
+# Copy this file to terraform.tfvars and update the values
+hcloud_token         = "your_hetzner_cloud_api_token"
+server_type          = "cpx21"
+location             = "fsn1"
+gitea_admin_username = "giteaadmin"
+gitea_admin_password = "StrongPassword123!"
+gitea_admin_email    = "admin@example.com"
+ssh_public_key_path  = "~/.ssh/id_ed25519.pub"
+ssh_private_key_path = "~/.ssh/id_ed25519"
+# Hetzner Object Storage Settings
+hetzner_object_storage_access_key = "hetzner_object_storage_access_key"
+hetzner_object_storage_secret_key = "hetzner_object_storage_secret_key"
+hetzner_object_storage_bucket_name = "lfs-repo-s3"
