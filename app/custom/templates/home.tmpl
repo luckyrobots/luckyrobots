@@ -5,17 +5,17 @@
         margin-top: 0 !important;
     }
     
-    /* Ensure the page content itself doesn't have unwanted margins/padding */
+    /* Make sure the page content itself doesn't have unwanted margins/padding */
     .page-content {
         margin: 0 !important;
         padding: 0 !important;
     }
+    
+   
 </style>
 <script>
-    // Update the page title
     document.title = "Lucky Robots";
     
-    // Update meta tags for social media previews
     document.querySelector('meta[property="og:title"]').setAttribute('content', 'Lucky Robots');
     document.querySelector('meta[property="og:description"]').setAttribute('content', 'High-performance Git for AI and robotics development');
     
@@ -27,11 +27,44 @@
         document.head.appendChild(metaDesc);
     }
     metaDesc.setAttribute('content', 'High-performance Git for AI and robotics development');
-    
+
+    function removeIframeAndRedirect() {
+        const iframeContainer = document.querySelector('.page-content.home');
+        sessionStorage.setItem('redirectToLogin', 'true');
+        const iframe = document.querySelector('iframe');
+
+        if (iframe) {
+            iframe.remove();
+        }
+        
+        if (iframeContainer) {
+            iframeContainer.innerHTML = '<div style="text-align: center; padding: 50px;"><h2>Redirecting to login page...</h2></div>';
+        }
+        
+        setTimeout(function() {
+            // Redirect to the login page in the parent window context
+            window.top.location.href = '/user/login';
+        }, 100);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('action') === 'signin') {
+            removeIframeAndRedirect();
+        }
+        
+        if (sessionStorage.getItem('redirectToLogin') === 'true') {
+            sessionStorage.removeItem('redirectToLogin');
+            if (window !== window.top) {
+                window.top.location.href = '/user/login';
+            }
+        }
+    });
+
 </script>
 <div role="main" aria-label="{{if .IsSigned}}{{ctx.Locale.Tr "dashboard"}}{{else}}{{ctx.Locale.Tr "home"}}{{end}}" class="page-content home">
 	<iframe 
-		src="https://fortuitous-reassurance-987334.framer.app/" 
+		src="https://fortuitous-reassurance-987334.framer.app/?parent=luckyrobots" 
 		style="width: 100%; height: 100vh; border: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;"
 		title="Lucky Robots Landing Page"
 	></iframe>

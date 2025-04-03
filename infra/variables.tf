@@ -5,7 +5,7 @@ variable "hcloud_token" {
 
 variable "server_type" {
   description = "Server type/size to use"
-  default     = "cpx21"
+  default     = "cpx41"
 }
 
 variable "location" {

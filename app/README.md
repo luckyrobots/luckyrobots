@@ -15,13 +15,13 @@ This repository contains a customized version of Gitea with built-in Parquet fil
 ### Option 1: Using Docker Run
 
 ```bash
-docker run -d --name=gitea-parquet-viewer \
+docker run -d --name=luckyrobots \
   -p 3000:3000 \
   -p 22:22 \
   -v gitea-data:/data \
   -e USER_UID=1000 \
   -e USER_GID=1000 \
-  luckyrobots/gitea-parquet-viewer:latest
+  goranlr/robotea:latest
 ```
 
 ### Option 2: Using Docker Compose
