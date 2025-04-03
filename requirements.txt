@@ -2,7 +2,7 @@ asyncio
 websockets
 watchdog
 fastapi
-uvicorn
+uvicorn[standard]
 ultralytics
 requests
 tqdm

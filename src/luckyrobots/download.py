@@ -36,37 +36,9 @@ def get_base_url():
 
 
 def check_binary(binary_folder):
-    base_url = get_base_url()
 
-    changes = check_updates(binary_folder)
-    # print(changes)
-    # sys.exit()
-    
-    if changes:
-        if "--lr-update" in sys.argv:
-            print("Updating LuckyRobots...")
-            apply_changes(changes)
-            print("Update completed successfully.")
-        else:
-            print("""
- ██▓    ▓█████ ██▒   █▓▓█████  ██▓        █    ██  ██▓███  
-▓██▒    ▓█   ▀▓██░   █▒▓█   ▀ ▓██▒        ██  ▓██▒▓██░  ██▒
-▒██░    ▒███   ▓██  █▒░▒███   ▒██░       ▓██  ▒██░▓██░ ██▓▒
-▒██░    ▒▓█  ▄  ▒██ █░░▒▓█  ▄ ▒██░       ▓▓█  ░██░▒██▄█▓▒ ▒
-░██████▒░▒████▒  ▒▀█░  ░▒████▒░██████▒   ▒▒█████▓ ▒██▒ ░  ░
-░ ▒░▓  ░░░ ▒░ ░  ░ ▐░  ░░ ▒░ ░░ ▒░▓  ░   ░▒▓▒ ▒ ▒ ▒▓▒░ ░  ░
-░ ░ ▒  ░ ░ ░  ░  ░ ░░   ░ ░  ░░ ░ ▒  ░   ░░▒░ ░ ░ ░▒ ░     
-  ░ ░      ░       ░░     ░     ░ ░       ░░░ ░ ░ ░░       
-    ░  ░   ░  ░     ░     ░  ░    ░  ░     ░               
-                   ░                                       
-
-New version available! Run with --lr-update to level up!
-            """)
-            return binary_folder
-    else:
-        print("LuckyRobots is up to date.")
-    
-    
+    # print(binary_folder)
+        
     return binary_folder
 
 def get_os_type():

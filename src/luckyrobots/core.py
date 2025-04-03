@@ -149,7 +149,17 @@ class LuckyRobots:
         if binary_path is None:
             binary_path = check_binary("./Binary")    
         if not os.path.exists(binary_path):
-            print(f"I couldn't find the binary at {binary_path}, are you sure it's running and capture mode is on?")
+            print(f"I couldn't find the binary at {binary_path}, please download the latest version of Lucky Robots from:")
+            print("")
+            print("https://luckyrobots.com/luckyrobots/luckyworld/releases")
+            print("")
+            print("and unzip it in the same directory as your file ie ./Binary folder")
+            print("")
+            print("Linux: your executable will be     ./Binary/Luckyrobots.sh")
+            print("Windows: your executable will be   ./Binary/Luckyrobots.exe")
+            print("MacOS: your executable will be     ./Binary/Luckyrobots.app")
+            print("")
+            print("If you are running this from a different directory, you can change the lr.start(binary_path='...') parameter to the full path of the binary.")            
             os._exit(1)
         
 

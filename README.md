@@ -3,15 +3,13 @@
 
 https://github.com/lucky-robots/lucky-robots/assets/203507/6c29b881-2ff6-4734-ad33-71c09ad75b62
 
-Lucky Robots: Where robots come for a boot camp, like going to a spa day! 🤖💆‍♂️ We use the fancy Unreal Engine 5.3, Open3D and YoloV8 to create a lavish, virtual 5-star resort experience for our metal buddies so they're absolutely pumped before they meet the real world. Our training framework? More like a robotic paradise with zero robot mishaps. "Gentle" methods? We're practically the robot whisperers here, you won't see humans with metal sticks around. That's why it's "Lucky Robots" because every robot leaves our sessions feeling like they just won the jackpot – all without a scratch! 🎰🤣
+Lucky Robots: Where robots come for a boot camp, like going to a spa day! 🤖💆‍♂️ We use the fancy Unreal Engine 5.5 to create a lavish, virtual 5-star resort experience for our metal buddies so they're absolutely pumped before they meet the real world. Our training framework? More like a robotic paradise with zero robot mishaps. "Gentle" methods? We're practically the robot whisperers here, you won't see humans with metal sticks around. That's why it's "Lucky Robots" because every robot leaves our sessions feeling like they just won the jackpot – all without a scratch! 🎰🤣
 
-Joking aside, whether you're an AI/ML Developer, aspiring to design the next Roomba, or interested in delving into robotics, there's no need to invest thousands of dollars in a physical robot and attempt to train it in your living space. With Lucky, you can master the art of training your robot, simulate its behavior with up to 90% accuracy, and then reach out to the robot's manufacturer to launch your new company.
-
-Remember, no robots were emotionally or physically harmed in our ultra-luxurious training process. Thus, Lucky Robots!
+Jokes aside, if you're an AI/ML Developer, aspiring to develop an AI model for humanoids, SO-100s, or any robot, there's no need to invest thousands of dollars in a physical robot and attempt to train it in your garage. With Lucky, you can create any amount of synthetic, robot-complete data, run it through your AI pipeline and get your robot  to do the thing you want it to do.
 
 Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
 
-(Note for the repository: Our Unreal repo got too big for GitHub (250GB+!), so we moved it to a local Perforce server. Major bummer for collab, we know. 😞 We're setting up read-only FTP access to the files. If you need access or have ideas to work around this, give me a shout. I'll hook you up with FTP access for now.)
+Our project is fully open source; to access our Unreal Repository where you can build it from the source visit: [https://luckyrobots.com/luckyrobots/luckyworld](https://luckyrobots.com/luckyrobots/luckyworld)
 
 ## Getting Started
 

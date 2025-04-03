@@ -27,7 +27,7 @@ sed -i.bak "s/version=\"$current_version\"/version=\"$new_version\"/" setup.py &
 echo "Version updated from $current_version to $new_version"
 
 # Uncomment the following lines when ready to build and upload
-python3.11 -m pip install --upgrade build
-python3.11 -m build
-python3.11 -m pip install --upgrade twine
-python3.11 -m twine upload dist/*
+python -m pip install --upgrade build
+python -m build
+python -m pip install --upgrade twine
+python -m twine upload dist/*
