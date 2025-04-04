@@ -176,7 +176,7 @@ resource "null_resource" "run_gitea_setup" {
       "export HETZNER_OBJECT_STORAGE_ACCESS_KEY='${var.hetzner_object_storage_access_key}'",
       "export HETZNER_OBJECT_STORAGE_SECRET_KEY='${var.hetzner_object_storage_secret_key}'",
       "export HETZNER_OBJECT_STORAGE_BUCKET_NAME='${var.hetzner_object_storage_bucket_name}'",
-      "export HETZNER_S3_ENDPOINT='fsn1.your-objectstorage.com'",
+      "export HETZNER_S3_ENDPOINT='nbg1.your-objectstorage.com'",
       "bash /root/run-setup-background.sh"
     ]
   }
