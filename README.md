@@ -47,7 +47,7 @@ cd luckyrobots/examples
 2. Create your environment and install
 
 ```bash
-conda create -n lr
+conda create -n lr python=3.8
 conda activate lr
 pip install luckyrobots  # or use uv for faster installation
 ```
