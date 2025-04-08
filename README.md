@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-   Where real robot training meets unreal simulation
+   Infinite synthetic data generation for embodied AI
 </p>
 
 <div align="center">
