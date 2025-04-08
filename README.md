@@ -1,15 +1,36 @@
-# Lucky Robots
+<p align="center">
+  <img width="384" alt="Default_Logo_Horizontal@2x" src="https://github.com/user-attachments/assets/ae6ad53a-741e-4e7a-94cb-5a46a8e81398" />
+</p>
 
+<p align="center">
+   Where real robot training meets unreal simulation
+</p>
 
-## Robot Learning in Hyperrealistic Environments
+<div align="center">
+  
+[![GitHub stars](https://img.shields.io/github/stars/luckyrobots/luckyrobots?style=social)](https://github.com/luckyrobots/luckyrobots/stargazers)
+[![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/pypi/pyversions/luckyrobots)](https://pypi.org/project/luckyrobots/)
+[![Status](https://img.shields.io/badge/Status-Alpha-orange)](https://pypi.org/project/luckyrobots/)
+[![Examples](https://img.shields.io/badge/Examples-View_Code-green)](https://github.com/luckyrobots/luckyrobots/tree/main/examples)
+[![Discord](https://dcbadge.vercel.app/api/server/5CH3wx3tAs?style=flat)](https://discord.gg/5CH3wx3tAs)
+  
+</div>
 
-https://github.com/lucky-robots/lucky-robots/assets/203507/6c29b881-2ff6-4734-ad33-71c09ad75b62
+https://github.com/user-attachments/assets/0ab2953d-b188-4af7-a225-71decdd2378c
 
-This vision was born out of trying to teach our kids how to train robots for simple tasks like picking and placing objects. We quickly discovered that existing simulators were either restricted to those with academic affiliations, prohibitively complex, or simply insufficient for modern robotic learning... so we decided to create something better.
+## Why Lucky Robots?
+Our vision for accessible robotics was born out of trying to teach our kids how to train robots for simple tasks like picking and placing objects. We quickly discovered that existing simulators were either restricted to those with academic affiliations, prohibitively complex, or simply insufficient for modern robotic learning... so we decided to create something better.
 
 We built Lucky Robots to democratize robotic learning. Our platform pairs an intuitive Python API with [Lucky World](https://luckyrobots.com/luckyrobots/luckyworld), our state-of-the-art simulator that levarages UE5's hyperrealistic rendering and MuJoCo's precise physics. This combination makes professional-grade robotic simulation accessible to everyone, with no need for specialized hardware or a PhD-level understanding.
 
 Whether you're a parent inspiring the next generation, a researcher pushing the boundaries of science, or an industry professional developing cutting-edge applications, Lucky Robots was built for you.
+
+<p align="center">
+  <img width="49%" alt="Bedroom environment in Lucky World" src="https://github.com/user-attachments/assets/279a7864-9a8b-453e-8567-3a174f5db8ab" />
+  <img width="49%" alt="Open floor plan in Lucky World" src="https://github.com/user-attachments/assets/68c72b97-98ab-42b0-a065-8a4247b014c7" />
+</p>
 
 ## Getting Started
 
@@ -40,26 +61,6 @@ python vlm_gpt.py
 ```
 
 This will automatically download our simulation binary and run it for you.
-
-## Including Files Without Repository Storage
-
-When you want to include files in your documentation without storing them in the repository, you have several options:
-
-1. **External URLs**: Link to files hosted elsewhere
-
-   ```markdown
-   ![External Image](https://example.com/path/to/image.png)
-   ```
-2. **Base64 Encoded Images**: Embed images directly in markdown
-
-   ```markdown
-   ![Base64 Image](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==)
-   ```
-3. **Data URIs**: Include file content directly
-
-   ```markdown
-   [Download Sample Data](data:text/plain;base64,SGVsbG8gV29ybGQ=)
-   ```
 
 ## Event Listeners
 
@@ -159,7 +160,7 @@ lr.send_message(commands)
   - `R1 10` - Or: `lr.send_message([["R1 10"]])`
   - `R2 -30` (turn cam) - Or: `lr.send_message([["R2 -30"]])`
 
-### Lucky Robot v3
+### Luck-e v3
 
 - `[JOINT][DEGREE]` Example: `EX1 30`
 
@@ -183,7 +184,7 @@ lr.start(binary_path, sendBinaryData=False)
 
 Set `sendBinaryData=True` to include file contents in the `robot_output` object.
 
-## What We're Working On Next
+## What's Next?
 
 * Drones
 * VLA demo
@@ -201,11 +202,3 @@ Absolutely! Show us a few cool things and/or contribute a few PRs - let us know!
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://claude.ai/chat/LICENSE) file for details.
-
----
-
-<p align="center">
-<strong>Lucky Robots</strong><br>
-<strong>Where real robot training meets unreal simulation.</strong><br>
-<a href="https://luckyrobots.com">Website</a> | <a href="https://github.com/luckyrobots/luckyrobots">GitHub</a>
-</p>
