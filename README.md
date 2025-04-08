@@ -1,46 +1,67 @@
-# Lucky Robots
-## Robotics-AI Training in Hyperrealistic Game Environments (sound on!)
+<p align="center">
+  <img width="384" alt="Default_Logo_Horizontal@2x" src="https://github.com/user-attachments/assets/ae6ad53a-741e-4e7a-94cb-5a46a8e81398" />
+</p>
 
-https://github.com/lucky-robots/lucky-robots/assets/203507/6c29b881-2ff6-4734-ad33-71c09ad75b62
+<p align="center">
+   Infinite synthetic data generation for embodied AI
+</p>
 
-Lucky Robots: Where robots come for a boot camp, like going to a spa day! 🤖💆‍♂️ We use the fancy Unreal Engine 5.5 to create a lavish, virtual 5-star resort experience for our metal buddies so they're absolutely pumped before they meet the real world. Our training framework? More like a robotic paradise with zero robot mishaps. "Gentle" methods? We're practically the robot whisperers here, you won't see humans with metal sticks around. That's why it's "Lucky Robots" because every robot leaves our sessions feeling like they just won the jackpot – all without a scratch! 🎰🤣
+<div align="center">
 
-Jokes aside, if you're an AI/ML Developer, aspiring to develop an AI model for humanoids, SO-100s, or any robot, there's no need to invest thousands of dollars in a physical robot and attempt to train it in your garage. With Lucky, you can create any amount of synthetic, robot-complete data, run it through your AI pipeline and get your robot  to do the thing you want it to do.
+[![GitHub stars](https://img.shields.io/github/stars/luckyrobots/luckyrobots?style=social)](https://github.com/luckyrobots/luckyrobots/stargazers)
+[![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/pypi/pyversions/luckyrobots)](https://pypi.org/project/luckyrobots/)
+[![Status](https://img.shields.io/badge/Status-Alpha-orange)](https://pypi.org/project/luckyrobots/)
+[![Examples](https://img.shields.io/badge/Examples-View_Code-green)](https://github.com/luckyrobots/luckyrobots/tree/main/examples)
+[![Discord](https://dcbadge.vercel.app/api/server/5CH3wx3tAs?style=flat)](https://discord.gg/5CH3wx3tAs)
 
-Cheers to happy, and more importantly, unbruised robots! 🍀🤖🎉
+</div>
 
-Our project is fully open source; to access our Unreal Repository where you can build it from the source visit: [https://luckyrobots.com/luckyrobots/luckyworld](https://luckyrobots.com/luckyrobots/luckyworld)
+https://github.com/user-attachments/assets/0ab2953d-b188-4af7-a225-71decdd2378c
+
+## Why Lucky Robots?
+
+Our vision for accessible robotics was born out of trying to teach our kids how to train robots for simple tasks like picking and placing objects. We quickly discovered that existing simulators were either restricted to those with academic affiliations, prohibitively complex, or simply insufficient for modern robotic learning... so we decided to create something better.
+
+We built Lucky Robots to democratize robotic learning. Our platform pairs an intuitive Python API with [Lucky World](https://luckyrobots.com/luckyrobots/luckyworld), our state-of-the-art simulator that levarages UE5's hyperrealistic rendering and MuJoCo's precise physics. This combination makes professional-grade robotic simulation accessible to everyone, with no need for specialized hardware or a PhD-level understanding.
+
+Whether you're a parent inspiring the next generation, a researcher pushing the boundaries of science, or an industry professional developing cutting-edge applications, Lucky Robots was built for you.
+
+<p align="center">
+  <img width="49%" alt="Bedroom environment in Lucky World" src="https://github.com/user-attachments/assets/279a7864-9a8b-453e-8567-3a174f5db8ab" />
+  <img width="49%" alt="Open floor plan in Lucky World" src="https://github.com/user-attachments/assets/68c72b97-98ab-42b0-a065-8a4247b014c7" />
+</p>
 
 ## Getting Started
 
-To begin using Lucky Robots:
+To start building with Lucky Robots:
 
+1. Clone the repository
 
-1. if you want to run the examples in this repository: (optional)
-
-```
-   git clone https://github.com/luckyrobots/luckyrobots.git
-   cd luckyrobots/examples
-```
-2. Use your fav package manager (optional)
-```
-   conda create -n lr
-   conda activate lr
+```bash
+git clone https://github.com/luckyrobots/luckyrobots.git
+cd luckyrobots/examples
 ```
 
-2. Install the package using pip:
-```
-   pip install luckyrobots
+2. Create your environment and install
+
+```bash
+conda create -n lr python=3.8
+conda activate lr
+pip install luckyrobots  # or use uv for faster installation
 ```
 
-3. Run one of the following
-```
-   python basic_usage.py 
-   python yolo_example.py
-   python yolo_mac_example.py
+3. Run any of the following examples
+
+```bash
+python basic_usage.py 
+python yolo_example.py
+python yolo_mac_example.py
+python vlm_gpt.py
 ```
 
-It will download the binary and will run it for you.
+This will automatically download our simulation binary and run it for you.
 
 ## Event Listeners
 
@@ -49,6 +70,7 @@ Lucky Robots provides several event listeners to interact with the simulated rob
 1. **@lr.on("robot_output")**: Receives robot output, including RGB and depth images, and coordinates.
 
    Example output:
+
    ```python
    {
        "body_pos": {"Time": "1720752411", "rx": "-0.745724", "ry": "0.430001", "rz": "0.007442", "tx": "410.410786", "ty": "292.086556", "tz": "0.190011", "file_path": "/.../4_body_pos.txt"},
@@ -60,7 +82,6 @@ Lucky Robots provides several event listeners to interact with the simulated rob
        "rgb_cam2": {"file_path": "/.../4_rgb_cam2.jpg"}
    }
    ```
-
 2. **@lr.on("message")**: Decodes messages from the robot to understand its internal state.
 3. **@lr.on("start")**: Triggered when the robot starts, allowing for initialization tasks.
 4. **@lr.on("tasks")**: Manages the robot's task list.
@@ -70,7 +91,7 @@ Lucky Robots provides several event listeners to interact with the simulated rob
 
 ## Controlling the Robot
 
-To control the robot, send commands using the `lr.send_message()` function. For example, to make the robot's main wheels turn 10 times:
+To control the robot, send commands using the `lr.send_message()` function:
 
 ```python
 commands = [["W 3600 1"]]  # This makes the main wheels turn 10 times.
@@ -82,7 +103,7 @@ For multiple commands and to know when a particular one ends, assign an ID field
 commands = [[{"id": 1234, "code": "W 18000 1"}]]
 ```
 
-If you want to send a whole set of instructions, add multiple arrays. Each array will wait until the previous array finishes. Commands inside one array are executed simultaneously, allowing smoother movements like the robot lifting its arms while moving forward or turning its head while placing an object. 
+If you want to send a whole set of instructions, add multiple command lists. Each command list will wait until the previous command list finishes. Commands inside one list are executed simultaneously, allowing smoother movements like the robot lifting its arms while moving forward or turning its head while placing an object.
 
 ```python
 commands = [["W 1800 1","a 30"],["a 0", "W 1800 1"]]
@@ -90,7 +111,7 @@ commands = [["W 1800 1","a 30"],["a 0", "W 1800 1"]]
 
 Commands in one list will override previous commands if they conflict. For instance, if you instruct your robot to turn its wheels 20 times, and on the 5th turn, you instruct it again to turn 3 times, the robot will travel a total of 8 revolutions and stop.
 
-To know when a particular batch finishes, give it an ID and listen for that ID:
+To know when a particular batch of commands finishes, give it an ID and listen for that ID:
 
 ```python
 commands = [
@@ -101,197 +122,84 @@ commands = [
 lr.send_message(commands)
 ```
 
-## MOVING THE ROBOTS
+### Moving the Robots
 
-### FORWARD - BACKWARD
+**Forward/Backward**
+
 - `[DIRECTION] [DISTANCE] [SPEED]` Example: `W 50 1`
   - `[DIRECTION]`: W is forward, S is backward
   - `[DISTANCE]`: Travel distance in centimeters
   - `[SPEED]`: Speed at which motor will react - km/h
   - Send via API: `lr.send_message([["W 50 1"]])`
 
-### LEFT - RIGHT
+**Left/Right**
+
 - `[DIRECTION] [DEGREE]` Example: `A 30`
   - `[DIRECTION]`: A is left, D is right
   - `[DEGREE]`: Spin Rotation in degrees
-  - Or: `lr.send_message([["A 30"]])`
+  - Send via API: `lr.send_message([["A 30"]])`
 
-### RESET
+**Reset**
+
 - `RESET`: Resets all positions and rotations to the zero pose
-- Or: `lr.send_message([["RESET"]])`
+- Send via API: `lr.send_message([["RESET"]])`
 
-### STRETCH-3 
+### Stretch v1
 
 - `[JOINT][DISTANCE]` Example: `EX1 30`
+
   - `EX1 10`  (extend 1st joint 10cm outwards)
   - `EX2 -10` (extend 2nd joint 10cm inwards)
   - `EX3 10`  (extend 3rd joint 10cm outwards)
   - `EX4 10`  (extend 4th joint 10cm outwards)
   - Or: `lr.send_message([["EX1 10"]])`, `lr.send_message([["EX2 -10"]])`, etc.
-
 - `U 10` (Up) - Or: `lr.send_message([["U 10"]])`
 - `U -10` (Down) - Or: `lr.send_message([["U -10"]])`
-
 - Gripper: `G 5` or `G -10` - Or: `lr.send_message([["G 5"]])` or `lr.send_message([["G -10"]])`
-
 - Hand Cam Angle:
+
   - `R1 10` - Or: `lr.send_message([["R1 10"]])`
   - `R2 -30` (turn cam) - Or: `lr.send_message([["R2 -30"]])`
 
-### LUCKY ROBOT-3 
+### Luck-e v3
 
 - `[JOINT][DEGREE]` Example: `EX1 30`
+
   - `EX1 20`  (1st rotate the joint 20 degrees)
   - `EX2 -10` (2nd rotate the joint -10 degrees)
   - `EX3 10`  (3rd rotate the joint 10 degrees)
   - `EX4 10`  (4th rotate the joint 10 degrees)
   - Or: `lr.send_message([["EX1 20"]])`, `lr.send_message([["EX2 -10"]])`, etc.
-
 - `U 10` (Up) - Or: `lr.send_message([["U 10"]])`
 - `U -10` (Down) - Or: `lr.send_message([["U -10"]])`
-
 - Gripper: `G 5` or `G -10` - Or: `lr.send_message([["G 5"]])` or `lr.send_message([["G -10"]])`
-
 - Hand Cam Angle: `R 10` - Or: `lr.send_message([["R 10"]])`
 
 ## Starting the Robot
 
-To start the robot simulation, use:
+To start the robot simulation with custom options:
 
 ```python
 lr.start(binary_path, sendBinaryData=False)
 ```
 
-### ** WHAT WE ARE WORKING ON NEXT **
+Set `sendBinaryData=True` to include file contents in the `robot_output` object.
 
-*   Releasing our first basic end to end model
-*   Drone!!!
-*   Scan your own room
-*   Import URDFs
-*   (your idea?)
+## What's Next?
 
-
-
-
-### brief history of the project ###
-------------------------------
-
-** UPDATE 3/19/24 FIRST LUCKY WORLD UBUNTU BUILD IS COMPLETE: https://drive.google.com/drive/folders/15iYXzqFNEg1b2E6Ft1ErwynqBMaa0oOa
-
-** UPDATE 3/6/24 **
-
-We have designed [Stretch 3 Robot](https://hello-robot.com/stretch-3-product) and working on adding this robot to our world
-
-<img width="504" alt="image" src="https://github.com/lucky-robots/lucky-robots/assets/203507/54b1bbbc-67e0-4add-a58f-84b08d14e680">
-
-
-** UPDATE 1/6/24 **
-
-WE GOT OUR FIRST TEST LINUX BUILD (NOT THE ACTUAL WORLD, THAT'S BEING BUILT) (TESTED ON UBUNTU 22.04)
-
-https://drive.google.com/file/d/1_OCMwn8awKZHBfCfc9op00y6TvetI18U/view?usp=sharing
-
-
-** UPDATE 2/15/24 **
-
-[Luck-e World second release is out (Windows only - we're working on Linux build next)!](https://drive.google.com/drive/folders/10sVx5eCcx7d9ZR6tn0zqeQCaOF84MIQt)
-
-
-** UPDATE 2/8/24 **
-
-We are now writing prompts against the 3d environment we have reconstructed using point clouds...
-
-
-https://github.com/lucky-robots/lucky-robots/assets/203507/a93c9f19-2891-40e1-8598-717ad13efba6
-
-
-
-
-** UPDATE 2/6/24 **
-
-Lucky first release: https://drive.google.com/file/d/1qIbkez1VGU1WcIpqk8UuXTbSTMV7VC3R/view?amp;usp=embed_facebook
-
-Now you can run the simulation on your Windows Machine, and run your AI models against it. If you run into issues, please submit an issue.
-
-** UPDATE 1/15/24 **
-
-Luck-e is starting to understand the world around us and navigate accordingly!
-
-https://github.com/lucky-robots/lucky-robots/assets/203507/4e56bbc5-92da-4754-92f4-989b9cb86b6f
-
-
-** UPDATE 1/13/24 **
-
-We are able to construct a 3d world using single camera @niconielsen32 (This is not a 3d room generated by a game engine, this is what we generate from what we're seeing through a camera in the game!)
-
-https://github.com/lucky-robots/lucky-robots/assets/203507/f2fd19ee-b40a-4fef-bd30-72c56d0f9ead
-
-
-
-** UPDATE 12/29/23 **
-We are now flying! Look at these environments, can you tell they're not real?
-
-![Screenshot_18](https://github.com/lucky-robots/lucky-robots/assets/203507/f988a18e-9dc3-484e-9d9f-eb7ad57180b2)
-![Screenshot_17](https://github.com/lucky-robots/lucky-robots/assets/203507/f423d73f-d336-47b6-abf0-6f1b174bd740)
-![Screenshot_19](https://github.com/lucky-robots/lucky-robots/assets/203507/7f2b9ae2-f84f-41a1-8511-959e2586b809)
-![Screenshot_15](https://github.com/lucky-robots/lucky-robots/assets/203507/d65a0fb4-3a4d-4207-9181-2de0e2ce63ce)
-![Screenshot_11](https://github.com/lucky-robots/lucky-robots/assets/203507/cf328e8d-fc40-4be3-81ac-a900d0505fd8)
-![Screenshot_14](https://github.com/lucky-robots/lucky-robots/assets/203507/5ae9bf2d-246b-437f-ba1b-901a7f10b1fa)
-![Screenshot_12](https://github.com/lucky-robots/lucky-robots/assets/203507/e2f0684e-ca18-40b0-8680-76ccec918171)
-![Screenshot_8](https://github.com/lucky-robots/lucky-robots/assets/203507/26904b69-c8b8-467d-8355-595cc62ead3f)
-![Screenshot_7](https://github.com/lucky-robots/lucky-robots/assets/203507/e43e25b0-b68d-4c1e-9a7d-800b9cf5312b)
-
-
-** UPDATE 12/27/23 **
-
-Lucky now has a drone  - like the Mars Rover! When it's activated camera feed switches to it automatically!
-
-
-https://github.com/lucky-robots/lucky-robots/assets/203507/29103a5a-a209-4d49-acd1-adad88e5b590
-
-
-** UPDATE 12/5/23 **
-
-Completed our first depth map using Midas monocular depth estimation model
-
-
-https://github.com/lucky-robots/lucky-robots/assets/203507/647a5c32-297a-4157-b72b-afeacdaae48a
-
-
-https://user-images.githubusercontent.com/203507/276747207-b4db8da0-a14e-4f41-a6a0-ef3e2ea7a31c.mp4
-
-## Table of Contents
-
-- [Features](#features)
-- [Support](#support)
-- [Contributing](#contributing)
-- [Join Our Team](#join-our-team)
-- [License](#license)
-
-## Features
-
-1. **Realistic Training Environments**: Train your robots in various scenarios and terrains crafted meticulously in Unreal Engine.
-2. **Python Integration**: The framework integrates seamlessly with Python 3.10, enabling developers to write training algorithms and robot control scripts in Python.
-3. **Safety First**: No physical wear and tear on robots during training. Virtual training ensures that our robotic friends remain in tip-top condition.
-4. **Modular Design**: Easily extend and modify the framework to suit your specific requirements or add new training environments.
-
-
-## Support
-
-For any queries, issues, or feature requests, please refer to our [issues page](https://github.com/LuckyRobots/LuckyRobotsTrainingFramework/issues).
+* Drones
+* VLA demo
+* 3D scene reconstruction
+* (your idea?)
 
 ## Contributing
 
-We welcome contributions! Please read our [contributing guide](CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to Lucky Robots.
+Contributions are welcome! Check out our [contribution guidelines](https://claude.ai/chat/CONTRIBUTING.md) to get started.
 
 ## Join our team?
 
-Absolutely! Show us a few cool things and/or contribute a few PRs -- let us know!
+Absolutely! Show us a few cool things and/or contribute a few PRs - let us know!
 
 ## License
 
-Lucky Robots Training Framework is released under the [MIT License](LICENSE.md).
-
----
-
-Happy training! Remember, be kind to robots. 🤖💚
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
