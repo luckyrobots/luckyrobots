@@ -7,7 +7,7 @@
 </p>
 
 <div align="center">
-  
+
 [![GitHub stars](https://img.shields.io/github/stars/luckyrobots/luckyrobots?style=social)](https://github.com/luckyrobots/luckyrobots/stargazers)
 [![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -15,12 +15,13 @@
 [![Status](https://img.shields.io/badge/Status-Alpha-orange)](https://pypi.org/project/luckyrobots/)
 [![Examples](https://img.shields.io/badge/Examples-View_Code-green)](https://github.com/luckyrobots/luckyrobots/tree/main/examples)
 [![Discord](https://dcbadge.vercel.app/api/server/5CH3wx3tAs?style=flat)](https://discord.gg/5CH3wx3tAs)
-  
+
 </div>
 
 https://github.com/user-attachments/assets/0ab2953d-b188-4af7-a225-71decdd2378c
 
 ## Why Lucky Robots?
+
 Our vision for accessible robotics was born out of trying to teach our kids how to train robots for simple tasks like picking and placing objects. We quickly discovered that existing simulators were either restricted to those with academic affiliations, prohibitively complex, or simply insufficient for modern robotic learning... so we decided to create something better.
 
 We built Lucky Robots to democratize robotic learning. Our platform pairs an intuitive Python API with [Lucky World](https://luckyrobots.com/luckyrobots/luckyworld), our state-of-the-art simulator that levarages UE5's hyperrealistic rendering and MuJoCo's precise physics. This combination makes professional-grade robotic simulation accessible to everyone, with no need for specialized hardware or a PhD-level understanding.
@@ -201,4 +202,4 @@ Absolutely! Show us a few cool things and/or contribute a few PRs - let us know!
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://claude.ai/chat/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
