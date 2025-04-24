@@ -6,18 +6,19 @@ import platform
 import atexit
 import sys
 
-LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckeworld_lock')
+LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckyworld_lock')
 
-def is_luckyworld_running():
+def is_luckyworld_running() -> bool:
+    """Check if LuckyWorld is running by checking the lock file or process name"""
     # Check for the lock file
     if os.path.exists(LOCK_FILE):
         with open(LOCK_FILE, 'r') as f:
             pid = int(f.read().strip())
         if psutil.pid_exists(pid):
-            # Double-check if the process is actually LuckEWorld
+            # Double-check if the process is actually LuckyWorld
             try:
                 process = psutil.Process(pid)
-                if "LuckEWorld" in process.name() or "luckyrobots" in process.name():
+                if "LuckyWorld" in process.name():
                     return True
             except psutil.NoSuchProcess:
                 pass  # Process doesn't exist, continue to remove lock file
@@ -25,28 +26,31 @@ def is_luckyworld_running():
         # If we reach here, the lock file is stale
         remove_lock_file()
     
-    # Check for any running LuckEWorld processes
+    # Check for any running LuckyWorld processes
     for proc in psutil.process_iter(['name']):
-        if "LuckEWorld" in proc.info['name'] or "luckyrobots" in proc.info['name']:
+        if "LuckyWorld" in proc.info['name']:
             create_lock_file(proc.pid)
             return True
     
     return False
 
-def create_lock_file(pid):
+def create_lock_file(pid: int) -> None:
+    """Create a lock file with the process ID to prevent multiple instances of LuckyWorld from running"""
     with open(LOCK_FILE, 'w') as f:
         f.write(str(pid))
 
-def remove_lock_file():
+def remove_lock_file() -> None:
+    """Remove the lock file to allow LuckyWorld to run again"""
     if os.path.exists(LOCK_FILE):
         os.remove(LOCK_FILE)
 
-def run_luckyworld_executable(directory_to_watch):
+def run_luckyworld_executable(directory_to_watch: str) -> None:
+    """Run the LuckyWorld executable"""
     # Determine the correct path based on the operating system
     if platform.system() == "Darwin":  # macOS
         executable_path = os.path.join(directory_to_watch, "..","..","..","MacOS", "luckyrobots")
     elif platform.system() == "Linux":  # Linux
-        executable_path = os.path.join(directory_to_watch, "..","..","luckyrobots.sh")
+        executable_path = os.path.join(directory_to_watch, "..","..","Luckyrobots.sh")
     else:  # Windows or other platforms
         executable_path = os.path.join(directory_to_watch, "..","..","luckyrobots.exe")        
 
@@ -87,9 +91,9 @@ def run_luckyworld_executable(directory_to_watch):
         create_lock_file(process.pid)
         
         if verbose:
-            print("LuckEWorld application started successfully as an independent process.")
+            print("LuckyWorld application started successfully as an independent process.")
     except subprocess.CalledProcessError as e:
-        print(f"Error: Failed to start LuckEWorld application. {e}")
+        print(f"Error: Failed to start LuckyWorld application. {e}")
     except PermissionError as e:
         print(f"Error: Permission denied. Unable to set execute permissions. {e}")
     except Exception as e:
