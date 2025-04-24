@@ -12,6 +12,8 @@ import logging
 import random
 import signal
 
+from typing import Union, Any, Dict, List, Optional
+
 from .watcher import Watcher
 from .handler import Handler
 from .download import check_binary
@@ -20,7 +22,7 @@ from .run_executable import is_luckyworld_running, run_luckyworld_executable
 
 
 # Constants
-LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckeworld_lock')
+LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckyworld_lock')
 DEFAULT_PORT = 3000
 DEFAULT_HOST = "0.0.0.0"
 
@@ -34,25 +36,26 @@ class LuckyRobots:
     websocket = None
     port = DEFAULT_PORT
     host = DEFAULT_HOST
-    delegate_object = None
     
     @staticmethod
-    async def send_message(message: str) -> None:
-        """Send a raw text message over WebSocket"""
+    async def send_message(message: Union[str, Dict[str, Any]]) -> None:
+        """Send a raw text message or JSON object over WebSocket"""
         if LuckyRobots.websocket is not None:
+            if isinstance(message, dict):
+                message = json.dumps(message)
             await LuckyRobots.websocket.send_text(message)
         else:
             print("WebSocket connection is not established yet.")
-
+            
     @staticmethod
-    async def send_commands(commands: list) -> None:
+    async def send_commands(commands: Union[str, List[Dict[str, Any]]]) -> None:
         """Send formatted robot commands
         
         Args:
             commands: List of command strings or command dictionaries
         """
         if not isinstance(commands, list):
-            await LuckyRobots.send_message(json.dumps(commands))
+            await LuckyRobots.send_message(commands)
             return
 
         instructions = {
@@ -71,7 +74,7 @@ class LuckyRobots:
         }
         
         print("Sending instructions:", instructions)
-        await LuckyRobots.send_message(json.dumps(instructions))
+        await LuckyRobots.send_message(instructions)
 
     @staticmethod
     def message_receiver(func):
@@ -89,13 +92,13 @@ class LuckyRobots:
         return func
     
     @staticmethod
-    async def message_received(message,data=None):
+    async def message_received(message, data: Optional[Any] = None):
         if LuckyRobots.receiver_function is not None:
-            await LuckyRobots.receiver_function(message,data)
+            await LuckyRobots.receiver_function(message, data)
 
     @staticmethod
-    def message_received_sync(message,data=None):
-        asyncio.run(LuckyRobots.message_received(message,data))
+    def message_received_sync(message, data: Optional[Any] = None):
+        asyncio.run(LuckyRobots.message_received(message, data))
     
     @classmethod
     async def _handle_websocket_messages(cls, websocket: WebSocket) -> None:
@@ -124,7 +127,7 @@ class LuckyRobots:
             print("WebSocket connection closed")
             
     @staticmethod
-    def start(binary_path: str = None, send_bytes: bool = False) -> None:
+    def start(binary_path: Optional[str] = None, send_bytes: bool = False) -> None:
         """Start the LuckyRobots server and application
         
         Args:
@@ -143,7 +146,9 @@ class LuckyRobots:
         
         # Start application if needed
         if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
-            run_luckyworld_executable(directory_to_watch)
+            """Check if LuckyWorld is running, if not, run the executable"""
+            pass
+            # run_luckyworld_executable(directory_to_watch)
 
         library_dev()
 
@@ -161,21 +166,20 @@ class LuckyRobots:
         watcher.run()
         
     @staticmethod
-    def _initialize_binary(binary_path: str = None) -> str:
+    def _initialize_binary(binary_path: Optional[str] = None) -> str:
         """Initialize and validate binary path"""
         if binary_path is None:
             binary_path = check_binary("./Binary")
             
         if not os.path.exists(binary_path):
-            print("Binary not found. Please download from:")
+            print(f"Binary not found at {binary_path}, please download the latest version of Lucky Robots from:")
             print("\nhttps://luckyrobots.com/luckyrobots/luckyworld/releases")
             print("\nand unzip it in the same directory as your file ie ./Binary folder")
-            print("\nExpected locations:")
-            print("Linux:   ./Binary/Luckyrobots.sh")
-            print("Windows: ./Binary/Luckyrobots.exe")
-            print("MacOS:   ./Binary/Luckyrobots.app")
+            print("\nLinux: your executable will be     ./Binary/Luckyrobots.sh")
+            print("Windows: your executable will be   ./Binary/Luckyrobots.exe")
+            print("MacOS: your executable will be     ./Binary/Luckyrobots.app")
             print("\nIf you are running this from a different directory, you can change the lr.start(binary_path='...') parameter to the full path of the binary.")
-            sys.exit(1)
+            os._exit(1)
             
         return binary_path
     
