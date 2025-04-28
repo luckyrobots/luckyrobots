@@ -11,20 +11,17 @@ import uvicorn
 import logging
 import random
 import signal
-
+import websockets
+from pathlib import Path
 from typing import Union, Any, Dict, List, Optional
 
 from .watcher import Watcher
 from .handler import Handler
-from .download import check_binary
 from .library_dev import library_dev
 from .run_executable import is_luckyworld_running, run_luckyworld_executable
 
 
-# Constants
 LOCK_FILE = os.path.join(tempfile.gettempdir(), 'luckyworld_lock')
-DEFAULT_PORT = 3000
-DEFAULT_HOST = "0.0.0.0"
 
 app = FastAPI()
 
@@ -33,19 +30,33 @@ class LuckyRobots:
     """Main class for handling robot communication and control"""
     
     # Class variables
-    websocket = None
-    port = DEFAULT_PORT
-    host = DEFAULT_HOST
+    port = 3000
+    host = "0.0.0.0"
+    websocket_connections = set()
     
+    # TODO: Add a receiver_functions dictionary to store multiple receiver functions
+
     @staticmethod
     async def send_message(message: Union[str, Dict[str, Any]]) -> None:
-        """Send a raw text message or JSON object over WebSocket"""
-        if LuckyRobots.websocket is not None:
-            if isinstance(message, dict):
-                message = json.dumps(message)
-            await LuckyRobots.websocket.send_text(message)
-        else:
-            print("WebSocket connection is not established yet.")
+        """Send a raw text message or JSON object to all connected WebSocket clients"""
+        if isinstance(message, dict):
+            message = json.dumps(message)
+        
+        # Keep track of disconnected clients
+        disconnected = set()
+        
+        # Send to all active connections
+        for websocket in LuckyRobots.websocket_connections:
+            try:
+                await websocket.send_text(message)
+            except Exception as e:
+                print(f"Error sending message to client: {e}")
+                disconnected.add(websocket)
+    
+        # Remove disconnected clients
+        for websocket in disconnected:
+            LuckyRobots.websocket_connections.remove(websocket)
+            print(f"Removed disconnected client")
             
     @staticmethod
     async def send_commands(commands: Union[str, List[Dict[str, Any]]]) -> None:
@@ -87,7 +98,7 @@ class LuckyRobots:
             print(f"Error: Message receiver '{func_name}'{location_str} must be async")
             LuckyRobots.run_exit_handler()
             return func
-
+        
         LuckyRobots.receiver_function = func
         return func
     
@@ -100,30 +111,33 @@ class LuckyRobots:
     def message_received_sync(message, data: Optional[Any] = None):
         asyncio.run(LuckyRobots.message_received(message, data))
     
-    @classmethod
-    async def _handle_websocket_messages(cls, websocket: WebSocket) -> None:
+    @staticmethod
+    async def _handle_websocket_messages(websocket: WebSocket) -> None:
         """Handle incoming WebSocket messages by calling the receiver function"""
         try:
             while True:
                 data = await websocket.receive_text()
-                if cls.receiver_function:
-                    await cls.receiver_function(data)
+                if LuckyRobots.receiver_function:
+                    await LuckyRobots.receiver_function(data)
         except Exception as e:
             print(f"WebSocket error: {e}")
             
-    @classmethod
+    @staticmethod
     @app.websocket("/ws")
-    async def websocket_endpoint(cls, websocket: WebSocket) -> None:
+    async def websocket_endpoint(websocket: WebSocket) -> None:
         """WebSocket endpoint handler"""
+        
         try:
             await websocket.accept()
-            print("WebSocket connection established")
-            cls.websocket = websocket
-            await cls._handle_websocket_messages(websocket)
+            print(f"WebSocket connection established from {websocket.client.host}")
+            # Add to active connections
+            LuckyRobots.websocket_connections.add(websocket)
+            await LuckyRobots._handle_websocket_messages(websocket)
         except Exception as e:
             print(f"WebSocket error: {e}")
         finally:
-            cls.websocket = None
+            # Remove from active connections
+            LuckyRobots.websocket_connections.remove(websocket)
             print("WebSocket connection closed")
             
     @staticmethod
@@ -134,10 +148,8 @@ class LuckyRobots:
             binary_path: Path to the LuckyRobots binary
             send_bytes: Whether to send raw bytes instead of text
         """
-        # Initialize binary path
         binary_path = LuckyRobots._initialize_binary(binary_path)
         
-        # Set up directory watching
         directory_to_watch = LuckyRobots._setup_watch_directory(binary_path)
         
         # Configure handler
@@ -152,13 +164,12 @@ class LuckyRobots:
 
         library_dev()
 
-        # Start server in background
+        # Start the WebSocket server and client
         LuckyRobots._start_server()
+        LuckyRobots._start_client()
         
-        # Display welcome message
         LuckyRobots._display_welcome_message()
         
-        # Set up signal handlers
         LuckyRobots._setup_signal_handlers()
         
         # Start directory watcher
@@ -169,7 +180,7 @@ class LuckyRobots:
     def _initialize_binary(binary_path: Optional[str] = None) -> str:
         """Initialize and validate binary path"""
         if binary_path is None:
-            binary_path = check_binary("./Binary")
+            binary_path = Path(__file__).parent.parent.parent.parent / "LuckyWorldV2"
             
         if not os.path.exists(binary_path):
             print(f"Binary not found at {binary_path}, please download the latest version of Lucky Robots from:")
@@ -204,7 +215,39 @@ class LuckyRobots:
             
         server_thread = threading.Thread(target=run_server, daemon=True)
         server_thread.start()
+                
+        # Give the server time to start
+        time.sleep(1)
 
+    @staticmethod
+    def _start_client():
+        """Start the WebSocket client in a background thread"""
+        def client_connect():
+            asyncio.run(LuckyRobots._client_connect_async())
+        
+        client_thread = threading.Thread(target=client_connect, daemon=True)
+        client_thread.start()
+    
+    @staticmethod
+    async def _client_connect_async():
+        """Async method to connect to WebSocket server and handle messages"""        
+        connect_host = "127.0.0.1" if LuckyRobots.host == "0.0.0.0" else LuckyRobots.host
+        uri = f"ws://{connect_host}:{LuckyRobots.port}/ws"
+        
+        try:
+            print(f"Attempting to connect to {uri}")
+            async with websockets.connect(uri) as websocket:
+                print("Client connected to WebSocket server")
+                
+                while True:
+                    response = await websocket.recv()
+                    print(f"Server received: {response}")
+        except Exception as e:
+            print(f"Client connection error: {e}")
+        finally:
+            LuckyRobots.websocket_connections.remove(websocket)
+            print("Client connection closed")
+        
     @staticmethod
     def _display_welcome_message() -> None:
         """Display welcome message and instructions"""
