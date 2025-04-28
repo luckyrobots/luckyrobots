@@ -34,13 +34,6 @@ def get_base_url():
         return remote_url
     
 
-
-def check_binary(binary_folder):
-
-    # print(binary_folder)
-        
-    return binary_folder
-
 def get_os_type():
     os_type = platform.system().lower()
     if os_type == "darwin":
