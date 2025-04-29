@@ -164,6 +164,23 @@ class LuckyRobots:
         finally:
             LuckyRobots.world_client = None
             print("Lucky World client disconnected")
+            
+    @staticmethod
+    async def _handle_robot_messages(websocket: WebSocket) -> None:
+        """Handle messages from Python clients and forward them to the Unreal world
+        
+        This method is part of the message flow:
+        Python Client → /robot endpoint → handle_robot_messages → world_client (Unreal)
+        """
+        try:
+            while True:
+                data = await websocket.receive_text()
+                try:
+                    await LuckyRobots.world_client.send_text(json.dumps(data))
+                except json.JSONDecodeError:
+                    print("Received invalid JSON from Python client")
+        except Exception as e:
+            print(f"Error handling Python client message: {e}")
 
     @staticmethod
     async def _handle_world_messages(websocket: WebSocket) -> None:
@@ -279,7 +296,7 @@ class LuckyRobots:
     async def _client_connect_async():
         """Async method to connect to WebSocket server and handle messages"""        
         connect_host = "127.0.0.1" if LuckyRobots.host == "0.0.0.0" else LuckyRobots.host
-        uri = f"ws://{connect_host}:{LuckyRobots.port}/luckyrobots"
+        uri = f"ws://{connect_host}:{LuckyRobots.port}/robot"
         
         try:
             async with websockets.connect(uri) as websocket:                
