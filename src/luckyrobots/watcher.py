@@ -1,5 +1,6 @@
-from watchdog.observers import Observer
 from .handler import Handler
+from watchdog.observers import Observer
+
 
 class Watcher:
     def __init__(self, directory_path: str) -> None:
@@ -8,11 +9,10 @@ class Watcher:
 
     def run(self) -> None:
         """
-        This method is used to run the file watcher.
-        It will watch the directory for changes and call the Handler class to process the files.
+        Watch the directory for changes and call the Handler class to process the files.
         """
         event_handler = Handler()
-        self.observer.schedule(event_handler, self.directory_path, recursive=False)
+        self.observer.schedule(event_handler, self.directory_path, recursive=True)
         self.observer.start()
         
         try:

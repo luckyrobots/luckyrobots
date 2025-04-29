@@ -1,19 +1,21 @@
-import os
 import json
-import time
+
+from .models import Observation
+from typing import Optional, Dict, Any
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
+
 
 class Handler(FileSystemEventHandler):
     """
-    This class is used to handle the file events from the LuckyRobots server.
+    Handles file events in the robotdata directory.
     It will read the file and send the contents to the LuckyRobots server.
     """
-    file_num = 0
-    image_stack = {}
+    
+    timestamp = 0
+    chunk_size = 4096 # 4KB
     send_bytes = False
-    emit_counter = 0
     lucky_robots = None
-
+    
     @classmethod
     def set_send_bytes(cls, value: bool) -> None:
         cls.send_bytes = value
@@ -21,102 +23,130 @@ class Handler(FileSystemEventHandler):
     @classmethod
     def set_lucky_robots(cls, lr: object) -> None:
         cls.lucky_robots = lr
-
+            
     @staticmethod
-    def on_created(event: FileSystemEvent):
+    def on_modified(event: FileSystemEvent) -> None:
         """
-        This method is called when a new file has been added to the directory.
+        Modified files are saved in the robotdata directory to capture observations
         """
-        if not event.is_directory:
-            Handler.process_file(event.src_path, event.event_type)
-
+        if not event.is_directory and event.src_path.endswith('.json'):
+            # Skip temporary files
+            if event.src_path.startswith('.'):
+                return
+                
+            # Get the actual file path (without temporary extensions)
+            file_path = event.src_path
+            if '~' in file_path:
+                file_path = file_path.split('~')[0]
+                
+            Handler._process_observation(file_path, event.event_type)
+    
     @staticmethod
-    def get_file_name(file_path: str) -> str:
-        return os.path.basename(file_path)
-
-    @staticmethod
-    def on_modified(event: FileSystemEvent):
-        if not event.is_directory:
-            Handler.process_file(event.src_path, event.event_type)
-
-    @staticmethod
-    def process_file(file_path: str, event_type: str) -> None:
+    def _process_observation(file_path: str, event_type: str) -> None:
         """
-        This method is called when a file is modified.
-        It will read the file and send it to the message receiver function after the file watcher has warmed up.
+        This method is called when the file watcher has detected a new file.
+        It will read the file and send it to the message receiver function.
         """
-        file = Handler.get_file_name(file_path)
-        # Example file name: "123_camera_rgb.txt" -> file_num would be 123
-        current_file_num = int(file.split('_')[0]) if file.split('_')[0].isdigit() else Handler.file_num
-        
-        Handler.lucky_robots.message_received_sync("robot_output", Handler.image_stack)
-
-        
-        if current_file_num == Handler.file_num:
-            # Overwrite the file in the image stack if the file number is the same.
-            Handler.add_file(file_path)
-        else:
-            # emit.counter 5 to give file watcher some warmup time.
-            if len(Handler.image_stack) > 0 and Handler.emit_counter > 5:
+        # Read the most recent observation from the file
+        observation_data = Handler._read_json_tail(file_path)
+        if observation_data is not None:
+            try:
+                # Convert the JSON data to a Pydantic model
+                observation = Observation(**observation_data)
                 if Handler.lucky_robots is not None:
-                    Handler.lucky_robots.message_received_sync("robot_output", Handler.image_stack)
+                    Handler.lucky_robots.message_received_sync("observation_handler", observation)
                 else:
                     print("Warning: lucky_robots is not set in Handler class")
+            except Exception as e:
+                print(f"Error converting observation data to model: {e}")
+
+    @staticmethod
+    def _read_json_tail(file_path: str) -> Optional[Dict[str, Any]]:
+        """
+        Efficiently read only the most recent JSON object appended to a file
+        without reading the entire file.
+        """
+
+        try:
+            with open(file_path, 'rb') as file:
+                # Seek to end of file
+                file.seek(0, 2)
+                file_size = file.tell()
+                
+                # Start from the end with a reasonable chunk size
+                pos = max(0, file_size - Handler.chunk_size)
+                
+                # We need to find the last complete JSON object
+                brace_stack = []
+                buffer = ""
+                last_object_end = file_size
+                
+                while pos >= 0:
+                    # Read chunk from the file
+                    file.seek(pos)  
+                    chunk = file.read(min(Handler.chunk_size, last_object_end - pos)).decode('utf-8')
                     
-            Handler.emit_counter += 1
-            Handler.file_num = current_file_num
-            Handler.add_file(file_path)
-
-    @staticmethod
-    def add_file(file_path: str) -> None:
-        """
-        This method is used to add a file to the image stack.
-        """
-        
-        file = Handler.get_file_name(file_path)
-        file_bytes = None
-        file_type = file.split('_', 1)[1].rsplit('.', 1)[0]
-        
-        if file_path not in Handler.image_stack:
-            if file.endswith('.txt'):
-                # Read the file and convert it to a json object.
-                try:
-                    with open(file_path, 'r') as f:
-                        file_content = f.read()
-                        file_bytes = json.loads(file_content)
-                except json.JSONDecodeError:
-                    print(f"Error decoding JSON from {file_path}")
-                    file_bytes = {}
-                except IOError as e:
-                    print(f"Error reading file {file_path}: {e}")
-                    file_bytes = {}
-            else:
-                # Read the file and convert it to a json object.
-                if Handler.send_bytes:
-                    file_bytes = Handler._read_file_with_retry(file_path)
-                else:
-                    file_bytes = None
-            
-            Handler.image_stack[file_type] = {"file_path": file_path, "contents": file_bytes}        
-
-
-    @staticmethod
-    def on_deleted(event: FileSystemEvent) -> None:
-        if event.is_directory:
+                    # Process the chunk from right to left to find the start of the last object
+                    combined = chunk + buffer
+                    
+                    # Scan backward to find the matching opening brace
+                    for i in range(len(combined) - 1, -1, -1):
+                        if combined[i] == '}':
+                            brace_stack.append('}')
+                        elif combined[i] == '{':
+                            if brace_stack and brace_stack[-1] == '}':
+                                brace_stack.pop()
+                                if not brace_stack:
+                                    # Found the start of the last complete object
+                                    try:
+                                        json_str = combined[i:last_object_end - pos]
+                                        return json.loads(json_str)
+                                    except json.JSONDecodeError:
+                                        # Not a valid JSON, continue searching
+                                        pass
+                            else:
+                                brace_stack.append('{')
+                    
+                    # Keep the unprocessed part for the next iteration
+                    buffer = chunk
+                    last_object_end = pos + len(chunk)
+                    
+                    # Move to the previous chunk
+                    pos = max(0, pos - Handler.chunk_size)
+                    
+                    # If we're at the beginning of the file, process remaining content
+                    if pos == 0:
+                        try:
+                            # Try parsing the entire buffer as a JSON object
+                            return json.loads(buffer)
+                        except json.JSONDecodeError:
+                            # Try finding any complete JSON object in the buffer
+                            brace_count = 0
+                            start_pos = None
+                            
+                            for i, char in enumerate(buffer):
+                                if char == '{' and brace_count == 0:
+                                    start_pos = i
+                                    brace_count = 1
+                                elif char == '{':
+                                    brace_count += 1
+                                elif char == '}':
+                                    brace_count -= 1
+                                    if brace_count == 0 and start_pos is not None:
+                                        # Found a complete JSON object
+                                        json_str = buffer[start_pos:i+1]
+                                        try:
+                                            return json.loads(json_str)
+                                        except json.JSONDecodeError:
+                                            # Not a valid JSON, continue
+                                            pass
+                            
+                            # If we get here, we couldn't find a valid JSON object
+                            return None
+                
+                # If we couldn't find a valid object
+                return None
+                    
+        except Exception as e:
+            print(f"Error reading file {file_path}: {e}")
             return None
-        else:
-            # print(f"Received deleted event - {event.src_path}")
-            pass
-
-    @staticmethod
-    def _read_file_with_retry(file_path: str, retries: int = 5, delay: int = 1) -> str:
-        for attempt in range(retries):
-            try:
-                with open(file_path, 'rb') as f:
-                    content = f.read()
-                    return content
-            except (PermissionError, FileNotFoundError) as e:
-                print(f"Attempt {attempt + 1}: Failed to read {file_path} - {e}")
-                time.sleep(delay)
-        else:
-            print(f"Failed to read {file_path} after {retries} attempts")
