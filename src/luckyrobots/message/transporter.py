@@ -326,6 +326,7 @@ class Transporter:
         transport_message = TransportMessage(
             msg_type=MessageType.PUBLISH,
             node_name=self.node_name,
+            uuid=self.uuid,
             topic_or_service=topic,
             data=data,
         )
