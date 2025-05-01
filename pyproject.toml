@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "luckyrobots"
+version = "0.1.43"
+description = "Robotics-AI Training in Hyperrealistic Game Environments"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Devrim Yasar", email = "braces.verbose03@icloud.com"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "watchdog",
+    "fastapi",
+    "uvicorn[standard]",
+    "ultralytics",
+    "requests",
+    "tqdm",
+    "beautifulsoup4",
+    "psutil",
+    "opencv-python",
+    "packaging",
+    "websockets",
+    "pydantic",
+    "numpy",
+    "asyncio",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/luckyrobots/luckyrobots"
+"Bug Tracker" = "https://github.com/luckyrobots/luckyrobots/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/luckyrobots"]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "twine",
+    "black",
+    "pre-commit",
+]
