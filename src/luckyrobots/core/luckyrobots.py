@@ -26,10 +26,11 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from .manager import Manager
 from ..message.transporter import MessageType, TransportMessage
 from ..message.srv.types import Reset, Step
-from ..runtime.run_executable import is_luckyworld_running
+from ..runtime.run_executable import is_luckyworld_running, run_luckyworld_executable
 from ..utils.handler import Handler
 from ..utils.library_dev import library_dev
 from ..utils.watcher import Watcher
+from ..core.models import ObservationModel
 from .node import Node
 from .parameters import load_from_file, set_param
 
@@ -164,32 +165,19 @@ class LuckyRobots(Node):
             logger.warning("LuckyRobots is already running")
             return
 
-        binary_path = self._initialize_binary(binary_path)
+        directory_to_watch = self._initialize_binary(binary_path)
 
         # Configure handler
         Handler.set_send_bytes(send_bytes)
         Handler.set_lucky_robots(self)
 
         if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
-            # Set up the directory to watch
-            directory_to_watch = self._setup_watch_directory(binary_path)
-
-            # Run the executable
-            # run_luckyworld_executable(directory_to_watch)
+            logger.error("LuckyWorld is not running, please start it first")
 
         library_dev()
 
         self._setup_signal_handlers()
-        self._setup_directory_watcher(binary_path)
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        self.step_service = loop.run_until_complete(
-            self.create_service(Step, "/step", self.handle_step)
-        )
-
-        loop.close()
+        self._setup_directory_watcher(directory_to_watch)
 
         # Start all registered nodes
         for node in self._nodes.values():
@@ -227,30 +215,16 @@ class LuckyRobots(Node):
 
         return binary_path
 
-    def _setup_watch_directory(self, binary_path: str) -> str:
-        """Set up and return the directory to watch"""
-        if sys.platform == "darwin":
-            directory = os.path.join(
-                binary_path,
-                "luckyrobots.app",
-                "Contents",
-                "UE",
-                "luckyrobots",
-                "robotdata",
-            )
-        else:
-            directory = os.path.join(binary_path, "luckyrobots", "robotdata")
-
-        os.makedirs(directory, exist_ok=True)
-        return directory
-
-    def _setup_directory_watcher(self, binary_path: str) -> None:
+    def _setup_directory_watcher(self, binary_path: str) -> str:
         """Set up the directory watcher in a background thread"""
-        directory = self._setup_watch_directory(binary_path)
+        directory = os.path.join(binary_path, "Saved")
+        os.makedirs(directory, exist_ok=True)
 
         watcher = Watcher(directory)
         watcher_thread = threading.Thread(target=watcher.run, daemon=True)
         watcher_thread.start()
+
+        return directory
 
     def _setup_signal_handlers(self) -> None:
         """Set up handlers for graceful shutdown"""
@@ -335,7 +309,6 @@ class LuckyRobots(Node):
         """
         logger.info(f"Processing reset request with seed: {request.seed}")
 
-        # Check if world client is connected
         if self.world_client is None:
             logger.error("No world client connection available")
             return Reset.Response(
@@ -345,18 +318,13 @@ class LuckyRobots(Node):
                 info={"error": "no_connection"},
             )
 
-        # Generate a unique ID for this request
         request_id = f"reset_{uuid.uuid4().hex}"
 
-        # Create a future to hold the response
         loop = asyncio.get_event_loop()
         response_future = loop.create_future()
 
-        # Store the future with the request ID
         self._pending_resets[request_id] = response_future
 
-        # Create message for world client
-        # Extract only the data we need from the request
         seed = request.seed if hasattr(request, "seed") else None
 
         message = {"type": "reset", "request_id": request_id, "seed": seed}
@@ -376,7 +344,7 @@ class LuckyRobots(Node):
                 info={"error": "communication_error"},
             )
 
-        # Wait for response
+        # Await response from world client
         try:
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
             logger.info(f"Received reset response for request {request_id}")
@@ -385,17 +353,7 @@ class LuckyRobots(Node):
             success = response_data.get("success", False)
             message = response_data.get("message", "Reset processed")
 
-            # Create observation if provided
-            observation = None
-            if "observation" in response_data and response_data["observation"]:
-                try:
-                    # Import needed for ObservationModel
-                    from ..core.models import ObservationModel
-
-                    observation = ObservationModel(**response_data["observation"])
-                except Exception as obs_error:
-                    logger.error(f"Error creating observation model: {obs_error}")
-                    # Still continue with the response, just without observation
+            observation = ObservationModel(**response_data["observation"])
 
             # Get any additional info
             info = response_data.get("info", {})
@@ -536,17 +494,7 @@ class LuckyRobots(Node):
             success = response_data.get("success", False)
             message = response_data.get("message", "Step processed")
 
-            # Create observation if provided
-            observation = None
-            if "observation" in response_data and response_data["observation"]:
-                try:
-                    # Import needed for ObservationModel
-                    from ..core.models import ObservationModel
-
-                    observation = ObservationModel(**response_data["observation"])
-                except Exception as obs_error:
-                    logger.error(f"Error creating observation model: {obs_error}")
-                    # Still continue with the response, just without observation
+            observation = ObservationModel(**response_data["observation"])
 
             # Get any additional info
             info = response_data.get("info", {})
