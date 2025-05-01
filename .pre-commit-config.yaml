@@ -1,0 +1,18 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: trailing-whitespace
+        types: [text]
+    -   id: end-of-file-fixer
+        types: [text]
+    -   id: check-yaml
+        types: [yaml]
+    -   id: check-added-large-files
+        types: [file]
+
+-   repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+    -   id: black
+        types: [python]

@@ -55,7 +55,7 @@ pip install luckyrobots  # or use uv for faster installation
 3. Run any of the following examples
 
 ```bash
-python basic_usage.py 
+python basic_usage.py
 python yolo_example.py
 python yolo_mac_example.py
 python vlm_gpt.py
