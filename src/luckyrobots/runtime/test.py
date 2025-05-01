@@ -1,8 +1,7 @@
 import time
 
+
 class Test:
-    
-    
     @staticmethod
     def receiver(func):
         Test.receiver_function = func
@@ -14,15 +13,14 @@ class Test:
         if Test.receiver_function is not None:
             Test.receiver_function(message)
         else:
-            print("Test message_received no receiver function") 
-            
-            
-            
-            
+            print("Test message_received no receiver function")
+
+
 @Test.receiver
 def receiver(message):
     print("receiver ", message)
     pass
+
 
 while True:
     time.sleep(1)

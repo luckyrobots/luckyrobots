@@ -1,5 +1,6 @@
-from .handler import Handler
 from watchdog.observers import Observer
+
+from .handler import Handler
 
 
 class Watcher:
@@ -14,11 +15,11 @@ class Watcher:
         event_handler = Handler()
         self.observer.schedule(event_handler, self.directory_path, recursive=True)
         self.observer.start()
-        
+
         try:
             while self.observer.is_alive():
                 self.observer.join(1)
         except KeyboardInterrupt:
             self.observer.stop()
-        
+
         self.observer.join()
