@@ -1,18 +1,20 @@
-import requests
-from tqdm import tqdm
-import platform
-from datetime import datetime
-import zipfile
 import os
-from bs4 import BeautifulSoup
-import sys 
+import platform
 import re
+import sys
+import zipfile
+from datetime import datetime
+
+import requests
+from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 from .check_updates import check_updates
+
 base_url = "https://builds.luckyrobots.xyz/"
 
+
 def get_base_url():
-    
     import requests
     from requests.exceptions import RequestException
 
@@ -32,7 +34,7 @@ def get_base_url():
     else:
         print("Using remote server:", remote_url)
         return remote_url
-    
+
 
 def get_os_type():
     os_type = platform.system().lower()
@@ -44,41 +46,41 @@ def get_os_type():
         return "linux"
     else:
         raise ValueError(f"Unsupported operating system: {os_type}")
-    
-    
+
+
 def apply_changes(changes):
     # Iterate through changes and handle each change type
     for item in changes:
-        if item['change_type'] in ['modified', 'new_file']:
+        if item["change_type"] in ["modified", "new_file"]:
             # Check if the item is a directory
-            if item.get('type') == 'directory':
+            if item.get("type") == "directory":
                 # Create the directory
-                item_path = os.path.join("./Binary", item['path'])
+                item_path = os.path.join("./Binary", item["path"])
                 os.makedirs(item_path, exist_ok=True)
                 print(f"Created directory: {item_path}")
             else:
                 # Handle file download with progress bar
                 os_type = get_os_type()
                 file_url = f"{base_url}{os_type}/{item['path']}"
-                
+
                 # Ensure the directory exists
-                item_path = os.path.join("./Binary", item['path'])
+                item_path = os.path.join("./Binary", item["path"])
                 item_dir = os.path.dirname(item_path)
                 os.makedirs(item_dir, exist_ok=True)
-                
+
                 # Download the file with progress bar
                 try:
                     response = requests.get(file_url, stream=True)
                     response.raise_for_status()
-                    total_size = int(response.headers.get('content-length', 0))
+                    total_size = int(response.headers.get("content-length", 0))
                     # " ▁▂▃▄▅▆▇█"
-                    with open(item_path, 'wb') as f, tqdm(
+                    with open(item_path, "wb") as f, tqdm(
                         desc=f"{item['path'][:8]}...{item['path'][-16:]}",
                         total=total_size,
-                        unit='iB',
+                        unit="iB",
                         unit_scale=True,
                         unit_divisor=1024,
-                        ascii=" ▆"
+                        ascii=" ▆",
                     ) as progress_bar:
                         for data in response.iter_content(chunk_size=1024):
                             size = f.write(data)
@@ -86,10 +88,10 @@ def apply_changes(changes):
                     # print(f"Downloaded: {item_path}")
                 except requests.RequestException as e:
                     print(f"Error downloading {item_path}: {e}")
-        
-        elif item['change_type'] == 'deleted':
+
+        elif item["change_type"] == "deleted":
             # Delete the file or directory
-            item_path = os.path.join("./Binary", item['path'])
+            item_path = os.path.join("./Binary", item["path"])
             try:
                 if os.path.isdir(item_path):
                     os.rmdir(item_path)
