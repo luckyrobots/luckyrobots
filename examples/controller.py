@@ -18,10 +18,10 @@ from luckyrobots import *
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger("robot_controller")
+logger = logging.getLogger("controller")
 
 
-class RobotController(Node):
+class Controller(Node):
     """Example node that controls a robot"""
 
     def __init__(
@@ -50,15 +50,13 @@ class RobotController(Node):
         self.latest_observation = None
         self.loop_running = False
 
-        self.twist_pub = self.create_publisher(TwistModel, "/twist")
+        self.action_pub = self.create_publisher(ActionModel, "/action")
         self.observation_sub = self.create_subscription(
             ObservationModel, "/observation", self.observation_callback
         )
 
         self.reset_client = self.create_client(Reset, "/reset")
         self.step_client = self.create_client(Step, "/step")
-
-        self.start_loop(rate_hz=10)
 
     def observation_callback(self, observation: ObservationModel) -> None:
         """Process a new observation.
@@ -114,6 +112,8 @@ class RobotController(Node):
         Args:
             rate_hz: The frequency to run the control loop at in Hz
         """
+
+        logger.info("Starting control loop")
         if self.loop_running:
             logger.warning("Control loop already running")
             return
@@ -123,6 +123,10 @@ class RobotController(Node):
 
         logger.info(f"Starting control loop at {rate_hz} Hz")
 
+        # Wait for a moment to ensure LuckyRobots core is fully initialized
+        await asyncio.sleep(1.0)
+
+        # Attempt to reset the robot
         response = await self.request_reset()
         if response is None:
             logger.error("Failed to reset robot, control loop will not start")
@@ -133,19 +137,20 @@ class RobotController(Node):
             while self.loop_running and not self._shutdown_event.is_set():
                 start_time = time.time()
 
-                # Generate a simple action (move forward)
-                twist = TwistModel(
-                    twist={
-                        "linear": {"x": 0.5, "y": 0.0, "z": 0.0},
-                        "angular": {"x": 0.0, "y": 0.0, "z": 0.0},
-                    }
+                action = ActionModel(
+                    twist=TwistModel(
+                        linear={"x": 0.5, "y": 0.0, "z": 0.0},
+                        angular={"x": 0.0, "y": 0.0, "z": 0.0},
+                    ),
                 )
 
-                self.twist_pub.publish(twist)
+                self.action_pub.publish(action)
 
-                response = await self.request_step(twist)
+                response = await self.request_step(action.twist)
                 if response is None:
                     logger.warning("Step request failed, continuing loop")
+
+                logger.info(f"Step response: {response.success}")
 
                 # Calculate sleep time to maintain the desired rate
                 elapsed = time.time() - start_time
@@ -202,12 +207,21 @@ def main():
         host = get_param("host", "localhost")
         port = get_param("port", 3000)
 
-        robot_controller = RobotController(host=host, port=port)
+        controller = Controller(host=host, port=port)
 
-        luckyrobots.register_node(robot_controller)
+        luckyrobots.register_node(controller)
+
         luckyrobots.start()
 
-        logger.info("Robot control system running. Press Ctrl+C to exit.")
+        # Wait for world client to connect
+        logger.info("Waiting for Unreal world client to connect...")
+        if luckyrobots.wait_for_world_client(timeout=60.0):
+            # Start the controller loop once world client is connected
+            controller.start_loop(rate_hz=10)
+            logger.info("Controller running. Press Ctrl+C to exit.")
+        else:
+            logger.error("No world client connected. Controller loop will not start.")
+
         luckyrobots.spin()
 
     except KeyboardInterrupt:
@@ -215,8 +229,8 @@ def main():
     except Exception as e:
         logger.error(f"Error in main: {e}")
     finally:
-        if "robot_controller" in locals():
-            robot_controller.stop_loop()
+        if "controller" in locals():
+            controller.stop_loop()
         logger.info("Application terminated")
 
 

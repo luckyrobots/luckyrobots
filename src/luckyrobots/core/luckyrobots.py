@@ -11,6 +11,7 @@ import asyncio
 import json
 import logging
 import os
+import uuid
 import platform
 import signal
 import sys
@@ -24,17 +25,15 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from .manager import Manager
 from ..message.transporter import MessageType, TransportMessage
-from ..message.pubsub import Publisher
 from ..message.srv.types import Reset, Step
 from ..runtime.run_executable import is_luckyworld_running
 from ..utils.handler import Handler
 from ..utils.library_dev import library_dev
 from ..utils.watcher import Watcher
-from .models import CameraShape, ObservationModel, ResetModel, StepModel
 from .node import Node
 from .parameters import load_from_file, set_param
 
-# Setup logging
+
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
@@ -45,48 +44,64 @@ manager = Manager()
 
 
 class LuckyRobots(Node):
-    # Singleton instance
-    _instance = None
-    _lock = threading.RLock()
-
-    # Configuration
     port = 3000
     host = "0.0.0.0"
 
-    # WebSocket clients
     robot_client = None
     world_client = None
 
-    # Node management
+    _pending_resets = {}
+    _pending_steps = {}
+
     _nodes: Dict[str, "Node"] = {}
     _running = False
     _shutdown_event = threading.Event()
 
-    def __new__(cls):
-        """Ensure only one instance of LuckyRobots exists"""
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super(LuckyRobots, cls).__new__(cls)
-            return cls._instance
-
     def __init__(self):
         """Initialize LuckyRobots"""
-        # Skip initialization if already initialized
-        if hasattr(self, "_initialized"):
-            return
-
-        # Start the websocket server right away to listen for a connection from lucky robots manager
-        self._start_websocket_server()
+        # Check if WebSocket server is already running
+        if not self._is_websocket_server_running():
+            self._start_websocket_server()
 
         super().__init__("lucky_robots_manager", "", "localhost", self.port)
 
-        self._initialized = True
-        self._nodes = {}
-        self._running = False
-        self._shutdown_event = threading.Event()
+        app.lucky_robots = self
 
         # Load default parameters
         self._load_default_params()
+
+    def _is_websocket_server_running(self) -> bool:
+        """Check if a WebSocket server is already running.
+
+        Returns:
+            bool: True if a WebSocket server is running, False otherwise
+        """
+        from websocket import create_connection
+
+        try:
+            ws_url = f"ws://{self.host}:{self.port}/nodes"
+            ws = create_connection(ws_url, timeout=1)
+            ws.close()
+            logger.info(f"WebSocket server running on {self.host}:{self.port}")
+            return True
+        except Exception as e:
+            logger.info(f"WebSocket server not running on {self.host}:{self.port}")
+            return False
+
+    def _start_websocket_server(self) -> None:
+        """Start the WebSocket server in a background thread"""
+
+        def run_server():
+            logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+            uvicorn.run(app, host=self.host, port=self.port, log_level="warning")
+
+        server_thread = threading.Thread(target=run_server, daemon=True)
+        server_thread.start()
+
+        logger.info(f"Starting WebSocket server on {self.host}:{self.port}")
+
+        # Give the server time to start
+        time.sleep(1)
 
     def _load_default_params(self) -> None:
         """Load default parameters"""
@@ -122,7 +137,17 @@ class LuckyRobots(Node):
 
     def _setup(self):
         """Setup the LuckyRobots core."""
-        pass
+
+        # Register the reset service that will forward requests to subscribers
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        self.reset_service = loop.run_until_complete(
+            self.create_service(Reset, "/reset", self.handle_reset)
+        )
+        self.step_service = loop.run_until_complete(
+            self.create_service(Step, "/step", self.handle_step)
+        )
+        loop.close()
 
     def start(
         self,
@@ -160,10 +185,6 @@ class LuckyRobots(Node):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        # Run create_service calls in the event loop since it needs to wait for response from luckyworld
-        self.reset_service = loop.run_until_complete(
-            self.create_service(Reset, "/reset", self.handle_reset)
-        )
         self.step_service = loop.run_until_complete(
             self.create_service(Step, "/step", self.handle_step)
         )
@@ -223,47 +244,6 @@ class LuckyRobots(Node):
         os.makedirs(directory, exist_ok=True)
         return directory
 
-    def _start_websocket_server(self) -> None:
-        """Start the WebSocket server in a background thread"""
-
-        def run_server():
-            logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-            uvicorn.run(app, host=self.host, port=self.port, log_level="warning")
-
-        server_thread = threading.Thread(target=run_server, daemon=True)
-        server_thread.start()
-
-        # Give the server time to start
-        time.sleep(1)
-
-    async def _process_robot_message(self, message: str) -> None:
-        """Process messages received from the robot client"""
-        try:
-            data = json.loads(message)
-            message_type = data.get("msg_type")
-
-            if message_type == "observation":
-                observation = ObservationModel(**data)
-                # Publish the observation to subscribers
-                for publisher in Publisher.get_publishers_for_topic("/observation"):
-                    publisher.publish(observation)
-            elif message_type == "reset":
-                reset = ResetModel(**data)
-                # Publish the reset to subscribers
-                for publisher in Publisher.get_publishers_for_topic("/reset"):
-                    publisher.publish(reset)
-            elif message_type == "step":
-                step = StepModel(**data)
-                # Publish the step to subscribers
-                for publisher in Publisher.get_publishers_for_topic("/step"):
-                    publisher.publish(step)
-            else:
-                logger.warning(f"Unknown message type: {message_type}")
-        except json.JSONDecodeError:
-            logger.error("Received invalid JSON from robot client")
-        except Exception as e:
-            logger.error(f"Error processing robot message: {e}")
-
     def _setup_directory_watcher(self, binary_path: str) -> None:
         """Set up the directory watcher in a background thread"""
         directory = self._setup_watch_directory(binary_path)
@@ -317,72 +297,356 @@ class LuckyRobots(Node):
         print("To receive camera feed: Choose a level and tick the Capture checkbox.")
         print("*" * 60)
 
+    def wait_for_world_client(self, timeout=60.0):
+        """Wait until a world client is connected.
+
+        Args:
+            timeout: Maximum time to wait in seconds
+
+        Returns:
+            bool: True if a world client connected within the timeout, False otherwise
+        """
+        logger.info(f"Waiting for world client to connect (timeout: {timeout}s)")
+
+        start_time = time.time()
+
+        while not self.world_client and time.time() - start_time < timeout:
+            time.sleep(0.5)  # Check every half second
+
+        if self.world_client:
+            logger.info("World client connected successfully")
+            return True
+        else:
+            logger.warning(f"No world client connected after {timeout} seconds")
+            return False
+
     async def handle_reset(self, request: Reset.Request) -> Reset.Response:
-        """Handle the reset request"""
+        """Handle the reset request by forwarding to the world client.
 
-        # Create a dummy camera shape
-        camera_shape = CameraShape(image_width=640, image_height=480, channel=3)
+        This method is called when a reset service request is received from a node.
+        It forwards the request to the world client via WebSocket and returns
+        the response.
 
-        # Create dummy camera data with correct field names
-        camera_data = {
-            "cameraName": "front_camera",
-            "dtype": "uint8",
-            "shape": camera_shape.dict(),
-            "filePath": "/tmp/dummy_image.jpg",
-        }
+        Args:
+            request: The reset request containing optional seed
 
-        # Create dummy observation with correct field names
-        observation = {
-            "timeStamp": int(time.time() * 1000),  # Current time in milliseconds
-            "id": "dummy_observation_1",
-            "observationState": {
-                "left_wheel": 0,
-                "right_wheel": 0,
-                "arm_joint1": 0,
-                "arm_joint2": 0,
-            },
-            "observationCameras": [camera_data],
-        }
+        Returns:
+            Reset.Response: The response from the world client
+        """
+        logger.info(f"Processing reset request with seed: {request.seed}")
 
-        return Reset.Response(
-            success=True,
-            message="Reset successful",
-            observation=ObservationModel(**observation),
-            info={"status": "reset_complete"},
-        )
+        # Check if world client is connected
+        if self.world_client is None:
+            logger.error("No world client connection available")
+            return Reset.Response(
+                success=False,
+                message="No world client connection available",
+                observation=None,
+                info={"error": "no_connection"},
+            )
+
+        # Generate a unique ID for this request
+        request_id = f"reset_{uuid.uuid4().hex}"
+
+        # Create a future to hold the response
+        loop = asyncio.get_event_loop()
+        response_future = loop.create_future()
+
+        # Store the future with the request ID
+        self._pending_resets[request_id] = response_future
+
+        # Create message for world client
+        # Extract only the data we need from the request
+        seed = request.seed if hasattr(request, "seed") else None
+
+        message = {"type": "reset", "request_id": request_id, "seed": seed}
+
+        # Send to world client
+        try:
+            await self.world_client.send_text(json.dumps(message))
+            logger.info(f"Sent reset request {request_id} to world client")
+        except Exception as e:
+            logger.error(f"Error sending reset request to world client: {e}")
+            if request_id in self._pending_resets:
+                del self._pending_resets[request_id]
+            return Reset.Response(
+                success=False,
+                message=f"Error sending reset request: {str(e)}",
+                observation=None,
+                info={"error": "communication_error"},
+            )
+
+        # Wait for response
+        try:
+            response_data = await asyncio.wait_for(response_future, timeout=30.0)
+            logger.info(f"Received reset response for request {request_id}")
+
+            # Process response data into Reset.Response
+            success = response_data.get("success", False)
+            message = response_data.get("message", "Reset processed")
+
+            # Create observation if provided
+            observation = None
+            if "observation" in response_data and response_data["observation"]:
+                try:
+                    # Import needed for ObservationModel
+                    from ..core.models import ObservationModel
+
+                    observation = ObservationModel(**response_data["observation"])
+                except Exception as obs_error:
+                    logger.error(f"Error creating observation model: {obs_error}")
+                    # Still continue with the response, just without observation
+
+            # Get any additional info
+            info = response_data.get("info", {})
+            if not isinstance(info, dict):
+                info = {"data": info}
+
+            return Reset.Response(
+                success=success, message=message, observation=observation, info=info
+            )
+
+        except asyncio.TimeoutError:
+            logger.error(f"Reset request {request_id} timed out after 30 seconds")
+            if request_id in self._pending_resets:
+                del self._pending_resets[request_id]
+            return Reset.Response(
+                success=False,
+                message="Reset request timed out - no response from world client",
+                observation=None,
+                info={"error": "timeout"},
+            )
+        except Exception as e:
+            logger.error(f"Error processing reset response: {e}")
+            if request_id in self._pending_resets:
+                del self._pending_resets[request_id]
+            return Reset.Response(
+                success=False,
+                message=f"Error processing reset response: {str(e)}",
+                observation=None,
+                info={"error": "processing_error"},
+            )
+
+    async def _process_reset_response(self, message_data):
+        """Process a reset response from the world client.
+
+        This method is called when a reset response is received from the world client.
+        It resolves the future for the corresponding request.
+
+        Args:
+            message_data: The response data from the world client
+        """
+        request_id = message_data.get("request_id")
+
+        if not request_id:
+            logger.warning("Received reset response without request_id")
+            return
+
+        if request_id not in self._pending_resets:
+            logger.warning(
+                f"Received reset response for unknown request_id: {request_id}"
+            )
+            return
+
+        logger.info(f"Processing reset response for request {request_id}")
+
+        # Get the future for this request
+        future = self._pending_resets[request_id]
+
+        # Set the result on the future if it's not already done
+        if not future.done():
+            future.set_result(message_data)
+            logger.debug(f"Set result for reset request {request_id}")
+
+        # Clean up the pending request
+        del self._pending_resets[request_id]
 
     async def handle_step(self, request: Step.Request) -> Step.Response:
-        """Handle the step request"""
-        # Create a dummy camera shape
-        camera_shape = CameraShape(image_width=640, image_height=480, channel=3)
+        """Handle the step request by forwarding to the world client.
 
-        # Create dummy camera data with correct field names
-        camera_data = {
-            "cameraName": "front_camera",
-            "dtype": "uint8",
-            "shape": camera_shape.dict(),
-            "filePath": "/tmp/dummy_image.jpg",
-        }
+        This method is called when a step service request is received from a node.
+        It forwards the request to the world client via WebSocket and returns
+        the response.
 
-        # Create dummy observation with correct field names
-        observation = {
-            "timeStamp": int(time.time() * 1000),  # Current time in milliseconds
-            "id": "dummy_observation_2",
-            "observationState": {
-                "left_wheel": 0,
-                "right_wheel": 0,
-                "arm_joint1": 0,
-                "arm_joint2": 0,
-            },
-            "observationCameras": [camera_data],
-        }
+        Args:
+            request: The step request containing action data
 
-        return Step.Response(
-            success=True,
-            message="Step successful",
-            observation=ObservationModel(**observation),
-            info={"status": "step_complete"},
+        Returns:
+            Step.Response: The response from the world client
+        """
+        # Check if world client is connected
+        if self.world_client is None:
+            logger.error("No world client connection available")
+            return Step.Response(
+                success=False,
+                message="No world client connection available",
+                observation=None,
+                info={"error": "no_connection"},
+            )
+
+        # Generate a unique ID for this request
+        request_id = f"step_{uuid.uuid4().hex}"
+
+        # Create a future to hold the response
+        loop = asyncio.get_event_loop()
+        response_future = loop.create_future()
+
+        # Store the future with the request ID
+        self._pending_steps[request_id] = response_future
+
+        # Create message for world client
+        # Extract pose and twist data if available
+        pose = (
+            request.pose.dict() if hasattr(request, "pose") and request.pose else None
         )
+        twist = (
+            request.twist.dict()
+            if hasattr(request, "twist") and request.twist
+            else None
+        )
+
+        message = {
+            "type": "step",
+            "request_id": request_id,
+            "pose": pose,
+            "twist": twist,
+        }
+
+        # Send to world client
+        try:
+            await self.world_client.send_text(json.dumps(message))
+            logger.info(f"Sent step request {request_id} to world client")
+        except Exception as e:
+            logger.error(f"Error sending step request to world client: {e}")
+            if request_id in self._pending_steps:
+                del self._pending_steps[request_id]
+            return Step.Response(
+                success=False,
+                message=f"Error sending step request: {str(e)}",
+                observation=None,
+                info={"error": "communication_error"},
+            )
+
+        # Wait for response
+        try:
+            response_data = await asyncio.wait_for(response_future, timeout=30.0)
+            logger.info(f"Received step response for request {request_id}")
+
+            # Process response data into Step.Response
+            success = response_data.get("success", False)
+            message = response_data.get("message", "Step processed")
+
+            # Create observation if provided
+            observation = None
+            if "observation" in response_data and response_data["observation"]:
+                try:
+                    # Import needed for ObservationModel
+                    from ..core.models import ObservationModel
+
+                    observation = ObservationModel(**response_data["observation"])
+                except Exception as obs_error:
+                    logger.error(f"Error creating observation model: {obs_error}")
+                    # Still continue with the response, just without observation
+
+            # Get any additional info
+            info = response_data.get("info", {})
+            if not isinstance(info, dict):
+                info = {"data": info}
+
+            return Step.Response(
+                success=success, message=message, observation=observation, info=info
+            )
+
+        except asyncio.TimeoutError:
+            logger.error(f"Step request {request_id} timed out after 30 seconds")
+            if request_id in self._pending_steps:
+                del self._pending_steps[request_id]
+            return Step.Response(
+                success=False,
+                message="Step request timed out - no response from world client",
+                observation=None,
+                info={"error": "timeout"},
+            )
+        except Exception as e:
+            logger.error(f"Error processing step response: {e}")
+            if request_id in self._pending_steps:
+                del self._pending_steps[request_id]
+            return Step.Response(
+                success=False,
+                message=f"Error processing step response: {str(e)}",
+                observation=None,
+                info={"error": "processing_error"},
+            )
+
+    async def _process_step_response(self, message_data):
+        """Process a step response from the world client.
+
+        This method is called when a step response is received from the world client.
+        It resolves the future for the corresponding request.
+
+        Args:
+            message_data: The response data from the world client
+        """
+        request_id = message_data.get("request_id")
+
+        if not request_id:
+            logger.warning("Received step response without request_id")
+            return
+
+        if request_id not in self._pending_steps:
+            logger.warning(
+                f"Received step response for unknown request_id: {request_id}"
+            )
+            return
+
+        logger.info(f"Processing step response for request {request_id}")
+
+        # Get the future for this request
+        future = self._pending_steps[request_id]
+
+        # Set the result on the future if it's not already done
+        if not future.done():
+            future.set_result(message_data)
+            logger.debug(f"Set result for step request {request_id}")
+
+        # Clean up the pending request
+        del self._pending_steps[request_id]
+
+    def spin(self) -> None:
+        """Keep the main thread alive until shutdown"""
+        if not self._running:
+            logger.warning("LuckyRobots is not running")
+            return
+
+        self._display_welcome_message()
+
+        logger.info("LuckyRobots spinning")
+        try:
+            self._shutdown_event.wait()
+        except KeyboardInterrupt:
+            self.shutdown()
+        logger.info("LuckyRobots stopped spinning")
+
+    def _stop_websocket_server(self) -> None:
+        """Stop the WebSocket server if it's running"""
+        if self._server is not None:
+            logger.info("Stopping WebSocket server...")
+            # Signal the server to stop
+            self._server.should_exit = True
+
+            # Wait for the server thread to exit (with timeout)
+            if self._server_thread and self._server_thread.is_alive():
+                self._server_thread.join(timeout=2.0)
+                if self._server_thread.is_alive():
+                    logger.warning(
+                        "WebSocket server thread did not terminate gracefully"
+                    )
+                else:
+                    logger.info("WebSocket server stopped")
+
+            # Reset server references
+            self._server = None
+            self._server_thread = None
 
     def shutdown(self) -> None:
         """Shut down LuckyRobots and all nodes"""
@@ -401,23 +665,11 @@ class LuckyRobots(Node):
         # Shutdown this node
         super().shutdown()
 
+        # Stop the WebSocket server
+        self._stop_websocket_server()
+
         self._shutdown_event.set()
         logger.info("LuckyRobots shutdown complete")
-
-    def spin(self) -> None:
-        """Keep the main thread alive until shutdown"""
-        if not self._running:
-            logger.warning("LuckyRobots is not running")
-            return
-
-        self._display_welcome_message()
-
-        logger.info("LuckyRobots spinning")
-        try:
-            self._shutdown_event.wait()
-        except KeyboardInterrupt:
-            self.shutdown()
-        logger.info("LuckyRobots stopped spinning")
 
 
 @app.websocket("/nodes")
@@ -474,3 +726,42 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
                 logger.error(f"Error processing message from {node_name}: {e}")
     except WebSocketDisconnect:
         logger.info(f"Node {node_name} disconnected")
+
+
+@app.websocket("/world")
+async def world_endpoint(websocket: WebSocket) -> None:
+    """WebSocket endpoint for world client communication"""
+    await websocket.accept()
+
+    # Store the world client connection
+    if hasattr(app, "lucky_robots"):
+        app.lucky_robots.world_client = websocket
+        logger.info("World client connected")
+
+    try:
+        # Process messages until disconnection
+        while True:
+            message_text = await websocket.receive_text()
+            try:
+                message_data = json.loads(message_text)
+
+                # Process the message based on its type
+                if "type" in message_data:
+                    if message_data["type"] == "reset_response":
+                        await app.lucky_robots._process_reset_response(message_data)
+                    elif message_data["type"] == "step_response":
+                        await app.lucky_robots._process_step_response(message_data)
+                    elif message_data["type"] == "observation":
+                        await app.lucky_robots._process_observation(message_data)
+                    else:
+                        logger.warning(f"Unknown message type: {message_data['type']}")
+                else:
+                    logger.warning("Received message without type field")
+            except json.JSONDecodeError:
+                logger.error(f"Received invalid JSON from world client")
+            except Exception as e:
+                logger.error(f"Error processing message from world client: {e}")
+    except WebSocketDisconnect:
+        logger.info("World client disconnected")
+        if hasattr(app, "lucky_robots"):
+            app.lucky_robots.world_client = None

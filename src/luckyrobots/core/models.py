@@ -2,9 +2,9 @@
 Defines the data models that can be used to handle messages over the network.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class CameraShape(BaseModel):
@@ -67,7 +67,28 @@ class StepModel(BaseModel):
     info: Dict[str, Any] = Field(..., description="Information about the step")
 
 
-class TwistModel(BaseModel):
-    """Model for the twist message to be sent from the node to the core"""
+class PoseModel(BaseModel):
+    """Model for the pose message"""
 
-    twist: Dict[str, Any] = Field(..., description="Twist to be sent to the robot")
+    position: Dict[str, float] = Field(..., description="Position")
+    orientation: Dict[str, float] = Field(..., description="Orientation")
+
+
+class TwistModel(BaseModel):
+    """Model for the twist message"""
+
+    linear: Dict[str, float] = Field(..., description="Linear velocity")
+    angular: Dict[str, float] = Field(..., description="Angular velocity")
+
+
+class ActionModel(BaseModel):
+    """Model for the action message"""
+
+    pose: Optional[PoseModel] = Field(None, description="Pose of the robot")
+    twist: Optional[TwistModel] = Field(None, description="Twist of the robot")
+
+    @model_validator(mode="after")
+    def check_at_least_one_exists(self):
+        if self.pose is None and self.twist is None:
+            raise ValueError("At least one of pose or twist must be provided")
+        return self
