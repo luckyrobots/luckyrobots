@@ -152,6 +152,8 @@ class LuckyRobots(Node):
 
     def start(
         self,
+        robot_type: str = None,
+        task: str = None,
         binary_path: Optional[str] = None,
         send_bytes: bool = False,
     ) -> None:
@@ -172,6 +174,7 @@ class LuckyRobots(Node):
         Handler.set_lucky_robots(self)
 
         if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
+            # run_luckyworld_executable(robot_type, task)
             logger.error("LuckyWorld is not running, please start it first")
 
         library_dev()

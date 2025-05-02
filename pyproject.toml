@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "luckyrobots"
-version = "0.1.43"
+version = "0.1.45"
 description = "Robotics-AI Training in Hyperrealistic Game Environments"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -32,6 +32,7 @@ dependencies = [
     "pydantic",
     "numpy",
     "asyncio",
+    "websocket-client",
 ]
 
 [project.urls]
