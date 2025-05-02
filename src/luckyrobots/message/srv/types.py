@@ -6,7 +6,7 @@ This module defines the data models used for request and response messaging.
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, TypeVar
 
-from ...core.models import PoseModel, TwistModel, ObservationModel
+from ...core.models import ActionModel, ObservationModel
 
 T = TypeVar("T")
 
@@ -40,8 +40,8 @@ class Reset:
     class Response(ServiceResponse):
         """Response from reset service"""
 
-        observation: Optional[ObservationModel] = None
-        info: Optional[Dict[str, Any]] = None
+        observation: ObservationModel
+        info: Dict[str, Any]
 
 
 @dataclass
@@ -52,12 +52,11 @@ class Step:
     class Request(ServiceRequest):
         """Request to step the robot with an action"""
 
-        pose: Optional[PoseModel] = None
-        twist: Optional[TwistModel] = None
+        action: ActionModel
 
     @dataclass
     class Response(ServiceResponse):
         """Response from step service"""
 
-        observation: Optional[ObservationModel] = None
-        info: Optional[Dict[str, Any]] = None
+        observation: ObservationModel
+        info: Dict[str, Any]
