@@ -5,18 +5,20 @@ This module provides the WebSocketTransport class which handles message
 serialization and communication over WebSockets between distributed nodes.
 """
 
+import msgpack
 import asyncio
 import json
 import logging
-import threading
 import time
 import uuid
 import websockets
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
-from concurrent import futures
 from pydantic import BaseModel, ValidationError
+
+from ..utils.event_loop import run_coroutine
+
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -85,31 +87,8 @@ class Transporter:
         self._service_handlers: Dict[str, Callable[[Any], Any]] = {}
         self._response_futures: Dict[str, asyncio.Future] = {}
 
-        self._start_background_tasks()
-
-    def _start_background_tasks(self):
-        """Start background tasks for handling connections and messages"""
-        # Create a new event loop for the background thread
-        self._loop = asyncio.new_event_loop()
-
-        # Create and start the thread
-        self._thread = threading.Thread(target=self._run_event_loop, daemon=True)
-        self._thread.start()
-
-        # Wait for the loop to be set up
-        while not hasattr(self, "_loop_ready") or not self._loop_ready:
-            time.sleep(0.01)
-
-    def _run_event_loop(self):
-        """Run the event loop in the background thread"""
-        asyncio.set_event_loop(self._loop)
-        self._loop_ready = True
-
-        # Start the connection task
-        self._connection_task = self._loop.create_task(self._maintain_connection())
-
-        # Run the event loop
-        self._loop.run_forever()
+        # Start connection task using the shared event loop
+        self._connection_task = run_coroutine(self._maintain_connection())
 
     async def _maintain_connection(self):
         """Maintain a WebSocket connection to the server, reconnecting as needed"""
@@ -152,6 +131,7 @@ class Transporter:
             uuid=self.uuid,
             topic_or_service="",
         )
+
         await self._send_message(message)
 
     async def _resubscribe(self):
@@ -163,6 +143,7 @@ class Transporter:
                 uuid=self.uuid,
                 topic_or_service=topic,
             )
+
             await self._send_message(message)
 
     async def _reregister_services(self):
@@ -174,19 +155,20 @@ class Transporter:
                 uuid=self.uuid,
                 topic_or_service=service,
             )
+
             await self._send_message(message)
 
     async def _handle_messages(self):
         """Handle incoming messages from the WebSocket connection"""
         while self._connection and self._should_run:
             try:
-                message_text = await self._connection.recv()
                 try:
+                    message_text = await self._connection.recv()
                     # Parse the message
-                    message_data = json.loads(message_text)
+                    message_data = msgpack.unpackb(message_text)
                     message = TransportMessage(**message_data)
 
-                    # Handle the message based on its type
+                    # Process directly since we're already in an async context
                     await self._process_message(message)
                 except (json.JSONDecodeError, ValidationError) as e:
                     logger.error(f"Error parsing message: {e}, message: {message_text}")
@@ -228,6 +210,7 @@ class Transporter:
                         message_id=message.message_id,
                         data=result,
                     )
+
                     await self._send_message(response)
                 except Exception as e:
                     logger.error(f"Error handling service request: {e}")
@@ -240,6 +223,7 @@ class Transporter:
                         message_id=message.message_id,
                         data={"error": str(e), "success": False},
                     )
+
                     await self._send_message(error_response)
 
         elif message.msg_type == MessageType.SERVICE_RESPONSE:
@@ -299,7 +283,7 @@ class Transporter:
             await self._connected.wait()
 
         try:
-            await self._connection.send(message.json())
+            await self._connection.send(msgpack.dumps(message.dict()))
         except websockets.ConnectionClosed:
             logger.warning("Could not send message, connection closed")
             self._connected.clear()
@@ -331,18 +315,7 @@ class Transporter:
             data=data,
         )
 
-        # Schedule the send operation in the event loop
-        future = asyncio.run_coroutine_threadsafe(
-            self._send_message(transport_message), self._loop
-        )
-        try:
-            # Wait for a short time to catch immediate errors
-            future.result(timeout=0.1)
-        except futures.TimeoutError:
-            # This is expected - we don't need to wait for completion
-            pass
-        except Exception as e:
-            logger.error(f"Error publishing to topic {topic}: {e}")
+        run_coroutine(self._send_message(transport_message))
 
     def subscribe(self, topic: str, callback: Callable[[Any], None]):
         """Subscribe to a topic.
@@ -364,18 +337,7 @@ class Transporter:
             topic_or_service=topic,
         )
 
-        # Schedule the send operation in the event loop
-        future = asyncio.run_coroutine_threadsafe(
-            self._send_message(transport_message), self._loop
-        )
-        try:
-            # Wait for a short time to catch immediate errors
-            future.result(timeout=0.1)
-        except futures.TimeoutError:
-            # This is expected - we don't need to wait for completion
-            pass
-        except Exception as e:
-            logger.error(f"Error subscribing to topic {topic}: {e}")
+        run_coroutine(self._send_message(transport_message))
 
     def unsubscribe(self, topic: str, callback: Callable[[Any], None]):
         """Unsubscribe from a topic.
@@ -400,18 +362,7 @@ class Transporter:
                 topic_or_service=topic,
             )
 
-            # Schedule the send operation in the event loop
-            future = asyncio.run_coroutine_threadsafe(
-                self._send_message(transport_message), self._loop
-            )
-            try:
-                # Wait for a short time to catch immediate errors
-                future.result(timeout=0.1)
-            except futures.TimeoutError:
-                # This is expected - we don't need to wait for completion
-                pass
-            except Exception as e:
-                logger.error(f"Error unsubscribing from topic {topic}: {e}")
+            run_coroutine(self._send_message(transport_message))
 
             # Remove the empty list
             del self._topic_handlers[topic]
@@ -434,19 +385,7 @@ class Transporter:
             topic_or_service=service_name,
         )
 
-        # Schedule the send operation in the event loop
-        future = asyncio.run_coroutine_threadsafe(
-            self._send_message(transport_message), self._loop
-        )
-
-        try:
-            # Wait for a short time to catch immediate errors
-            future.result(timeout=0.1)
-        except futures.TimeoutError:
-            # This is expected - we don't need to wait for completion
-            pass
-        except Exception as e:
-            logger.error(f"Error registering service {service_name}: {e}")
+        run_coroutine(self._send_message(transport_message))
 
     def unregister_service(self, service_name: str):
         """Unregister a service.
@@ -466,18 +405,7 @@ class Transporter:
                 topic_or_service=service_name,
             )
 
-            # Schedule the send operation in the event loop
-            future = asyncio.run_coroutine_threadsafe(
-                self._send_message(transport_message), self._loop
-            )
-            try:
-                # Wait for a short time to catch immediate errors
-                future.result(timeout=0.1)
-            except futures.TimeoutError:
-                # This is expected - we don't need to wait for completion
-                pass
-            except Exception as e:
-                logger.error(f"Error unregistering service {service_name}: {e}")
+            run_coroutine(self._send_message(transport_message))
 
     async def call_service(
         self, service_name: str, request: Any, timeout: float = 30.0
@@ -563,17 +491,9 @@ class Transporter:
 
         # Schedule the send operation in the event loop
         try:
-            future = asyncio.run_coroutine_threadsafe(
-                self._send_message(transport_message), self._loop
-            )
-
-            # Wait for the message to be sent
-            future.result(timeout=1.0)
+            run_coroutine(self._send_message(transport_message))
         except Exception:
             pass
 
-        # Stop the event loop
-        self._loop.call_soon_threadsafe(self._loop.stop)
-
-        # Wait for the thread to finish
-        self._thread.join(timeout=2.0)
+        self._connection = None
+        self._response_futures.clear()

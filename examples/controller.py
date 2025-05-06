@@ -14,6 +14,7 @@ import logging
 import threading
 
 from luckyrobots import *
+from luckyrobots.utils.event_loop import run_coroutine
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -42,30 +43,14 @@ class Controller(Node):
         super().__init__(name, namespace, host, port)
 
         logger.info(f"Robot controller node {self.full_name} created")
-        self._control_thread = None
         self._shutdown_event = threading.Event()
-
-    def _setup(self) -> None:
-        """Setup the node."""
         self.latest_observation = None
         self.loop_running = False
 
-        self.action_pub = self.create_publisher(ActionModel, "/action")
-        self.observation_sub = self.create_subscription(
-            ObservationModel, "/observation", self.observation_callback
-        )
-
+    async def _setup_async(self) -> None:
+        """Setup the node asynchronously."""
         self.reset_client = self.create_client(Reset, "/reset")
         self.step_client = self.create_client(Step, "/step")
-
-    def observation_callback(self, observation: ObservationModel) -> None:
-        """Process a new observation.
-
-        Args:
-            observation: The observation to process
-        """
-        self.latest_observation = observation
-        logger.info(f"Received observation with timestamp: {observation.time_stamp}")
 
     async def request_reset(self, seed: int = None) -> Reset.Response:
         """Request a reset of the scene to an initial state.
@@ -79,28 +64,27 @@ class Controller(Node):
         request = Reset.Request(seed=seed)
 
         try:
-            response = await self.reset_client.call(request, timeout=500)
+            response = await self.reset_client.call(request, timeout=30.0)
             logger.info(f"Reset response: {response.success}, {response.message}")
             return response
         except Exception as e:
             logger.error(f"Error resetting scene: {e}")
             return None
 
-    async def request_step(self, twist: TwistModel) -> Step.Response:
-        """Request a step with the robot given a twist.
+    async def request_step(self, action: ActionModel) -> Step.Response:
+        """Request a step with the robot given an action.
 
         Args:
-            twist: The twist to execute
+            action: The action to execute
 
         Returns:
             The response from the step service
         """
-        logger.info(f"Stepping robot with twist: {twist}")
-        request = Step.Request(twist=twist)
+        logger.info(f"Stepping robot with action: {action}")
+        request = Step.Request(action=action)
 
         try:
             response = await self.step_client.call(request)
-            logger.info(f"Step response: {response.success}")
             return response
         except Exception as e:
             logger.error(f"Error stepping robot: {e}")
@@ -112,7 +96,6 @@ class Controller(Node):
         Args:
             rate_hz: The frequency to run the control loop at in Hz
         """
-
         logger.info("Starting control loop")
         if self.loop_running:
             logger.warning("Control loop already running")
@@ -144,9 +127,7 @@ class Controller(Node):
                     ),
                 )
 
-                self.action_pub.publish(action)
-
-                response = await self.request_step(action.twist)
+                response = await self.request_step(action)
                 if response is None:
                     logger.warning("Step request failed, continuing loop")
 
@@ -163,41 +144,22 @@ class Controller(Node):
             logger.info("Control loop ended")
 
     def start_loop(self, rate_hz: float = 1.0) -> None:
-        """Start the control loop in a background thread."""
-        if self._control_thread is not None and self._control_thread.is_alive():
-            logger.warning("Control thread is already running")
+        """Start the control loop using the shared event loop."""
+        if self.loop_running:
+            logger.warning("Control loop is already running")
             return
 
         self._shutdown_event.clear()
 
-        def run_async_loop():
-            # Create a new event loop for this thread
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-            try:
-                loop.run_until_complete(self.run_loop(rate_hz))
-            except Exception as e:
-                logger.error(f"Error in control thread: {e}")
-            finally:
-                loop.close()
-
-        self._control_thread = threading.Thread(target=run_async_loop, daemon=True)
-        self._control_thread.start()
-        logger.info("Started control loop in background thread")
+        # Use the shared event loop to run our coroutine
+        run_coroutine(self.run_loop(rate_hz))
+        logger.info("Started control loop in shared event loop")
 
     def stop_loop(self) -> None:
         """Stop the control loop"""
         self.loop_running = False
         self._shutdown_event.set()
         logger.info("Control loop stop requested")
-
-        if self._control_thread and self._control_thread.is_alive():
-            self._control_thread.join(timeout=2.0)
-            if self._control_thread.is_alive():
-                logger.warning("Control thread did not terminate gracefully")
-            else:
-                logger.info("Control thread terminated")
 
 
 def main():

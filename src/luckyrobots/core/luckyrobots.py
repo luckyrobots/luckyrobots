@@ -7,8 +7,8 @@ This module extends the LuckyRobots class with ROS-like functionality including:
 - Node management with distributed node support
 """
 
+import msgpack
 import asyncio
-import json
 import logging
 import os
 import uuid
@@ -33,7 +33,11 @@ from ..utils.watcher import Watcher
 from ..core.models import ObservationModel
 from .node import Node
 from .parameters import load_from_file, set_param
-
+from ..utils.event_loop import (
+    get_event_loop,
+    initialize_event_loop,
+    shutdown_event_loop,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -58,9 +62,12 @@ class LuckyRobots(Node):
     _running = False
     _shutdown_event = threading.Event()
 
+    _event_loop = None
+
     def __init__(self):
         """Initialize LuckyRobots"""
-        # Check if WebSocket server is already running
+        initialize_event_loop()
+
         if not self._is_websocket_server_running():
             self._start_websocket_server()
 
@@ -68,7 +75,6 @@ class LuckyRobots(Node):
 
         app.lucky_robots = self
 
-        # Load default parameters
         self._load_default_params()
 
     def _is_websocket_server_running(self) -> bool:
@@ -102,7 +108,7 @@ class LuckyRobots(Node):
         logger.info(f"Starting WebSocket server on {self.host}:{self.port}")
 
         # Give the server time to start
-        time.sleep(1)
+        time.sleep(0.5)
 
     def _load_default_params(self) -> None:
         """Load default parameters"""
@@ -136,22 +142,17 @@ class LuckyRobots(Node):
         self._nodes[node.full_name] = node
         logger.info(f"Registered node: {node.full_name}")
 
-    def _setup(self):
+    async def _setup_async(self):
         """Setup the LuckyRobots core."""
 
-        # Register the reset service that will forward requests to subscribers
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        self.reset_service = loop.run_until_complete(
-            self.create_service(Reset, "/reset", self.handle_reset)
+        self.reset_service = await self.create_service(
+            Reset, "/reset", self.handle_reset
         )
-        self.step_service = loop.run_until_complete(
-            self.create_service(Step, "/step", self.handle_step)
-        )
-        loop.close()
+        self.step_service = await self.create_service(Step, "/step", self.handle_step)
 
     def start(
         self,
+        scene: str = None,
         robot_type: str = None,
         task: str = None,
         binary_path: Optional[str] = None,
@@ -169,13 +170,12 @@ class LuckyRobots(Node):
 
         directory_to_watch = self._initialize_binary(binary_path)
 
-        # Configure handler
         Handler.set_send_bytes(send_bytes)
         Handler.set_lucky_robots(self)
 
         if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
-            # run_luckyworld_executable(robot_type, task)
-            logger.error("LuckyWorld is not running, please start it first")
+            logger.error("LuckyWorld is not running, starting it now...")
+            # run_luckyworld_executable(scene, robot_type, task, directory_to_watch)
 
         library_dev()
 
@@ -323,7 +323,7 @@ class LuckyRobots(Node):
 
         request_id = f"reset_{uuid.uuid4().hex}"
 
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
         response_future = loop.create_future()
 
         self._pending_resets[request_id] = response_future
@@ -334,7 +334,7 @@ class LuckyRobots(Node):
 
         # Send to world client
         try:
-            await self.world_client.send_text(json.dumps(message))
+            await self.world_client.send_bytes(msgpack.dumps(message))
             logger.info(f"Sent reset request {request_id} to world client")
         except Exception as e:
             logger.error(f"Error sending reset request to world client: {e}")
@@ -449,7 +449,7 @@ class LuckyRobots(Node):
         request_id = f"step_{uuid.uuid4().hex}"
 
         # Create a future to hold the response
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
         response_future = loop.create_future()
 
         # Store the future with the request ID
@@ -458,13 +458,24 @@ class LuckyRobots(Node):
         # Create message for world client
         # Extract pose and twist data if available
         pose = (
-            request.pose.dict() if hasattr(request, "pose") and request.pose else None
-        )
-        twist = (
-            request.twist.dict()
-            if hasattr(request, "twist") and request.twist
+            request.action.pose.dict()
+            if hasattr(request, "action") and request.action.pose
             else None
         )
+        twist = (
+            request.action.twist.dict()
+            if hasattr(request, "action") and request.action.twist
+            else None
+        )
+
+        if pose is None and twist is None:
+            logger.error("No pose or twist data provided in step request")
+            return Step.Response(
+                success=False,
+                message="No pose or twist data provided in step request",
+                observation=None,
+                info={"error": "no_data"},
+            )
 
         message = {
             "type": "step",
@@ -475,7 +486,7 @@ class LuckyRobots(Node):
 
         # Send to world client
         try:
-            await self.world_client.send_text(json.dumps(message))
+            await self.world_client.send_bytes(msgpack.dumps(message))
             logger.info(f"Sent step request {request_id} to world client")
         except Exception as e:
             logger.error(f"Error sending step request to world client: {e}")
@@ -619,6 +630,9 @@ class LuckyRobots(Node):
         # Stop the WebSocket server
         self._stop_websocket_server()
 
+        # Shutdown the event loop
+        shutdown_event_loop()
+
         self._shutdown_event.set()
         logger.info("LuckyRobots shutdown complete")
 
@@ -632,8 +646,8 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
 
     try:
         # Wait for the first message, which should be a NODE_ANNOUNCE
-        message_text = await websocket.receive_text()
-        message_data = json.loads(message_text)
+        message = await websocket.receive_bytes()
+        message_data = msgpack.unpackb(message)
         message = TransportMessage(**message_data)
 
         if message.msg_type != MessageType.NODE_ANNOUNCE:
@@ -649,9 +663,9 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
 
         # Process messages until disconnection
         while True:
-            message_text = await websocket.receive_text()
             try:
-                message_data = json.loads(message_text)
+                message = await websocket.receive_bytes()
+                message_data = msgpack.unpackb(message)
                 message = TransportMessage(**message_data)
 
                 # Process the message based on its type
@@ -671,8 +685,8 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
                 else:
                     # Route other messages (PUBLISH, SERVICE_REQUEST, SERVICE_RESPONSE)
                     await manager.route_message(message)
-            except json.JSONDecodeError:
-                logger.error(f"Received invalid JSON from {node_name}")
+            except msgpack.UnpackValueError:
+                logger.error(f"Received invalid msgpack from {node_name}")
             except Exception as e:
                 logger.error(f"Error processing message from {node_name}: {e}")
     except WebSocketDisconnect:
@@ -692,9 +706,9 @@ async def world_endpoint(websocket: WebSocket) -> None:
     try:
         # Process messages until disconnection
         while True:
-            message_text = await websocket.receive_text()
             try:
-                message_data = json.loads(message_text)
+                message = await websocket.receive_bytes()
+                message_data = msgpack.unpackb(message)
 
                 # Process the message based on its type
                 if "type" in message_data:
@@ -708,8 +722,8 @@ async def world_endpoint(websocket: WebSocket) -> None:
                         logger.warning(f"Unknown message type: {message_data['type']}")
                 else:
                     logger.warning("Received message without type field")
-            except json.JSONDecodeError:
-                logger.error(f"Received invalid JSON from world client")
+            except msgpack.UnpackValueError:
+                logger.error(f"Received invalid msgpack from world client")
             except Exception as e:
                 logger.error(f"Error processing message from world client: {e}")
     except WebSocketDisconnect:
