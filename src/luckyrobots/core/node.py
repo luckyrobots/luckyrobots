@@ -9,7 +9,7 @@ import asyncio
 import logging
 import threading
 import uuid
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, Type
 
 from ..message.pubsub import Publisher, Subscriber
 from ..message.srv.client import ServiceClient

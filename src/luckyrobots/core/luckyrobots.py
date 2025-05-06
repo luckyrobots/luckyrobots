@@ -22,6 +22,7 @@ from typing import Dict, Optional
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from websocket import create_connection
 
 from .manager import Manager
 from ..message.transporter import MessageType, TransportMessage
@@ -83,8 +84,6 @@ class LuckyRobots(Node):
         Returns:
             bool: True if a WebSocket server is running, False otherwise
         """
-        from websocket import create_connection
-
         try:
             ws_url = f"ws://{self.host}:{self.port}/nodes"
             ws = create_connection(ws_url, timeout=1)
@@ -156,7 +155,6 @@ class LuckyRobots(Node):
         robot_type: str = None,
         task: str = None,
         binary_path: Optional[str] = None,
-        send_bytes: bool = False,
     ) -> None:
         """Start the LuckyRobots core
 
@@ -170,7 +168,6 @@ class LuckyRobots(Node):
 
         directory_to_watch = self._initialize_binary(binary_path)
 
-        Handler.set_send_bytes(send_bytes)
         Handler.set_lucky_robots(self)
 
         if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
@@ -310,8 +307,6 @@ class LuckyRobots(Node):
         Returns:
             Reset.Response: The response from the world client
         """
-        logger.info(f"Processing reset request with seed: {request.seed}")
-
         if self.world_client is None:
             logger.error("No world client connection available")
             return Reset.Response(
@@ -321,10 +316,10 @@ class LuckyRobots(Node):
                 info={"error": "no_connection"},
             )
 
-        request_id = f"reset_{uuid.uuid4().hex}"
+        request_id = f"{uuid.uuid4().hex}"
 
-        loop = get_event_loop()
-        response_future = loop.create_future()
+        shared_loop = get_event_loop()
+        response_future = shared_loop.create_future()
 
         self._pending_resets[request_id] = response_future
 
@@ -335,7 +330,6 @@ class LuckyRobots(Node):
         # Send to world client
         try:
             await self.world_client.send_bytes(msgpack.dumps(message))
-            logger.info(f"Sent reset request {request_id} to world client")
         except Exception as e:
             logger.error(f"Error sending reset request to world client: {e}")
             if request_id in self._pending_resets:
@@ -350,7 +344,6 @@ class LuckyRobots(Node):
         # Await response from world client
         try:
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
-            logger.info(f"Received reset response for request {request_id}")
 
             # Process response data into Reset.Response
             success = response_data.get("success", False)
@@ -409,18 +402,20 @@ class LuckyRobots(Node):
             )
             return
 
-        logger.info(f"Processing reset response for request {request_id}")
-
         # Get the future for this request
         future = self._pending_resets[request_id]
 
-        # Set the result on the future if it's not already done
-        if not future.done():
-            future.set_result(message_data)
-            logger.debug(f"Set result for reset request {request_id}")
+        shared_loop = get_event_loop()
 
-        # Clean up the pending request
-        del self._pending_resets[request_id]
+        # Use call_soon_threadsafe to ensure the future is completed in the right context
+        shared_loop.call_soon_threadsafe(
+            lambda f=future, d=message_data: f.set_result(d) if not f.done() else None
+        )
+
+        # Also clean up the pending resets in a thread-safe way
+        shared_loop.call_soon_threadsafe(
+            lambda p=self._pending_resets, r=request_id: p.pop(r, None)
+        )
 
     async def handle_step(self, request: Step.Request) -> Step.Response:
         """Handle the step request by forwarding to the world client.
@@ -446,11 +441,11 @@ class LuckyRobots(Node):
             )
 
         # Generate a unique ID for this request
-        request_id = f"step_{uuid.uuid4().hex}"
+        request_id = f"{uuid.uuid4().hex}"
 
         # Create a future to hold the response
-        loop = get_event_loop()
-        response_future = loop.create_future()
+        shared_loop = get_event_loop()
+        response_future = shared_loop.create_future()
 
         # Store the future with the request ID
         self._pending_steps[request_id] = response_future
@@ -487,7 +482,6 @@ class LuckyRobots(Node):
         # Send to world client
         try:
             await self.world_client.send_bytes(msgpack.dumps(message))
-            logger.info(f"Sent step request {request_id} to world client")
         except Exception as e:
             logger.error(f"Error sending step request to world client: {e}")
             if request_id in self._pending_steps:
@@ -502,7 +496,6 @@ class LuckyRobots(Node):
         # Wait for response
         try:
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
-            logger.info(f"Received step response for request {request_id}")
 
             # Process response data into Step.Response
             success = response_data.get("success", False)
@@ -541,14 +534,6 @@ class LuckyRobots(Node):
             )
 
     async def _process_step_response(self, message_data):
-        """Process a step response from the world client.
-
-        This method is called when a step response is received from the world client.
-        It resolves the future for the corresponding request.
-
-        Args:
-            message_data: The response data from the world client
-        """
         request_id = message_data.get("request_id")
 
         if not request_id:
@@ -561,18 +546,20 @@ class LuckyRobots(Node):
             )
             return
 
-        logger.info(f"Processing step response for request {request_id}")
-
         # Get the future for this request
         future = self._pending_steps[request_id]
 
-        # Set the result on the future if it's not already done
-        if not future.done():
-            future.set_result(message_data)
-            logger.debug(f"Set result for step request {request_id}")
+        shared_loop = get_event_loop()
 
-        # Clean up the pending request
-        del self._pending_steps[request_id]
+        # Use call_soon_threadsafe to ensure the future is completed in the right context
+        shared_loop.call_soon_threadsafe(
+            lambda f=future, d=message_data: f.set_result(d) if not f.done() else None
+        )
+
+        # Also clean up the pending steps in a thread-safe way
+        shared_loop.call_soon_threadsafe(
+            lambda p=self._pending_steps, r=request_id: p.pop(r, None)
+        )
 
     def spin(self) -> None:
         """Keep the main thread alive until shutdown"""
@@ -645,7 +632,7 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
     node_name = None
 
     try:
-        # Wait for the first message, which should be a NODE_ANNOUNCE
+        # Wait for the first message, which should be NODE_ANNOUNCE
         message = await websocket.receive_bytes()
         message_data = msgpack.unpackb(message)
         message = TransportMessage(**message_data)
@@ -716,8 +703,6 @@ async def world_endpoint(websocket: WebSocket) -> None:
                         await app.lucky_robots._process_reset_response(message_data)
                     elif message_data["type"] == "step_response":
                         await app.lucky_robots._process_step_response(message_data)
-                    elif message_data["type"] == "observation":
-                        await app.lucky_robots._process_observation(message_data)
                     else:
                         logger.warning(f"Unknown message type: {message_data['type']}")
                 else:

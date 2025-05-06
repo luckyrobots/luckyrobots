@@ -9,7 +9,7 @@ import msgpack
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger("unreal_world_client")
+logger = logging.getLogger("simulated_world")
 
 
 class SimulatedUnrealWorldClient:
@@ -108,8 +108,6 @@ class SimulatedUnrealWorldClient:
         Args:
             message: The reset request message
         """
-        logger.info(f"Handling reset request: {message}")
-
         # Extract request details
         request_id = message.get("request_id", f"unknown_{uuid.uuid4().hex}")
         seed = message.get("seed")
@@ -149,26 +147,11 @@ class SimulatedUnrealWorldClient:
         Args:
             message: The step request message
         """
-        logger.info(f"Handling step request: {message}")
 
         # Extract request details
-        request_id = message.get("request_id", f"unknown_{uuid.uuid4().hex}")
+        request_id = message.get("request_id", f"{uuid.uuid4().hex}")
         pose = message.get("pose")
         twist = message.get("twist")
-
-        # Update robot state based on twist
-        if twist:
-            linear = twist.get("linear", {})
-            angular = twist.get("angular", {})
-
-            # Simple simulation of robot movement
-            # In a real world client, this would update the physics simulation
-            linear_x = linear.get("x", 0)
-            angular_z = angular.get("z", 0)
-
-            # Update wheel velocities based on differential drive model
-            self.robot_state["left_wheel"] += int(10 * (linear_x - angular_z))
-            self.robot_state["right_wheel"] += int(10 * (linear_x + angular_z))
 
         # Create observation
         observation = self.create_observation()
@@ -185,7 +168,6 @@ class SimulatedUnrealWorldClient:
 
         # Send response
         await self.send_message(response)
-        logger.info(f"Sent step response for request {request_id}")
 
     async def run(self):
         """Run the client, connecting to the server and handling messages"""

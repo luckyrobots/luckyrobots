@@ -14,12 +14,7 @@ class Handler(FileSystemEventHandler):
 
     timestamp = 0
     chunk_size = 4096  # 4KB
-    send_bytes = False
     lucky_robots = None
-
-    @classmethod
-    def set_send_bytes(cls, value: bool) -> None:
-        cls.send_bytes = value
 
     @classmethod
     def set_lucky_robots(cls, lr: object) -> None:
