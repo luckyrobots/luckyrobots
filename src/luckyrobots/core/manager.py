@@ -180,9 +180,6 @@ class Manager:
         Args:
             message: The service request message to route
         """
-        logger.info(
-            f"[SERVICE_REQUEST_FLOW] Routing service request to {message.topic_or_service}"
-        )
         service_name = message.topic_or_service
         requester_node = message.node_name
 
@@ -268,9 +265,6 @@ class Manager:
         Args:
             message: The service response message to route
         """
-        logger.info(
-            f"[SERVICE_RESPONSE_FLOW] Routing service response to {message.topic_or_service}"
-        )
         service_name = message.topic_or_service
         message_id = message.message_id
 

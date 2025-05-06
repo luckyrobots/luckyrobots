@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, ValidationError
 
-from ..utils.event_loop import run_coroutine
+from ..utils.event_loop import run_coroutine, get_event_loop
 
 
 logging.basicConfig(
@@ -251,7 +251,7 @@ class Transporter:
                 result = await handler(request_data)
             else:
                 # Run non-async handler in a thread pool
-                loop = asyncio.get_running_loop()
+                loop = get_event_loop()
                 result = await loop.run_in_executor(None, handler, request_data)
 
             # Check if the result itself is a coroutine (sometimes happens with wrapped functions)
@@ -438,8 +438,8 @@ class Transporter:
         message_id = f"{self.node_name}_{service_name}_{time.time()}_{uuid.uuid4().hex}"
 
         # Create a future for the response within the same event loop
-        loop = asyncio.get_running_loop()
-        future = loop.create_future()
+        shared_loop = get_event_loop()
+        future = shared_loop.create_future()
         self._response_futures[message_id] = future
 
         # Create the service request message

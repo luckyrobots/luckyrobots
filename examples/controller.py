@@ -58,9 +58,6 @@ class Controller(Node):
         Returns:
             The response from the reset service
         """
-        logger.info(
-            f"Resetting scene with seed: {seed if seed is not None else 'random'}"
-        )
         request = Reset.Request(seed=seed)
 
         try:
@@ -80,7 +77,6 @@ class Controller(Node):
         Returns:
             The response from the step service
         """
-        logger.info(f"Stepping robot with action: {action}")
         request = Step.Request(action=action)
 
         try:
@@ -116,6 +112,8 @@ class Controller(Node):
             self.loop_running = False
             return
 
+        logger.info("Robot reset successfully, starting control loop")
+
         try:
             while self.loop_running and not self._shutdown_event.is_set():
                 start_time = time.time()
@@ -126,11 +124,10 @@ class Controller(Node):
                         angular={"x": 0.0, "y": 0.0, "z": 0.0},
                     ),
                 )
-
+                logger.info(f"Sending step request with action: {action}")
                 response = await self.request_step(action)
                 if response is None:
                     logger.warning("Step request failed, continuing loop")
-
                 logger.info(f"Step response: {response.success}")
 
                 # Calculate sleep time to maintain the desired rate
