@@ -7,7 +7,7 @@ name = "luckyrobots"
 version = "0.1.45"
 description = "Robotics-AI Training in Hyperrealistic Game Environments"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [
     {name = "Devrim Yasar", email = "braces.verbose03@icloud.com"},

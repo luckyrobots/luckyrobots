@@ -49,15 +49,17 @@ def remove_lock_file() -> None:
         os.remove(LOCK_FILE)
 
 
-def run_luckyworld_executable(directory_to_watch: str) -> None:
+def run_luckyworld_executable(
+    scene: str, robot_type: str, task: str, directory_to_watch: str
+) -> None:
     """Run the LuckyWorld executable"""
     # Determine the correct path based on the operating system
     if platform.system() == "Darwin":  # macOS
         executable_path = os.path.join(
-            directory_to_watch, "..", "..", "..", "MacOS", "luckyrobots"
+            directory_to_watch, "..", "..", "..", "MacOS", "LuckyWorld"
         )
     elif platform.system() == "Linux":  # Linux
-        executable_path = os.path.join(directory_to_watch, "..", "..", "Luckyrobots.sh")
+        executable_path = os.path.join(directory_to_watch, "..", "..", "LuckyWorld.sh")
     else:  # Windows or other platforms
         executable_path = os.path.join(
             directory_to_watch, "..", "..", "luckyrobots.exe"
@@ -76,12 +78,21 @@ def run_luckyworld_executable(directory_to_watch: str) -> None:
         # Check if --lr-verbose flag is used
         verbose = "--lr-verbose" in sys.argv
 
+        # Build command with simulation parameters
+        command = [executable_path]
+        if scene:
+            command.extend(["--scene", scene])
+        if robot_type:
+            command.extend(["--robot-type", robot_type])
+        if task:
+            command.extend(["--task", task])
+
         # Run the executable as a detached process
         if platform.system() == "Windows":
             # For Windows
             DETACHED_PROCESS = 0x00000008
             process = subprocess.Popen(
-                executable_path,
+                command,
                 creationflags=DETACHED_PROCESS,
                 close_fds=True,
                 stdout=subprocess.DEVNULL if not verbose else None,
@@ -90,7 +101,7 @@ def run_luckyworld_executable(directory_to_watch: str) -> None:
         else:
             # For Unix-based systems (macOS, Linux)
             process = subprocess.Popen(
-                executable_path,
+                command,
                 start_new_session=True,
                 stdout=subprocess.DEVNULL if not verbose else None,
                 stderr=subprocess.DEVNULL if not verbose else None,
@@ -101,7 +112,7 @@ def run_luckyworld_executable(directory_to_watch: str) -> None:
 
         if verbose:
             print(
-                "LuckyWorld application started successfully as an independent process."
+                f"LuckyWorld application started successfully with scene={scene}, robot_type={robot_type}, task={task}"
             )
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to start LuckyWorld application. {e}")

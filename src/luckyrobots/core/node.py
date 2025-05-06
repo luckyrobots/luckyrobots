@@ -15,6 +15,7 @@ from ..message.pubsub import Publisher, Subscriber
 from ..message.srv.client import ServiceClient
 from ..message.srv.service import ServiceServer, ServiceError
 from ..message.transporter import Transporter
+from ..utils.event_loop import run_coroutine
 from .parameters import get_param, has_param, set_param
 
 logging.basicConfig(
@@ -345,10 +346,10 @@ class Node:
         node-specific initialization and setup.
         """
         self._running = True
-        self._setup()
+        run_coroutine(self._setup_async())
         logger.info(f"Node {self.full_name} started")
 
-    def _setup(self):
+    async def _setup_async(self):
         """Setup the node.
 
         This method should be overridden by subclasses to implement

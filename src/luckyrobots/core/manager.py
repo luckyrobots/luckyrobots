@@ -5,6 +5,7 @@ This module provides a WebSocket server that acts as a central hub for distribut
 nodes to discover each other and communicate.
 """
 
+import msgpack
 import asyncio
 import logging
 from typing import Dict, Set
@@ -164,11 +165,12 @@ class Manager:
             subscribers = self.subscriptions.get(topic, set()).copy()
 
         # Send the message to all subscribers except the sender
-        message_json = message.json()
         for node_name in subscribers:
             if node_name != sender_node and node_name in self.active_nodes:
                 try:
-                    await self.active_nodes[node_name].send_text(message_json)
+                    await self.active_nodes[node_name].send(
+                        msgpack.dumps(message.dict())
+                    )
                 except Exception as e:
                     logger.error(f"Error sending to node {node_name}: {e}")
 
@@ -178,6 +180,9 @@ class Manager:
         Args:
             message: The service request message to route
         """
+        logger.info(
+            f"[SERVICE_REQUEST_FLOW] Routing service request to {message.topic_or_service}"
+        )
         service_name = message.topic_or_service
         requester_node = message.node_name
 
@@ -197,8 +202,8 @@ class Manager:
 
             if requester_node in self.active_nodes:
                 try:
-                    await self.active_nodes[requester_node].send_text(
-                        error_response.json()
+                    await self.active_nodes[requester_node].send(
+                        msgpack.dumps(error_response.dict())
                     )
                 except Exception as e:
                     logger.error(
@@ -209,7 +214,9 @@ class Manager:
         # Forward the request to the service provider
         if provider_node in self.active_nodes:
             try:
-                await self.active_nodes[provider_node].send_text(message.json())
+                await self.active_nodes[provider_node].send(
+                    msgpack.dumps(message.dict())
+                )
             except Exception as e:
                 logger.error(
                     f"Error forwarding service request to node {provider_node}: {e}"
@@ -228,8 +235,8 @@ class Manager:
 
                 if requester_node in self.active_nodes:
                     try:
-                        await self.active_nodes[requester_node].send_text(
-                            error_response.json()
+                        await self.active_nodes[requester_node].send(
+                            msgpack.dumps(error_response.dict())
                         )
                     except Exception as e2:
                         logger.error(
@@ -247,8 +254,8 @@ class Manager:
 
             if requester_node in self.active_nodes:
                 try:
-                    await self.active_nodes[requester_node].send_text(
-                        error_response.json()
+                    await self.active_nodes[requester_node].send(
+                        msgpack.dumps(error_response.dict())
                     )
                 except Exception as e:
                     logger.error(
@@ -261,6 +268,9 @@ class Manager:
         Args:
             message: The service response message to route
         """
+        logger.info(
+            f"[SERVICE_RESPONSE_FLOW] Routing service response to {message.topic_or_service}"
+        )
         service_name = message.topic_or_service
         message_id = message.message_id
 
@@ -287,7 +297,9 @@ class Manager:
         # Forward the response to the requester
         if requester_node in self.active_nodes:
             try:
-                await self.active_nodes[requester_node].send_text(message.json())
+                await self.active_nodes[requester_node].send(
+                    msgpack.dumps(message.dict())
+                )
             except Exception as e:
                 logger.error(
                     f"Error forwarding service response to node {requester_node}: {e}"
