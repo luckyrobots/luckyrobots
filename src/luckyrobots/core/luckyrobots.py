@@ -17,7 +17,6 @@ import signal
 import sys
 import threading
 import time
-from pathlib import Path
 from typing import Dict, Optional
 
 import uvicorn
@@ -28,9 +27,7 @@ from .manager import Manager
 from ..message.transporter import MessageType, TransportMessage
 from ..message.srv.types import Reset, Step
 from ..runtime.run_executable import is_luckyworld_running, run_luckyworld_executable
-from ..utils.handler import Handler
 from ..utils.library_dev import library_dev
-from ..utils.watcher import Watcher
 from ..core.models import ObservationModel
 from .node import Node
 from .parameters import load_from_file, set_param
@@ -50,8 +47,8 @@ manager = Manager()
 
 
 class LuckyRobots(Node):
+    host = "localhost"
     port = 3000
-    host = "0.0.0.0"
 
     robot_client = None
     world_client = None
@@ -65,14 +62,17 @@ class LuckyRobots(Node):
 
     _event_loop = None
 
-    def __init__(self):
+    def __init__(self, host: str = "localhost", port: int = 3000):
         """Initialize LuckyRobots"""
         initialize_event_loop()
+
+        self.host = host or self.host
+        self.port = port or self.port
 
         if not self._is_websocket_server_running():
             self._start_websocket_server()
 
-        super().__init__("lucky_robots_manager", "", "localhost", self.port)
+        super().__init__("lucky_robots_manager", "", host, port)
 
         app.lucky_robots = self
 
@@ -166,18 +166,13 @@ class LuckyRobots(Node):
             logger.warning("LuckyRobots is already running")
             return
 
-        directory_to_watch = self._initialize_binary(binary_path)
-
-        Handler.set_lucky_robots(self)
-
         if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
             logger.error("LuckyWorld is not running, starting it now...")
-            # run_luckyworld_executable(scene, robot_type, task, directory_to_watch)
+            # run_luckyworld_executable(scene, robot_type, task, binary_path)
 
         library_dev()
 
         self._setup_signal_handlers()
-        self._setup_directory_watcher(directory_to_watch)
 
         # Start all registered nodes
         for node in self._nodes.values():
@@ -189,42 +184,6 @@ class LuckyRobots(Node):
         super().start()
 
         self._running = True
-
-    def _initialize_binary(self, binary_path: Optional[str] = None) -> str:
-        """Initialize and validate binary path"""
-        if binary_path is None:
-            binary_path = (
-                Path(__file__).parent.parent.parent.parent.parent / "LuckyWorldV2"
-            )
-
-        if not os.path.exists(binary_path):
-            print(
-                f"Binary not found at {binary_path}, please download the latest version of Lucky World from:"
-            )
-            print("\nhttps://luckyrobots.com/luckyrobots/luckyworld/releases")
-            print(
-                "\nand unzip it in the same directory as your file ie ./Binary folder"
-            )
-            print("\nLinux: your executable will be     ./Binary/LuckyWorld.sh")
-            print("Windows: your executable will be   ./Binary/LuckyWorld.exe")
-            print("MacOS: your executable will be     ./Binary/LuckyWorld.app")
-            print(
-                "\nIf you are running this from a different directory, you can change the lr.start(binary_path='...') parameter to the full path of the binary."
-            )
-            os._exit(1)
-
-        return binary_path
-
-    def _setup_directory_watcher(self, binary_path: str) -> str:
-        """Set up the directory watcher in a background thread"""
-        directory = os.path.join(binary_path, "Saved")
-        os.makedirs(directory, exist_ok=True)
-
-        watcher = Watcher(directory)
-        watcher_thread = threading.Thread(target=watcher.run, daemon=True)
-        watcher_thread.start()
-
-        return directory
 
     def _setup_signal_handlers(self) -> None:
         """Set up handlers for graceful shutdown"""
@@ -271,7 +230,7 @@ class LuckyRobots(Node):
         print("To receive camera feed: Choose a level and tick the Capture checkbox.")
         print("*" * 60)
 
-    def wait_for_world_client(self, timeout=60.0):
+    def wait_for_world_client(self, timeout: float = 60.0) -> bool:
         """Wait until a world client is connected.
 
         Args:
@@ -381,7 +340,7 @@ class LuckyRobots(Node):
                 info={"error": "processing_error"},
             )
 
-    async def _process_reset_response(self, message_data):
+    async def _process_reset_response(self, message_data: dict) -> None:
         """Process a reset response from the world client.
 
         This method is called when a reset response is received from the world client.
@@ -533,7 +492,7 @@ class LuckyRobots(Node):
                 info={"error": "processing_error"},
             )
 
-    async def _process_step_response(self, message_data):
+    async def _process_step_response(self, message_data: dict) -> None:
         request_id = message_data.get("request_id")
 
         if not request_id:
@@ -624,6 +583,7 @@ class LuckyRobots(Node):
         logger.info("LuckyRobots shutdown complete")
 
 
+# TODO: Build out system monitor for CPU, memory, and disk usage
 @app.websocket("/nodes")
 async def nodes_endpoint(websocket: WebSocket) -> None:
     """WebSocket endpoint for node communication"""

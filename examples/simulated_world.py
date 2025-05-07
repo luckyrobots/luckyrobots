@@ -12,7 +12,7 @@ logging.basicConfig(
 logger = logging.getLogger("simulated_world")
 
 
-class SimulatedUnrealWorldClient:
+class SimulatedWorld:
     """Simulates the Unreal Engine world client that connects to LuckyRobots core"""
 
     def __init__(self, server_url="ws://localhost:3000/world"):
@@ -223,15 +223,15 @@ class SimulatedUnrealWorldClient:
 
 async def main():
     """Main function to run the simulated Unreal world client"""
-    client = SimulatedUnrealWorldClient()
+    simulated_world = SimulatedWorld()
 
     # Handle keyboard interrupt
     try:
-        await client.run()
+        await simulated_world.run()
     except KeyboardInterrupt:
         logger.info("Received keyboard interrupt, shutting down...")
     finally:
-        await client.stop()
+        await simulated_world.stop()
         logger.info("Simulated Unreal world client terminated")
 
 

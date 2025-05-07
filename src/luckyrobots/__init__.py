@@ -6,12 +6,7 @@ from .core.parameters import get_param, set_param
 from .utils.check_updates import check_updates
 from .utils.event_loop import run_coroutine, create_task
 
-# Expose static methods
-start = LuckyRobots.start
-set_host = LuckyRobots.set_host
 
-
-# Export the necessary functions and classes
 __all__ = [
     "LuckyRobots",
     "Node",
