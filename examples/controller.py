@@ -1,20 +1,24 @@
-"""Simple example for controlling a single robot.
+"""Real-time robot controller.
 
-This minimal example demonstrates how to:
-1. Connect to a robot
-2. Create service clients for resetting and stepping the robot
-3. Create a publisher for sending actions
-4. Subscribe to robot observations
-5. Implement a basic control loop
+Demonstrates core robot control functionality: connecting to the simulation,
+resetting the robot state, and implementing a continuous control loop
+that sends movement commands at a configurable rate.
 """
 
 import time
 import asyncio
 import logging
 import threading
-
-from luckyrobots import *
-from luckyrobots.utils.event_loop import run_coroutine
+import argparse
+from luckyrobots import (
+    Node,
+    LuckyRobots,
+    Step,
+    Reset,
+    ActionModel,
+    TwistModel,
+    run_coroutine,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -23,8 +27,6 @@ logger = logging.getLogger("controller")
 
 
 class Controller(Node):
-    """Example node that controls a robot"""
-
     def __init__(
         self,
         name: str = "controller",
@@ -32,33 +34,21 @@ class Controller(Node):
         host: str = None,
         port: int = None,
     ) -> None:
-        """Initialize the robot controller node.
-
-        Args:
-            name: The name of the node
-            namespace: The namespace for the node
-            host: The host to connect to
-            port: The port to connect to
-        """
         super().__init__(name, namespace, host, port)
 
-        logger.info(f"Robot controller node {self.full_name} created")
+        logger.info(f"Controller node {self.full_name} created")
         self._shutdown_event = threading.Event()
-        self.latest_observation = None
         self.loop_running = False
 
     async def _setup_async(self) -> None:
-        """Setup the node asynchronously."""
         self.reset_client = self.create_client(Reset, "/reset")
         self.step_client = self.create_client(Step, "/step")
 
-    async def request_reset(self, seed: int = None) -> Reset.Response:
-        """Request a reset of the scene to an initial state.
-
-        Returns:
-            The response from the reset service
-        """
-        request = Reset.Request(seed=seed)
+    async def request_reset(
+        self, seed: int | None = None, options: dict | None = None
+    ) -> Reset.Response:
+        """Request a reset of the scene to an initial state."""
+        request = Reset.Request(seed=seed, options=options)
 
         try:
             response = await self.reset_client.call(request, timeout=30.0)
@@ -69,14 +59,7 @@ class Controller(Node):
             return None
 
     async def request_step(self, action: ActionModel) -> Step.Response:
-        """Request a step with the robot given an action.
-
-        Args:
-            action: The action to execute
-
-        Returns:
-            The response from the step service
-        """
+        """Request a step with the robot given an action."""
         request = Step.Request(action=action)
 
         try:
@@ -160,13 +143,18 @@ class Controller(Node):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Keyboard Teleop for LuckyRobots")
+    parser.add_argument("--host", type=str, default=None, help="Host to connect to")
+    parser.add_argument("--port", type=int, default=None, help="Port to connect to")
+    parser.add_argument(
+        "--rate", type=float, default=10.0, help="Control loop rate in Hz"
+    )
+    args = parser.parse_args()
+
     try:
-        luckyrobots = LuckyRobots()
+        luckyrobots = LuckyRobots(host=args.host, port=args.port)
 
-        host = get_param("host", "localhost")
-        port = get_param("port", 3000)
-
-        controller = Controller(host=host, port=port)
+        controller = Controller(host=args.host, port=args.port)
 
         luckyrobots.register_node(controller)
 
@@ -176,7 +164,7 @@ def main():
         logger.info("Waiting for Unreal world client to connect...")
         if luckyrobots.wait_for_world_client(timeout=60.0):
             # Start the controller loop once world client is connected
-            controller.start_loop(rate_hz=10)
+            controller.start_loop(rate_hz=args.rate)
             logger.info("Controller running. Press Ctrl+C to exit.")
         else:
             logger.error("No world client connected. Controller loop will not start.")
