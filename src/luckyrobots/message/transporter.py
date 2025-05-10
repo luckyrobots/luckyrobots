@@ -23,12 +23,10 @@ from ..utils.event_loop import run_coroutine, get_event_loop
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger("transport")
+logger = logging.getLogger("transporter")
 
 
 class MessageType(str, Enum):
-    """Types of messages that can be sent over the transport layer"""
-
     PUBLISH = "publish"
     SUBSCRIBE = "subscribe"
     UNSUBSCRIBE = "unsubscribe"
@@ -41,19 +39,15 @@ class MessageType(str, Enum):
 
 
 class TransportMessage(BaseModel):
-    """Message format for transport layer communication"""
-
     msg_type: MessageType
     node_name: str
     uuid: str
     topic_or_service: str
     data: Optional[dict] = None
-    message_id: Optional[str] = None  # For correlating requests and responses
+    message_id: Optional[str] = None
 
 
 class Transporter:
-    """WebSocket-based transport layer for distributed communication"""
-
     def __init__(
         self,
         node_name: str,
@@ -62,15 +56,6 @@ class Transporter:
         port: int = 3000,
         reconnect_interval: float = 5.0,
     ):
-        """Initialize the transport layer.
-
-        Args:
-            node_name: The name of the node this transport belongs to
-            uuid: The unique identifier for the node
-            host: Host name or IP address of the WebSocket server
-            port: Port number of the WebSocket server
-            reconnect_interval: Time between reconnection attempts in seconds
-        """
         self.node_name = node_name
         self.uuid = uuid
         self.server_uri = f"ws://{host}:{port}/nodes"
@@ -179,11 +164,6 @@ class Transporter:
                 logger.error(f"Error handling message: {e}")
 
     async def _process_message(self, message: TransportMessage):
-        """Process an incoming message based on its type.
-
-        Args:
-            message: The message to process
-        """
         if message.msg_type == MessageType.PUBLISH:
             # Handle published messages
             if message.topic_or_service in self._topic_handlers:
@@ -235,15 +215,6 @@ class Transporter:
                 del self._response_futures[message.message_id]
 
     async def _run_service_handler(self, handler: Callable, request_data: dict) -> dict:
-        """Run a service handler function.
-
-        Args:
-            handler: The handler function
-            request_data: The request data
-
-        Returns:
-            The response data
-        """
         try:
             # If the handler is asynchronous, await it
             if asyncio.iscoroutinefunction(handler):
@@ -274,11 +245,6 @@ class Transporter:
             raise
 
     async def _send_message(self, message: TransportMessage):
-        """Send a message over the WebSocket connection.
-
-        Args:
-            message: The message to send
-        """
         if not self._connection:
             await self._connected.wait()
 
@@ -291,12 +257,6 @@ class Transporter:
             logger.error(f"Error sending message: {e}")
 
     def publish(self, topic: str, message: Any):
-        """Publish a message to a topic.
-
-        Args:
-            topic: The topic to publish to
-            message: The message to publish
-        """
         # Ensure message is serializable
         if hasattr(message, "dict"):
             data = message.dict()
@@ -318,12 +278,6 @@ class Transporter:
         run_coroutine(self._send_message(transport_message))
 
     def subscribe(self, topic: str, callback: Callable[[Any], None]):
-        """Subscribe to a topic.
-
-        Args:
-            topic: The topic to subscribe to
-            callback: The callback function to call when a message is received
-        """
         # Add the callback to the topic handlers
         if topic not in self._topic_handlers:
             self._topic_handlers[topic] = []
@@ -340,12 +294,6 @@ class Transporter:
         run_coroutine(self._send_message(transport_message))
 
     def unsubscribe(self, topic: str, callback: Callable[[Any], None]):
-        """Unsubscribe from a topic.
-
-        Args:
-            topic: The topic to unsubscribe from
-            callback: The callback function to remove
-        """
         # Remove the callback from the topic handlers
         if topic not in self._topic_handlers:
             return
@@ -368,12 +316,6 @@ class Transporter:
             del self._topic_handlers[topic]
 
     def register_service(self, service_name: str, handler: Callable[[Any], Any]):
-        """Register a service.
-
-        Args:
-            service_name: The name of the service
-            handler: The handler function to call when a request is received
-        """
         # Add the handler to the service handlers
         self._service_handlers[service_name] = handler
 
@@ -388,11 +330,6 @@ class Transporter:
         run_coroutine(self._send_message(transport_message))
 
     def unregister_service(self, service_name: str):
-        """Unregister a service.
-
-        Args:
-            service_name: The name of the service
-        """
         # Remove the handler from the service handlers
         if service_name in self._service_handlers:
             del self._service_handlers[service_name]
@@ -410,20 +347,6 @@ class Transporter:
     async def call_service(
         self, service_name: str, request: Any, timeout: float = 30.0
     ) -> Any:
-        """Call a service.
-
-        Args:
-            service_name: The name of the service
-            request: The request data
-            timeout: Timeout in seconds
-
-        Returns:
-            The response data
-
-        Raises:
-            TimeoutError: If the service call times out
-            Exception: If an error occurs during the service call
-        """
         # Ensure request is serializable
         if hasattr(request, "dict"):
             data = request.dict()

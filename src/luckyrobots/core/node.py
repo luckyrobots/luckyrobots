@@ -1,10 +1,3 @@
-"""
-Node implementation with built-in distributed communication.
-
-This module provides a Node class with integrated WebSocket-based distributed
-communication for building ROS-like systems.
-"""
-
 import asyncio
 import logging
 import threading
@@ -25,19 +18,9 @@ logger = logging.getLogger("node")
 
 
 class Node:
-    """Base class for all nodes in the LuckyRobots framework with distributed communication"""
-
     def __init__(
         self, name: str, namespace: str = "", host: str = None, port: int = None
     ):
-        """Initialize a new node.
-
-        Args:
-            name: The name of the node
-            namespace: Optional namespace for the node
-            host: Host to connect to (defaults to parameters)
-            port: Port to connect to (defaults to parameters)
-        """
         self.name = name
         self.namespace = namespace.strip("/")
         self.full_name = (
@@ -70,14 +53,6 @@ class Node:
         logger.info(f"Created node: {self.full_name} (ID: {self.instance_id})")
 
     def get_qualified_name(self, name: str) -> str:
-        """Convert a relative name to a fully qualified name.
-
-        Args:
-            name: Relative or absolute name
-
-        Returns:
-            Fully qualified name
-        """
         if name.startswith("/"):
             return name
 
@@ -86,16 +61,6 @@ class Node:
     def create_publisher(
         self, message_type: Type, topic: str, queue_size: int = 10
     ) -> Publisher:
-        """Create a publisher for a topic.
-
-        Args:
-            message_type: The type of messages to publish
-            topic: The topic to publish on
-            queue_size: Maximum queue size for messages
-
-        Returns:
-            The created publisher
-        """
         qualified_topic = self.get_qualified_name(topic)
         publisher = Publisher(qualified_topic, message_type, queue_size)
         self._publishers[qualified_topic] = publisher
@@ -121,17 +86,6 @@ class Node:
         callback: Callable[[Any], None],
         queue_size: int = 10,
     ) -> Subscriber:
-        """Create a subscriber for a topic.
-
-        Args:
-            message_type: The type of messages to expect
-            topic: The topic to subscribe to
-            callback: The function to call when a message is received
-            queue_size: Maximum queue size for messages
-
-        Returns:
-            The created subscriber
-        """
         qualified_topic = self.get_qualified_name(topic)
         subscriber = Subscriber(qualified_topic, message_type, callback, queue_size)
         self._subscribers[qualified_topic] = subscriber
@@ -155,15 +109,6 @@ class Node:
         return subscriber
 
     def create_client(self, service_type: Type, service_name: str) -> ServiceClient:
-        """Create a client for a server.
-
-        Args:
-            service_type: The type of service to connect to
-            service_name: The name of the service to connect to
-
-        Returns:
-            The created client
-        """
         qualified_name = self.get_qualified_name(service_name)
         client = ServiceClient(service_type, qualified_name)
         self._clients[qualified_name] = client
@@ -225,16 +170,6 @@ class Node:
     async def create_service(
         self, service_type: Type, service_name: str, handler: Callable[[Any], Any]
     ) -> ServiceServer:
-        """Create a service for a service name.
-
-        Args:
-            service_name: The name of the service to create a server for
-            service_type: The type of service the server accepts
-            handler: The function to call when a request is received
-
-        Returns:
-            The created service
-        """
         qualified_name = self.get_qualified_name(service_name)
         service = ServiceServer(service_type, qualified_name, handler)
         self._services[qualified_name] = service
@@ -294,32 +229,12 @@ class Node:
         host: str = "localhost",
         port: int = 3000,
     ) -> ServiceClient:
-        """Create a service client for a service name.
-
-        Args:
-            service_type: The type of service to connect to
-            service_name: The name of the service to connect to
-            host: WebSocket server host
-            port: WebSocket server port
-
-        Returns:
-            The created service client
-        """
         qualified_name = self.get_qualified_name(service_name)
         client = ServiceClient(service_type, qualified_name, host, port)
         self._clients[qualified_name] = client
         return client
 
     def get_param(self, name: str, default: Any = None) -> Any:
-        """Get a parameter value.
-
-        Args:
-            name: Parameter name
-            default: Default value to return if parameter doesn't exist
-
-        Returns:
-            The parameter value, or default if not found
-        """
         # Try node-specific parameter first
         node_param = f"{self.full_name}/{name}"
         if has_param(node_param):
@@ -329,49 +244,24 @@ class Node:
         return get_param(name, default)
 
     def set_param(self, name: str, value: Any) -> None:
-        """Set a parameter value.
-
-        Args:
-            name: Parameter name
-            value: Parameter value
-        """
         # Always set as node-specific parameter
         node_param = f"{self.full_name}/{name}"
         set_param(node_param, value)
 
     def start(self) -> None:
-        """Start the node.
-
-        This method should be overridden by subclasses to implement
-        node-specific initialization and setup.
-        """
         self._running = True
         run_coroutine(self._setup_async())
         logger.info(f"Node {self.full_name} started")
 
     async def _setup_async(self):
-        """Setup the node.
-
-        This method should be overridden by subclasses to implement
-        node-specific setup.
-        """
         pass
 
     def spin(self) -> None:
-        """Spin the node.
-
-        This method blocks until the node is shutdown.
-        """
         logger.info(f"Node {self.full_name} spinning")
         self._shutdown_event.wait()
         logger.info(f"Node {self.full_name} stopped spinning")
 
     def shutdown(self) -> None:
-        """Shutdown the node.
-
-        This method should be overridden by subclasses to implement
-        node-specific cleanup.
-        """
         self._running = False
 
         # Shutdown WebSocket transporter

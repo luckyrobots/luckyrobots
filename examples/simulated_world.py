@@ -67,7 +67,7 @@ class SimulatedWorld:
             return False
 
         try:
-            await self.websocket.send(msgpack.dumps(message))
+            await self.websocket.send(json.dumps(message))
             return True
         except Exception as e:
             logger.error(f"Error sending message: {e}")
@@ -183,7 +183,7 @@ class SimulatedWorld:
                 # Process incoming messages
                 async for message in self.websocket:
                     try:
-                        data = msgpack.unpackb(message)
+                        data = json.loads(message)
 
                         # Handle different message types
                         if "type" in data:
