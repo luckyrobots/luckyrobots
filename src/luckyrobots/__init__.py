@@ -4,7 +4,7 @@ from .core.models import ObservationModel, ActionModel, PoseModel, TwistModel
 from .message.srv.types import Reset, Step
 from .core.parameters import get_param, set_param
 from .utils.check_updates import check_updates
-from .utils.event_loop import run_coroutine, create_task
+from .utils.event_loop import run_coroutine
 
 
 __all__ = [
@@ -22,5 +22,4 @@ __all__ = [
     "set_host",
     "start",
     "run_coroutine",
-    "create_task",
 ]

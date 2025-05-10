@@ -1,12 +1,5 @@
-"""
-Client implementation for service request/response patterns.
-
-This module provides a ServiceClient class for making requests to services with
-timeout handling, error handling, and remote service support.
-"""
-
 import asyncio
-from typing import Any, Dict, Generic, Optional, Type, TypeVar
+from typing import Generic, Optional, Type, TypeVar
 
 from .service import (
     ServiceNotFoundError,
@@ -18,15 +11,7 @@ R = TypeVar("R")  # Response type
 
 
 class ServiceClient(Generic[T, R]):
-    """Client class for making requests to services"""
-
     def __init__(self, service_type: Type[T], service_name: str):
-        """Initialize a service client.
-
-        Args:
-            service_type: The type of service to connect to
-            service_name: The name of the service to connect to
-        """
         # ServiceClient attributes
         self.service_type = service_type
         self.service_name = service_name
@@ -35,15 +20,6 @@ class ServiceClient(Generic[T, R]):
         self._service: Optional[ServiceServer] = None
 
     async def connect(self, retry_count: int = 3, retry_delay: float = 1.0) -> bool:
-        """Connect to the service.
-
-        Args:
-            retry_count: Number of connection attempts
-            retry_delay: Delay between attempts in seconds
-
-        Returns:
-            True if connected successfully, False otherwise
-        """
         for attempt in range(retry_count):
             self._service = ServiceServer.get_service(self.service_name)
             if self._service is not None:
@@ -57,23 +33,6 @@ class ServiceClient(Generic[T, R]):
     async def call(
         self, request: T, service_name: str = None, timeout: float = 30.0
     ) -> R:
-        """Call the service with a request.
-
-        Args:
-            request: The request to send to the service
-            service_name: The name of the service to call (defaults to client's service_name)
-            timeout: Timeout in seconds
-
-        Returns:
-            The response from the server
-
-        Raises:
-            ValueError: If the service name is incorrect
-            TypeError: If the request type is incorrect
-            ServiceNotFoundError: If the service is not found
-            ServiceTimeoutError: If the service call times out
-            ServiceError: For other service-related errors
-        """
         # Default to the client's service name if none provided
         if service_name is None:
             service_name = self.service_name
@@ -116,5 +75,5 @@ class ServiceClient(Generic[T, R]):
                 f"got {self._service.service_type.Response.__name__}"
             )
 
-        # Call the server
+        # Call the service server
         return await self._service.call(request, service_name, timeout=timeout)

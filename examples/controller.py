@@ -1,10 +1,3 @@
-"""Real-time robot controller.
-
-Demonstrates core robot control functionality: connecting to the simulation,
-resetting the robot state, and implementing a continuous control loop
-that sends movement commands at a configurable rate.
-"""
-
 import time
 import asyncio
 import logging
@@ -47,19 +40,16 @@ class Controller(Node):
     async def request_reset(
         self, seed: int | None = None, options: dict | None = None
     ) -> Reset.Response:
-        """Request a reset of the scene to an initial state."""
         request = Reset.Request(seed=seed, options=options)
 
         try:
             response = await self.reset_client.call(request, timeout=30.0)
-            logger.info(f"Reset response: {response.success}, {response.message}")
             return response
         except Exception as e:
             logger.error(f"Error resetting scene: {e}")
             return None
 
     async def request_step(self, action: ActionModel) -> Step.Response:
-        """Request a step with the robot given an action."""
         request = Step.Request(action=action)
 
         try:
@@ -70,11 +60,6 @@ class Controller(Node):
             return None
 
     async def run_loop(self, rate_hz: float = 1.0) -> None:
-        """Start the control loop.
-
-        Args:
-            rate_hz: The frequency to run the control loop at in Hz
-        """
         logger.info("Starting control loop")
         if self.loop_running:
             logger.warning("Control loop already running")
@@ -124,7 +109,6 @@ class Controller(Node):
             logger.info("Control loop ended")
 
     def start_loop(self, rate_hz: float = 1.0) -> None:
-        """Start the control loop using the shared event loop."""
         if self.loop_running:
             logger.warning("Control loop is already running")
             return
@@ -136,7 +120,6 @@ class Controller(Node):
         logger.info("Started control loop in shared event loop")
 
     def stop_loop(self) -> None:
-        """Stop the control loop"""
         self.loop_running = False
         self._shutdown_event.set()
         logger.info("Control loop stop requested")
@@ -147,7 +130,7 @@ def main():
     parser.add_argument("--host", type=str, default=None, help="Host to connect to")
     parser.add_argument("--port", type=int, default=None, help="Port to connect to")
     parser.add_argument(
-        "--rate", type=float, default=10.0, help="Control loop rate in Hz"
+        "--rate", type=float, default=1.0, help="Control loop rate in Hz"
     )
     args = parser.parse_args()
 
