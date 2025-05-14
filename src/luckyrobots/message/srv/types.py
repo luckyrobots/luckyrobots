@@ -30,6 +30,9 @@ class ResetRequest(ServiceRequest):
     seed: Optional[int] = Field(
         default=None, description="The seed to reset the robot with"
     )
+    options: Optional[Dict[str, Any]] = Field(
+        default=None, description="Options for the reset"
+    )
 
 
 class ResetResponse(ServiceResponse):
