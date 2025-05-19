@@ -68,7 +68,7 @@ class ServiceServer(Generic[T, R]):
             )
 
         # Validate the request type if possible
-        request_type = getattr(self.service_type, "Request", self.service_type)
+        request_type = getattr(self.service_type, "Request")
         if not isinstance(request, request_type):
             raise TypeError(
                 f"Expected request of type {request_type.__name__}, got {type(request).__name__}"

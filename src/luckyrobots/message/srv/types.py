@@ -20,8 +20,22 @@ class ServiceRequest(BaseModel):
 class ServiceResponse(BaseModel):
     """Base class for service responses"""
 
-    success: bool = Field(description="Whether the service call was successful")
-    message: str = Field(description="A message describing the service call")
+    success: bool = Field(
+        default=True, description="Whether the service call was successful"
+    )
+    message: str = Field(
+        default="", description="A message describing the service call"
+    )
+
+    type: str = Field(description="Type of response (reset_response or step_response)")
+    id: str = Field(description="Unique identifier")
+    time_stamp: str = Field(alias="timeStamp", description="Timestamp value")
+
+    observation: ObservationModel = Field(description="Observation data")
+    info: Dict[str, str] = Field(description="Additional information")
+
+    class Config:
+        populate_by_name = True
 
 
 class ResetRequest(ServiceRequest):
@@ -36,10 +50,9 @@ class ResetRequest(ServiceRequest):
 
 
 class ResetResponse(ServiceResponse):
-    """Response from reset service"""
+    """Response to reset request"""
 
-    observation: ObservationModel = Field(description="The observation from the reset")
-    info: Dict[str, Any] = Field(description="Additional information about the reset")
+    pass
 
 
 class Reset:
@@ -56,10 +69,9 @@ class StepRequest(ServiceRequest):
 
 
 class StepResponse(ServiceResponse):
-    """Response from step service"""
+    """Response to step request"""
 
-    observation: ObservationModel = Field(description="The observation from the step")
-    info: Dict[str, Any] = Field(description="Additional information about the step")
+    pass
 
 
 class Step:
