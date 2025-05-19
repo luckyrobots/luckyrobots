@@ -430,8 +430,11 @@ class LuckyRobots(Node):
         try:
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
 
-            success = response_data.get("success", False)
-            message = response_data.get("message", "Step processed")
+            success = True
+            message = "Step request processed"
+            type = response_data["type"]
+            id = response_data["id"]
+            time_stamp = response_data["timeStamp"]
 
             observation = ObservationModel(**response_data["observation"])
 
@@ -440,7 +443,13 @@ class LuckyRobots(Node):
                 info = {"data": info}
 
             return Step.Response(
-                success=success, message=message, observation=observation, info=info
+                success=success,
+                message=message,
+                type=type,
+                id=id,
+                time_stamp=time_stamp,
+                observation=observation,
+                info=info,
             )
 
         except asyncio.TimeoutError:
