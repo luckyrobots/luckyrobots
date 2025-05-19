@@ -88,11 +88,11 @@ class Controller(Node):
                 action = ActionModel(
                     joint_positions={
                         "0": 0.0,  # Rotation
-                        "1": 0.5,  # Pitch
-                        "2": 1.2,  # Elbow
-                        "3": -0.3,  # Wrist Pitch
-                        "4": 0.8,  # Wrist Roll
-                        "5": 0.5,  # Jaw
+                        "1": 0.0,  # Pitch
+                        "2": 0.0,  # Elbow
+                        "3": 0.0,  # Wrist Pitch
+                        "4": 0.0,  # Wrist Roll
+                        "5": 0.0,  # Jaw
                     }
                 )
                 logger.info(f"Sending step request with action: {action}")
@@ -100,6 +100,9 @@ class Controller(Node):
                 if response is None:
                     logger.warning("Step request failed, continuing loop")
                 logger.info(f"Step response: {response.success}")
+
+                print(f"timestamp: {response.time_stamp}")
+                print(f"observation: {response.observation.observation_state}")
 
                 # Calculate sleep time to maintain the desired rate
                 elapsed = time.time() - start_time
