@@ -1,6 +1,6 @@
 from .core.node import Node
 from .core.luckyrobots import LuckyRobots
-from .core.models import ObservationModel, ActionModel, PoseModel, TwistModel
+from .core.models import ObservationModel, ActionModel
 from .message.srv.types import Reset, Step
 from .core.parameters import get_param, set_param
 from .utils.check_updates import check_updates
@@ -12,8 +12,6 @@ __all__ = [
     "Node",
     "ObservationModel",
     "ActionModel",
-    "PoseModel",
-    "TwistModel",
     "Reset",
     "Step",
     "get_param",

@@ -9,7 +9,6 @@ from luckyrobots import (
     Step,
     Reset,
     ActionModel,
-    TwistModel,
     run_coroutine,
 )
 
@@ -87,10 +86,14 @@ class Controller(Node):
                 start_time = time.time()
 
                 action = ActionModel(
-                    twist=TwistModel(
-                        linear={"x": 0.5, "y": 0.0, "z": 0.0},
-                        angular={"x": 0.0, "y": 0.0, "z": 0.0},
-                    ),
+                    joint_positions={
+                        "0": 0.0,  # Rotation
+                        "1": 0.5,  # Pitch
+                        "2": 1.2,  # Elbow
+                        "3": -0.3,  # Wrist Pitch
+                        "4": 0.8,  # Wrist Roll
+                        "5": 0.5,  # Jaw
+                    }
                 )
                 logger.info(f"Sending step request with action: {action}")
                 response = await self.request_step(action)
@@ -144,7 +147,7 @@ def main():
         luckyrobots.start()
 
         # Wait for world client to connect
-        logger.info("Waiting for Unreal world client to connect...")
+        logger.info("Waiting for Lucky World client to connect...")
         if luckyrobots.wait_for_world_client(timeout=60.0):
             # Start the controller loop once world client is connected
             controller.start_loop(rate_hz=args.rate)

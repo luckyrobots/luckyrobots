@@ -246,16 +246,16 @@ class LuckyRobots(Node):
                 info={"error": "no_connection"},
             )
 
-        request_id = f"{uuid.uuid4().hex}"
+        id = f"{uuid.uuid4().hex}"
 
         shared_loop = get_event_loop()
         response_future = shared_loop.create_future()
 
-        self._pending_resets[request_id] = response_future
+        self._pending_resets[id] = response_future
 
         seed = request.seed if hasattr(request, "seed") else None
 
-        message = {"type": "reset", "request_id": request_id, "seed": seed}
+        message = {"type": "reset", "id": id, "seed": seed}
 
         # Send to world client
         try:
@@ -264,8 +264,8 @@ class LuckyRobots(Node):
             logger.info(f"Reset request sent to world client: {message}")
         except Exception as e:
             logger.error(f"Error sending reset request to world client: {e}")
-            if request_id in self._pending_resets:
-                del self._pending_resets[request_id]
+            if id in self._pending_resets:
+                del self._pending_resets[id]
             return Reset.Response(
                 success=False,
                 message=f"Error sending reset request: {str(e)}",
@@ -280,8 +280,11 @@ class LuckyRobots(Node):
             logger.info(f"Reset response received from world client: {response_data}")
 
             # Process response data into Reset.Response
-            success = response_data.get("success", False)
-            message = response_data.get("message", "Reset processed")
+            success = True
+            message = "Reset request processed"
+            type = response_data["type"]
+            id = response_data["id"]
+            time_stamp = response_data["timeStamp"]
 
             observation = ObservationModel(**response_data["observation"])
 
@@ -291,13 +294,19 @@ class LuckyRobots(Node):
                 info = {"data": info}
 
             return Reset.Response(
-                success=success, message=message, observation=observation, info=info
+                success=success,
+                message=message,
+                type=type,
+                id=id,
+                time_stamp=time_stamp,
+                observation=observation,
+                info=info,
             )
 
         except asyncio.TimeoutError:
-            logger.error(f"Reset request {request_id} timed out after 30 seconds")
-            if request_id in self._pending_resets:
-                del self._pending_resets[request_id]
+            logger.error(f"Reset request {id} timed out after 30 seconds")
+            if id in self._pending_resets:
+                del self._pending_resets[id]
             return Reset.Response(
                 success=False,
                 message="Reset request timed out - no response from world client",
@@ -306,8 +315,8 @@ class LuckyRobots(Node):
             )
         except Exception as e:
             logger.error(f"Error processing reset response: {e}")
-            if request_id in self._pending_resets:
-                del self._pending_resets[request_id]
+            if id in self._pending_resets:
+                del self._pending_resets[id]
             return Reset.Response(
                 success=False,
                 message=f"Error processing reset response: {str(e)}",
@@ -317,20 +326,18 @@ class LuckyRobots(Node):
 
     async def _process_reset_response(self, message_data: dict) -> None:
         """Process a reset response from the world client"""
-        request_id = message_data.get("request_id")
+        id = message_data.get("id")
 
-        if not request_id:
-            logger.warning("Received reset response without request_id")
+        if not id:
+            logger.warning("Received reset response without id")
             return
 
-        if request_id not in self._pending_resets:
-            logger.warning(
-                f"Received reset response for unknown request_id: {request_id}"
-            )
+        if id not in self._pending_resets:
+            logger.warning(f"Received reset response for unknown id: {id}")
             return
 
         # Get the future for this request
-        future = self._pending_resets[request_id]
+        future = self._pending_resets[id]
 
         shared_loop = get_event_loop()
 
@@ -339,7 +346,7 @@ class LuckyRobots(Node):
         )
 
         shared_loop.call_soon_threadsafe(
-            lambda p=self._pending_resets, r=request_id: p.pop(r, None)
+            lambda p=self._pending_resets, r=id: p.pop(r, None)
         )
 
     async def handle_step(self, request: Step.Request) -> Step.Response:
@@ -366,38 +373,41 @@ class LuckyRobots(Node):
             )
 
         # Generate a unique ID for this request
-        request_id = f"{uuid.uuid4().hex}"
+        id = f"{uuid.uuid4().hex}"
 
         shared_loop = get_event_loop()
         response_future = shared_loop.create_future()
 
-        self._pending_steps[request_id] = response_future
+        self._pending_steps[id] = response_future
 
-        pose = (
-            request.action.pose.dict()
-            if hasattr(request, "action") and request.action.pose
-            else None
-        )
-        twist = (
-            request.action.twist.dict()
-            if hasattr(request, "action") and request.action.twist
+        joint_positions = (
+            request.action.joint_positions
+            if hasattr(request.action, "joint_positions")
             else None
         )
 
-        if pose is None and twist is None:
-            logger.error("No pose or twist data provided in step request")
+        joint_velocities = (
+            request.action.joint_velocities
+            if hasattr(request.action, "joint_velocities")
+            else None
+        )
+
+        if joint_positions is None and joint_velocities is None:
+            logger.error(
+                "No joint positions or velocities data provided in step request"
+            )
             return Step.Response(
                 success=False,
-                message="No pose or twist data provided in step request",
+                message="No joint positions or velocities data provided in step request",
                 observation=None,
                 info={"error": "no_data"},
             )
 
         message = {
             "type": "step",
-            "request_id": request_id,
-            "pose": pose,
-            "twist": twist,
+            "id": id,
+            "joint_positions": joint_positions,
+            "joint_velocities": joint_velocities,
         }
 
         # Send to world client
@@ -407,8 +417,8 @@ class LuckyRobots(Node):
             logger.info(f"Step request sent to world client: {message}")
         except Exception as e:
             logger.error(f"Error sending step request to world client: {e}")
-            if request_id in self._pending_steps:
-                del self._pending_steps[request_id]
+            if id in self._pending_steps:
+                del self._pending_steps[id]
             return Step.Response(
                 success=False,
                 message=f"Error sending step request: {str(e)}",
@@ -434,9 +444,9 @@ class LuckyRobots(Node):
             )
 
         except asyncio.TimeoutError:
-            logger.error(f"Step request {request_id} timed out after 30 seconds")
-            if request_id in self._pending_steps:
-                del self._pending_steps[request_id]
+            logger.error(f"Step request {id} timed out after 30 seconds")
+            if id in self._pending_steps:
+                del self._pending_steps[id]
             return Step.Response(
                 success=False,
                 message="Step request timed out - no response from world client",
@@ -445,8 +455,8 @@ class LuckyRobots(Node):
             )
         except Exception as e:
             logger.error(f"Error processing step response: {e}")
-            if request_id in self._pending_steps:
-                del self._pending_steps[request_id]
+            if id in self._pending_steps:
+                del self._pending_steps[id]
             return Step.Response(
                 success=False,
                 message=f"Error processing step response: {str(e)}",
@@ -456,19 +466,17 @@ class LuckyRobots(Node):
 
     async def _process_step_response(self, message_data: dict) -> None:
         """Process a step response from the world client"""
-        request_id = message_data.get("request_id")
+        id = message_data.get("id")
 
-        if not request_id:
-            logger.warning("Received step response without request_id")
+        if not id:
+            logger.warning("Received step response without id")
             return
 
-        if request_id not in self._pending_steps:
-            logger.warning(
-                f"Received step response for unknown request_id: {request_id}"
-            )
+        if id not in self._pending_steps:
+            logger.warning(f"Received step response for unknown id: {id}")
             return
 
-        future = self._pending_steps[request_id]
+        future = self._pending_steps[id]
 
         shared_loop = get_event_loop()
 
@@ -479,7 +487,7 @@ class LuckyRobots(Node):
 
         # Also clean up the pending steps in a thread-safe way
         shared_loop.call_soon_threadsafe(
-            lambda p=self._pending_steps, r=request_id: p.pop(r, None)
+            lambda p=self._pending_steps, r=id: p.pop(r, None)
         )
 
     def spin(self) -> None:
