@@ -237,14 +237,10 @@ class LuckyRobots(Node):
         Returns:
             Reset.Response: The response from the world client
         """
+
         if self.world_client is None:
-            logger.error("No world client connection available")
-            return Reset.Response(
-                success=False,
-                message="No world client connection available",
-                observation=None,
-                info={"error": "no_connection"},
-            )
+            self.shutdown()
+            raise Exception("No world client connection available")
 
         id = f"{uuid.uuid4().hex}"
 
@@ -259,25 +255,16 @@ class LuckyRobots(Node):
 
         # Send to world client
         try:
-            logger.info(f"Sending reset request to world client: {message}")
             await self.world_client.send_text(json.dumps(message))
-            logger.info(f"Reset request sent to world client: {message}")
         except Exception as e:
-            logger.error(f"Error sending reset request to world client: {e}")
             if id in self._pending_resets:
                 del self._pending_resets[id]
-            return Reset.Response(
-                success=False,
-                message=f"Error sending reset request: {str(e)}",
-                observation=None,
-                info={"error": "communication_error"},
-            )
+            self.shutdown()
+            raise Exception(f"Error sending reset request to world client: {e}")
 
         # Await response from world client
         try:
-            logger.info(f"Awaiting reset response from world client: {message}")
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
-            logger.info(f"Reset response received from world client: {response_data}")
 
             # Process response data into Reset.Response
             success = True
@@ -304,25 +291,12 @@ class LuckyRobots(Node):
             )
 
         except asyncio.TimeoutError:
-            logger.error(f"Reset request {id} timed out after 30 seconds")
-            if id in self._pending_resets:
-                del self._pending_resets[id]
-            return Reset.Response(
-                success=False,
-                message="Reset request timed out - no response from world client",
-                observation=None,
-                info={"error": "timeout"},
-            )
+            self.shutdown()
+            raise Exception(f"Reset request {id} timed out after 30 seconds")
+
         except Exception as e:
-            logger.error(f"Error processing reset response: {e}")
-            if id in self._pending_resets:
-                del self._pending_resets[id]
-            return Reset.Response(
-                success=False,
-                message=f"Error processing reset response: {str(e)}",
-                observation=None,
-                info={"error": "processing_error"},
-            )
+            self.shutdown()
+            raise Exception(f"Error processing reset response: {e}")
 
     async def _process_reset_response(self, message_data: dict) -> None:
         """Process a reset response from the world client"""
@@ -364,13 +338,8 @@ class LuckyRobots(Node):
         """
         # Check if world client is connected
         if self.world_client is None:
-            logger.error("No world client connection available")
-            return Step.Response(
-                success=False,
-                message="No world client connection available",
-                observation=None,
-                info={"error": "no_connection"},
-            )
+            self.shutdown()
+            raise Exception("No world client connection available")
 
         # Generate a unique ID for this request
         id = f"{uuid.uuid4().hex}"
@@ -412,19 +381,10 @@ class LuckyRobots(Node):
 
         # Send to world client
         try:
-            logger.info(f"Sending step request to world client: {message}")
             await self.world_client.send_text(json.dumps(message))
-            logger.info(f"Step request sent to world client: {message}")
         except Exception as e:
-            logger.error(f"Error sending step request to world client: {e}")
-            if id in self._pending_steps:
-                del self._pending_steps[id]
-            return Step.Response(
-                success=False,
-                message=f"Error sending step request: {str(e)}",
-                observation=None,
-                info={"error": "communication_error"},
-            )
+            self.shutdown()
+            raise Exception(f"Error sending step request to world client: {e}")
 
         # Wait for response
         try:
@@ -453,25 +413,12 @@ class LuckyRobots(Node):
             )
 
         except asyncio.TimeoutError:
-            logger.error(f"Step request {id} timed out after 30 seconds")
-            if id in self._pending_steps:
-                del self._pending_steps[id]
-            return Step.Response(
-                success=False,
-                message="Step request timed out - no response from world client",
-                observation=None,
-                info={"error": "timeout"},
-            )
+            self.shutdown()
+            raise Exception(f"Step request {id} timed out after 30 seconds")
+
         except Exception as e:
-            logger.error(f"Error processing step response: {e}")
-            if id in self._pending_steps:
-                del self._pending_steps[id]
-            return Step.Response(
-                success=False,
-                message=f"Error processing step response: {str(e)}",
-                observation=None,
-                info={"error": "processing_error"},
-            )
+            self.shutdown()
+            raise Exception(f"Error processing step response: {e}")
 
     async def _process_step_response(self, message_data: dict) -> None:
         """Process a step response from the world client"""

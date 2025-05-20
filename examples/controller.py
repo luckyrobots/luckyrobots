@@ -75,11 +75,13 @@ class Controller(Node):
         # Attempt to reset the robot
         response = await self.request_reset()
         if response is None:
-            logger.error("Failed to reset robot, control loop will not start")
             self.loop_running = False
-            return
+            self.shutdown()
+            raise Exception("Failed to reset robot, control loop will not start")
 
-        logger.info("Robot reset successfully, starting control loop")
+        logger.info(f"Reset success: {response.success}")
+        logger.info(f"Reset observation: {response.observation.observation_state}")
+        logger.info(f"Reset info: {response.info}")
 
         try:
             while self.loop_running and not self._shutdown_event.is_set():
@@ -95,14 +97,15 @@ class Controller(Node):
                         "5": 0.0,  # Jaw
                     }
                 )
-                logger.info(f"Sending step request with action: {action}")
                 response = await self.request_step(action)
                 if response is None:
                     logger.warning("Step request failed, continuing loop")
-                logger.info(f"Step response: {response.success}")
 
-                print(f"timestamp: {response.time_stamp}")
-                print(f"observation: {response.observation.observation_state}")
+                logger.info(f"Step success: {response.success}")
+                logger.info(
+                    f"Step observation: {response.observation.observation_state}"
+                )
+                logger.info(f"Step info: {response.info}")
 
                 # Calculate sleep time to maintain the desired rate
                 elapsed = time.time() - start_time
@@ -149,16 +152,16 @@ def main():
 
         luckyrobots.start()
 
-        # Wait for world client to connect
         logger.info("Waiting for Lucky World client to connect...")
         if luckyrobots.wait_for_world_client(timeout=60.0):
-            # Start the controller loop once world client is connected
             controller.start_loop(rate_hz=args.rate)
             logger.info("Controller running. Press Ctrl+C to exit.")
+            luckyrobots.spin()
         else:
-            logger.error("No world client connected. Controller loop will not start.")
-
-        luckyrobots.spin()
+            luckyrobots.shutdown()
+            raise Exception(
+                "No world client connected. Controller loop will not start."
+            )
 
     except KeyboardInterrupt:
         logger.info("Received keyboard interrupt, shutting down...")
