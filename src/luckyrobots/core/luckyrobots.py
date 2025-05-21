@@ -221,8 +221,8 @@ class LuckyRobots(Node):
             logger.info("World client connected successfully")
             return True
         else:
-            logger.warning(f"No world client connected after {timeout} seconds")
-            return False
+            self.shutdown()
+            raise Exception(f"No world client connected after {timeout} seconds")
 
     async def handle_reset(self, request: Reset.Request) -> Reset.Response:
         """Handle the reset request by forwarding to the world client.
@@ -251,11 +251,11 @@ class LuckyRobots(Node):
 
         seed = request.seed if hasattr(request, "seed") else None
 
-        message = {"type": "reset", "id": id, "seed": seed}
+        request_data = {"type": "reset", "id": id, "seed": seed}
 
         # Send to world client
         try:
-            await self.world_client.send_text(json.dumps(message))
+            await self.world_client.send_text(json.dumps(request_data))
         except Exception as e:
             if id in self._pending_resets:
                 del self._pending_resets[id]
@@ -303,12 +303,12 @@ class LuckyRobots(Node):
         id = message_data.get("id")
 
         if not id:
-            logger.warning("Received reset response without id")
-            return
+            self.shutdown()
+            raise Exception("Received reset response without id")
 
         if id not in self._pending_resets:
-            logger.warning(f"Received reset response for unknown id: {id}")
-            return
+            self.shutdown()
+            raise Exception(f"Received reset response for unknown id: {id}")
 
         # Get the future for this request
         future = self._pending_resets[id]
@@ -372,7 +372,7 @@ class LuckyRobots(Node):
                 info={"error": "no_data"},
             )
 
-        message = {
+        request_data = {
             "type": "step",
             "id": id,
             "joint_positions": joint_positions,
@@ -381,7 +381,7 @@ class LuckyRobots(Node):
 
         # Send to world client
         try:
-            await self.world_client.send_text(json.dumps(message))
+            await self.world_client.send_text(json.dumps(request_data))
         except Exception as e:
             self.shutdown()
             raise Exception(f"Error sending step request to world client: {e}")
@@ -425,12 +425,12 @@ class LuckyRobots(Node):
         id = message_data.get("id")
 
         if not id:
-            logger.warning("Received step response without id")
-            return
+            self.shutdown()
+            raise Exception("Received step response without id")
 
         if id not in self._pending_steps:
-            logger.warning(f"Received step response for unknown id: {id}")
-            return
+            self.shutdown()
+            raise Exception(f"Received step response for unknown id: {id}")
 
         future = self._pending_steps[id]
 
