@@ -79,13 +79,11 @@ class Controller(Node):
             self.shutdown()
             raise Exception("Failed to reset robot, control loop will not start")
 
-        logger.info(f"Reset success: {response.success}")
-        logger.info(f"Reset observation: {response.observation.observation_state}")
         logger.info(f"Reset info: {response.info}")
 
         try:
             while self.loop_running and not self._shutdown_event.is_set():
-                start_time = time.time()
+                # start_time = time.time()
 
                 action = ActionModel(
                     joint_positions={
@@ -99,18 +97,16 @@ class Controller(Node):
                 )
                 response = await self.request_step(action)
                 if response is None:
-                    logger.warning("Step request failed, continuing loop")
+                    self.loop_running = False
+                    self.shutdown()
+                    raise Exception("Step request failed, control loop will not step")
 
-                logger.info(f"Step success: {response.success}")
-                logger.info(
-                    f"Step observation: {response.observation.observation_state}"
-                )
                 logger.info(f"Step info: {response.info}")
 
-                # Calculate sleep time to maintain the desired rate
-                elapsed = time.time() - start_time
-                sleep_time = max(0, period - elapsed)
-                await asyncio.sleep(sleep_time)
+                # # Calculate sleep time to maintain the desired rate
+                # elapsed = time.time() - start_time
+                # sleep_time = max(0, period - elapsed)
+                # await asyncio.sleep(sleep_time)
         except Exception as e:
             logger.error(f"Error in control loop: {e}")
         finally:
