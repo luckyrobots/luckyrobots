@@ -13,14 +13,6 @@ configs:
 
 This dataset was created using [LeRobot](https://github.com/huggingface/lerobot).
 
-## Dataset Description
-
-
-
-- **Homepage:** [More Information Needed]
-- **Paper:** [More Information Needed]
-- **License:** apache-2.0
-
 ## Dataset Structure
 
 [meta/info.json](meta/info.json):
