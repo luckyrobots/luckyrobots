@@ -154,11 +154,3 @@ This dataset was created using [LeRobot](https://github.com/huggingface/lerobot)
 }
 ```
 
-
-## Citation
-
-**BibTeX:**
-
-```bibtex
-[More Information Needed]
-```
