@@ -62,11 +62,11 @@ so100:
   camera_config:
     laptop:
       camera_index: 0
-      fps: 30
+      fps: 60
       camera_resolution: [640, 480]
     phone:
       camera_index: 1
-      fps: 30
+      fps: 60
       camera_resolution: [640, 480]
 
 stretch_v1:
