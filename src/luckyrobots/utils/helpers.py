@@ -13,9 +13,9 @@ def validate_params(scene: str = None, robot: str = None, task: str = None) -> b
     robot_config = get_robot_config(robot)
 
     if scene is not None and scene not in robot_config["scenes"]:
-        raise ValueError(f"Scene {scene} not found in {robot} config")
+        raise ValueError(f"Scene {scene} not available in {robot} config")
     if task is not None and task not in robot_config["tasks"]:
-        raise ValueError(f"Task {task} not found in {robot} config")
+        raise ValueError(f"Task {task} not available in {robot} config")
 
 
 def get_robot_config(robot: str = None) -> dict:
