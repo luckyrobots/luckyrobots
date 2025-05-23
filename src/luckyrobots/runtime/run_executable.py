@@ -50,7 +50,7 @@ def remove_lock_file() -> None:
 
 
 def run_luckyworld_executable(
-    scene: str, robot_type: str, task: str, directory_to_watch: str
+    scene: str, robot: str, task: str, directory_to_watch: str
 ) -> None:
     """Run the LuckyWorld executable"""
     # Determine the correct path based on the operating system
@@ -82,8 +82,8 @@ def run_luckyworld_executable(
         command = [executable_path]
         if scene:
             command.extend(["--scene", scene])
-        if robot_type:
-            command.extend(["--robot-type", robot_type])
+        if robot:
+            command.extend(["--robot", robot])
         if task:
             command.extend(["--task", task])
 
@@ -112,7 +112,7 @@ def run_luckyworld_executable(
 
         if verbose:
             print(
-                f"LuckyWorld application started successfully with scene={scene}, robot_type={robot_type}, task={task}"
+                f"LuckyWorld application started successfully with scene={scene}, robot={robot}, task={task}"
             )
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to start LuckyWorld application. {e}")

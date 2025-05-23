@@ -28,6 +28,7 @@ from ..utils.event_loop import (
     initialize_event_loop,
     shutdown_event_loop,
 )
+from ..utils.helpers import validate_params, get_robot_config
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -48,8 +49,8 @@ class LuckyRobots(Node):
     _pending_resets = {}
     _pending_steps = {}
 
-    _nodes: Dict[str, "Node"] = {}
     _running = False
+    _nodes: Dict[str, "Node"] = {}
     _shutdown_event = threading.Event()
 
     def __init__(self, host: str = None, port: int = None):
@@ -76,8 +77,8 @@ class LuckyRobots(Node):
             logger.info(f"WebSocket server running on {self.host}:{self.port}")
             return True
         except Exception as e:
-            logger.info(f"WebSocket server not running on {self.host}:{self.port}")
-            return False
+            logger.error(f"WebSocket server not running on {self.host}:{self.port}")
+            self.shutdown()
 
     def _start_websocket_server(self) -> None:
         """Start the websocket server in a separate thread using uvicorn"""
@@ -116,6 +117,10 @@ class LuckyRobots(Node):
         LuckyRobots.host = ip_address
         set_param("core/host", ip_address)
 
+    def get_robot_config(self, robot: str = None) -> dict:
+        """Get the configuration for the LuckyRobots node"""
+        return get_robot_config(robot)
+
     def register_node(self, node: Node) -> None:
         """Register a node with the LuckyRobots node"""
         self._nodes[node.full_name] = node
@@ -132,7 +137,7 @@ class LuckyRobots(Node):
         self,
         scene: str = None,
         task: str = None,
-        robot_type: str = None,
+        robot: str = None,
         render_mode: str = None,
         binary_path: Optional[str] = None,
     ) -> None:
@@ -141,13 +146,15 @@ class LuckyRobots(Node):
             logger.warning("LuckyRobots is already running")
             return
 
+        validate_params(scene, task, robot)
+
         if (
             not is_luckyworld_running()
             and "--lr-no-executable" not in sys.argv
             and render_mode is not None
         ):
             logger.error("LuckyWorld is not running, starting it now...")
-            # run_luckyworld_executable(scene, task, robot_type, binary_path)
+            run_luckyworld_executable(scene, task, robot, binary_path)
 
         library_dev()
 
@@ -260,7 +267,7 @@ class LuckyRobots(Node):
             if id in self._pending_resets:
                 del self._pending_resets[id]
             self.shutdown()
-            raise Exception(f"Error sending reset request to world client: {e}")
+            logger.error(f"Error sending reset request to world client: {e}")
 
         # Await response from world client
         try:
@@ -272,13 +279,8 @@ class LuckyRobots(Node):
             type = response_data["type"]
             id = response_data["id"]
             time_stamp = response_data["timeStamp"]
-
             observation = ObservationModel(**response_data["observation"])
-
-            # Get any additional info
-            info = response_data.get("info", {})
-            if not isinstance(info, dict):
-                info = {"data": info}
+            info = response_data["info"]
 
             return Reset.Response(
                 success=success,
@@ -292,11 +294,10 @@ class LuckyRobots(Node):
 
         except asyncio.TimeoutError:
             self.shutdown()
-            raise Exception(f"Reset request {id} timed out after 30 seconds")
-
+            logger.error(f"Reset request {id} timed out after 30 seconds")
         except Exception as e:
             self.shutdown()
-            raise Exception(f"Error processing reset response: {e}")
+            logger.error(f"Error processing reset response: {e}")
 
     async def _process_reset_response(self, message_data: dict) -> None:
         """Process a reset response from the world client"""
@@ -305,12 +306,10 @@ class LuckyRobots(Node):
         if not id:
             self.shutdown()
             raise Exception("Received reset response without id")
-
         if id not in self._pending_resets:
             self.shutdown()
             raise Exception(f"Received reset response for unknown id: {id}")
 
-        # Get the future for this request
         future = self._pending_resets[id]
 
         shared_loop = get_event_loop()
@@ -362,14 +361,9 @@ class LuckyRobots(Node):
         )
 
         if joint_positions is None and joint_velocities is None:
-            logger.error(
+            self.shutdown()
+            raise Exception(
                 "No joint positions or velocities data provided in step request"
-            )
-            return Step.Response(
-                success=False,
-                message="No joint positions or velocities data provided in step request",
-                observation=None,
-                info={"error": "no_data"},
             )
 
         request_data = {
@@ -384,7 +378,7 @@ class LuckyRobots(Node):
             await self.world_client.send_text(json.dumps(request_data))
         except Exception as e:
             self.shutdown()
-            raise Exception(f"Error sending step request to world client: {e}")
+            logger.error(f"Error sending step request to world client: {e}")
 
         # Wait for response
         try:
@@ -395,12 +389,8 @@ class LuckyRobots(Node):
             type = response_data["type"]
             id = response_data["id"]
             time_stamp = response_data["timeStamp"]
-
             observation = ObservationModel(**response_data["observation"])
-
-            info = response_data.get("info", {})
-            if not isinstance(info, dict):
-                info = {"data": info}
+            info = response_data["info"]
 
             return Step.Response(
                 success=success,
@@ -414,11 +404,10 @@ class LuckyRobots(Node):
 
         except asyncio.TimeoutError:
             self.shutdown()
-            raise Exception(f"Step request {id} timed out after 30 seconds")
-
+            logger.error(f"Step request {id} timed out after 30 seconds")
         except Exception as e:
             self.shutdown()
-            raise Exception(f"Error processing step response: {e}")
+            logger.error(f"Error processing step response: {e}")
 
     async def _process_step_response(self, message_data: dict) -> None:
         """Process a step response from the world client"""
