@@ -3,6 +3,7 @@ import asyncio
 import logging
 import threading
 import argparse
+from collections import deque
 from luckyrobots import (
     Node,
     LuckyRobots,
@@ -31,10 +32,46 @@ class Controller(Node):
         logger.info(f"Controller node {self.full_name} created")
         self._shutdown_event = threading.Event()
         self.loop_running = False
+        
+        # FPS tracking
+        self.frame_times = deque(maxlen=10)  # Keep last 10 frame times
+        self.last_frame_time = None
+        self.frame_count = 0
 
     async def _setup_async(self) -> None:
         self.reset_client = self.create_client(Reset, "/reset")
         self.step_client = self.create_client(Step, "/step")
+
+    def calculate_and_print_fps(self):
+        """Calculate and print current FPS based on frame timestamps"""
+        current_time = time.time()
+        
+        if self.last_frame_time is not None:
+            frame_delta = current_time - self.last_frame_time
+            self.frame_times.append(frame_delta)
+        
+        self.last_frame_time = current_time
+        self.frame_count += 1
+        
+        # Print FPS every 30 frames or every 5 seconds
+        if self.frame_count % 30 == 0 or (self.frame_times and len(self.frame_times) >= 10):
+            if len(self.frame_times) > 1:
+                avg_frame_time = sum(self.frame_times) / len(self.frame_times)
+                fps = 1.0 / avg_frame_time if avg_frame_time > 0 else 0
+                logger.info(f"📷 Current camera FPS: {fps:.2f} (avg over {len(self.frame_times)} frames)")
+            # else:
+                # logger.info("📷 Calculating FPS...")
+
+    def log_camera_info(self, response):
+        """Log information about received camera data"""
+        if response.observation and response.observation.observation_cameras:
+            cameras = response.observation.observation_cameras
+            # Only log camera info every 100 frames to avoid spam
+            # if self.frame_count % 100 == 0:
+            #     camera_info = []
+                # for cam in cameras:
+                #     camera_info.append(f"{cam.camera_name}({cam.shape.image_width}x{cam.shape.image_height})")
+                # logger.info(f"📹 Received data from {len(cameras)} camera(s): {', '.join(camera_info)}")
 
     async def request_reset(
         self, seed: int | None = None, options: dict | None = None
@@ -58,7 +95,7 @@ class Controller(Node):
             logger.error(f"Error stepping robot: {e}")
             return None
 
-    async def run_loop(self, rate_hz: float = 1.0) -> None:
+    async def run_loop(self, rate_hz: float = 120.0) -> None:
         logger.info("Starting control loop")
         if self.loop_running:
             logger.warning("Control loop already running")
@@ -83,7 +120,7 @@ class Controller(Node):
 
         try:
             while self.loop_running and not self._shutdown_event.is_set():
-                # start_time = time.time()
+                start_time = time.time()
 
                 action = ActionModel(
                     joint_positions={
@@ -101,19 +138,24 @@ class Controller(Node):
                     self.shutdown()
                     raise Exception("Step request failed, control loop will not step")
 
+                # Track FPS for camera data
+                if response.observation and response.observation.observation_cameras:
+                    self.calculate_and_print_fps()
+                    self.log_camera_info(response)
+
                 logger.info(f"Step info: {response.info}")
 
-                # # Calculate sleep time to maintain the desired rate
-                # elapsed = time.time() - start_time
-                # sleep_time = max(0, period - elapsed)
-                # await asyncio.sleep(sleep_time)
+                # Calculate sleep time to maintain the desired rate
+                elapsed = time.time() - start_time
+                sleep_time = max(0, period - elapsed)
+                await asyncio.sleep(sleep_time)
         except Exception as e:
             logger.error(f"Error in control loop: {e}")
         finally:
             self.loop_running = False
             logger.info("Control loop ended")
 
-    def start_loop(self, rate_hz: float = 1.0) -> None:
+    def start_loop(self, rate_hz: float = 30.0) -> None:
         if self.loop_running:
             logger.warning("Control loop is already running")
             return
@@ -135,12 +177,22 @@ def main():
     parser.add_argument("--host", type=str, default=None, help="Host to connect to")
     parser.add_argument("--port", type=int, default=None, help="Port to connect to")
     parser.add_argument(
-        "--rate", type=float, default=1.0, help="Control loop rate in Hz"
+        "--rate", type=float, default=30.0, help="Control loop rate in Hz"
+    )
+    parser.add_argument(
+        "--show-camera", action="store_true", help="Enable camera feed display windows"
     )
     args = parser.parse_args()
 
     try:
         luckyrobots = LuckyRobots(host=args.host, port=args.port)
+        
+        # Set camera display based on command line argument
+        luckyrobots.set_camera_display(args.show_camera)
+        if args.show_camera:
+            logger.info("Camera feed display enabled")
+        else:
+            logger.info("Camera feed display disabled")
 
         controller = Controller(host=args.host, port=args.port)
 
