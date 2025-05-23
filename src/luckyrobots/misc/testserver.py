@@ -1,23 +1,24 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import logging
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 
 # Global variable to store the next request
 next_req = {}
+
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         global next_req
         self.log_request("GET")
-        if self.path == '/html':
+        if self.path == "/html":
             self.send_response(200)
-            self.send_header('Content-type', 'text/html')
+            self.send_header("Content-type", "text/html")
             self.end_headers()
-            html = f'''
+            html = f"""
             <!DOCTYPE html>
             <html>
             <body>
@@ -30,11 +31,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 <pre id="storedJson">{json.dumps(next_req, indent=2)}</pre>
             </body>
             </html>
-            '''
+            """
             self.wfile.write(html.encode())
-        elif self.path == '/':
+        elif self.path == "/":
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header("Content-type", "application/json")
             self.end_headers()
             response = json.dumps(next_req)
             self.wfile.write(response.encode())
@@ -46,32 +47,32 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"404 Not Found")
 
     def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length).decode('utf-8')
+        content_length = int(self.headers["Content-Length"])
+        post_data = self.rfile.read(content_length).decode("utf-8")
         self.log_request("POST", post_data)
-        
+
         global next_req
-        if self.path == '/html':
+        if self.path == "/html":
             parsed_data = parse_qs(post_data)
-            json_data = parsed_data.get('json_data', ['{}'])[0]
+            json_data = parsed_data.get("json_data", ["{}"])[0]
             try:
                 global next_req
                 next_req = json.loads(json_data)
                 self.send_response(303)  # 303 See Other
-                self.send_header('Location', '/html')
+                self.send_header("Location", "/html")
                 self.end_headers()
             except json.JSONDecodeError:
                 self.send_response(400)
-                self.send_header('Content-type', 'text/html')
+                self.send_header("Content-type", "text/html")
                 self.end_headers()
-                error_message = '''
+                error_message = """
                 <html>
                 <body>
                     <h2>Error: Invalid JSON data</h2>
                     <a href="/html">Go back to form</a>
                 </body>
                 </html>
-                '''
+                """
                 self.wfile.write(error_message.encode())
         else:
             self.send_response(404)
@@ -85,11 +86,13 @@ class RequestHandler(BaseHTTPRequestHandler):
         if data:
             logging.info(f"Data: {data}")
 
+
 def run_server(port=3000):
-    server_address = ('', port)
+    server_address = ("", port)
     httpd = HTTPServer(server_address, RequestHandler)
     print(f"Server running on port {port}")
     httpd.serve_forever()
+
 
 if __name__ == "__main__":
     run_server()
