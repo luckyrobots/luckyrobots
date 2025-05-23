@@ -1,0 +1,81 @@
+so100:
+  observation_types:
+    - environment_state_pixels_agent_pos
+  available_scenes:
+    - loft
+  available_tasks:
+    - pickandplace
+  action_space:
+    joint_names:
+      - shoulder_pan
+      - shoulder_lift
+      - elbow_flex
+      - wrist_flex
+      - wrist_roll
+      - gripper
+    joint_limits:
+      - name: shoulder_pan
+        lower: -1.57
+        upper: 1.57
+      - name: shoulder_lift
+        lower: -1.57
+        upper: 1.57
+      - name: elbow_flex
+        lower: -1.57
+        upper: 1.57
+      - name: wrist_flex
+        lower: -1.57
+        upper: 1.57
+      - name: wrist_roll
+        lower: -1.57
+        upper: 1.57
+      - name: gripper
+        lower: 0.0
+        upper: 0.1
+  observation_space:
+    joint_names:
+      - shoulder_pan
+      - shoulder_lift
+      - elbow_flex
+      - wrist_flex
+      - wrist_roll
+      - gripper
+    joint_limits:
+      - name: shoulder_pan
+        lower: -1.57
+        upper: 1.57
+      - name: shoulder_lift
+        lower: -1.57
+        upper: 1.57
+      - name: elbow_flex
+        lower: -1.57
+        upper: 1.57
+      - name: wrist_flex
+        lower: -1.57
+        upper: 1.57
+      - name: wrist_roll
+        lower: -1.57
+        upper: 1.57
+      - name: gripper
+        lower: 0.0
+        upper: 0.1
+  camera_config:
+    laptop:
+      camera_index: 0
+      fps: 30
+      camera_resolution: [640, 480]
+    phone:
+      camera_index: 1
+      fps: 30
+      camera_resolution: [640, 480]
+
+stretch_v1:
+  observation_types:
+    - environment_state_pixels_agent_pos
+  available_scenes:
+    - loft
+  available_tasks:
+    - pickandplace
+    - navigation
+  action_space:
+  observation_space:
