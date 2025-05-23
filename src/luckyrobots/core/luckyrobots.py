@@ -146,15 +146,15 @@ class LuckyRobots(Node):
             logger.warning("LuckyRobots is already running")
             return
 
-        validate_params(scene, task, robot)
+        # validate_params(scene, task, robot)
 
-        if (
-            not is_luckyworld_running()
-            and "--lr-no-executable" not in sys.argv
-            and render_mode is not None
-        ):
-            logger.error("LuckyWorld is not running, starting it now...")
-            run_luckyworld_executable(scene, task, robot, binary_path)
+        # if (
+        #     not is_luckyworld_running()
+        #     and "--lr-no-executable" not in sys.argv
+        #     and render_mode is not None
+        # ):
+        #     logger.error("LuckyWorld is not running, starting it now...")
+        #     run_luckyworld_executable(scene, task, robot, binary_path)
 
         library_dev()
 
@@ -277,7 +277,7 @@ class LuckyRobots(Node):
             success = True
             message = "Reset request processed"
             type = response_data["type"]
-            id = response_data["id"]
+            id = response_data["iD"]
             time_stamp = response_data["timeStamp"]
             observation = ObservationModel(**response_data["observation"])
             info = response_data["info"]
@@ -301,7 +301,7 @@ class LuckyRobots(Node):
 
     async def _process_reset_response(self, message_data: dict) -> None:
         """Process a reset response from the world client"""
-        id = message_data.get("id")
+        id = message_data.get("iD")
 
         if not id:
             self.shutdown()
@@ -387,7 +387,7 @@ class LuckyRobots(Node):
             success = True
             message = "Step request processed"
             type = response_data["type"]
-            id = response_data["id"]
+            id = response_data["iD"]
             time_stamp = response_data["timeStamp"]
             observation = ObservationModel(**response_data["observation"])
             info = response_data["info"]
@@ -411,7 +411,7 @@ class LuckyRobots(Node):
 
     async def _process_step_response(self, message_data: dict) -> None:
         """Process a step response from the world client"""
-        id = message_data.get("id")
+        id = message_data.get("iD")
 
         if not id:
             self.shutdown()
