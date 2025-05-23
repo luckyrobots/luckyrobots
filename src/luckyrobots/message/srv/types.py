@@ -4,9 +4,7 @@ This module defines the data models used for request and response messaging.
 """
 
 from typing import Any, Dict, Optional
-
-from ...core.models import ActionModel, ObservationModel
-
+from ...core.models import ObservationModel
 
 from pydantic import BaseModel, Field
 
@@ -65,7 +63,9 @@ class Reset:
 class StepRequest(ServiceRequest):
     """Request to step the robot with an action"""
 
-    action: ActionModel = Field(description="The action to step the robot with")
+    actuator_values: list = Field(
+        description="The array of actuator values to control the robot with"
+    )
 
 
 class StepResponse(ServiceResponse):

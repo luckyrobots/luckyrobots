@@ -135,9 +135,9 @@ class LuckyRobots(Node):
 
     def start(
         self,
-        scene: str = None,
-        task: str = None,
-        robot: str = None,
+        scene: str = "kitchen",
+        task: str = "pickandplace",
+        robot: str = "so100",
         render_mode: str = None,
         binary_path: Optional[str] = None,
     ) -> None:
@@ -348,29 +348,10 @@ class LuckyRobots(Node):
 
         self._pending_steps[id] = response_future
 
-        joint_positions = (
-            request.action.joint_positions
-            if hasattr(request.action, "joint_positions")
-            else None
-        )
-
-        joint_velocities = (
-            request.action.joint_velocities
-            if hasattr(request.action, "joint_velocities")
-            else None
-        )
-
-        if joint_positions is None and joint_velocities is None:
-            self.shutdown()
-            raise Exception(
-                "No joint positions or velocities data provided in step request"
-            )
-
         request_data = {
             "type": "step",
             "id": id,
-            "joint_positions": joint_positions,
-            "joint_velocities": joint_velocities,
+            "actuator_values": request.actuator_values,
         }
 
         # Send to world client
@@ -558,7 +539,6 @@ async def world_endpoint(websocket: WebSocket) -> None:
         logger.info("World client connected")
 
     try:
-        # Process messages until disconnection
         while True:
             try:
                 message_json = await websocket.receive_json()
@@ -576,6 +556,7 @@ async def world_endpoint(websocket: WebSocket) -> None:
                 logger.error(f"Received invalid JSON from world client")
             except Exception as e:
                 logger.error(f"Error processing message from world client: {e}")
+                app.lucky_robots.shutdown()
     except WebSocketDisconnect:
         logger.info("World client disconnected")
         if hasattr(app, "lucky_robots"):
