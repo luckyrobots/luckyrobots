@@ -3,14 +3,8 @@ import asyncio
 import logging
 import threading
 import argparse
-from luckyrobots import (
-    Node,
-    LuckyRobots,
-    Step,
-    Reset,
-    ActionModel,
-    run_coroutine,
-)
+import numpy as np
+from luckyrobots import Node, LuckyRobots, Step, Reset, run_coroutine
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -48,8 +42,8 @@ class Controller(Node):
             logger.error(f"Error resetting scene: {e}")
             return None
 
-    async def request_step(self, action: ActionModel) -> Step.Response:
-        request = Step.Request(action=action)
+    async def request_step(self, actuator_values: np.ndarray) -> Step.Response:
+        request = Step.Request(actuator_values=actuator_values)
 
         try:
             response = await self.step_client.call(request)
@@ -79,23 +73,12 @@ class Controller(Node):
             self.shutdown()
             raise Exception("Failed to reset robot, control loop will not start")
 
-        logger.info(f"Reset info: {response.info}")
-
         try:
             while self.loop_running and not self._shutdown_event.is_set():
                 # start_time = time.time()
 
-                action = ActionModel(
-                    joint_positions={
-                        "0": 0.0,  # Rotation
-                        "1": 0.0,  # Pitch
-                        "2": 0.0,  # Elbow
-                        "3": 0.0,  # Wrist Pitch
-                        "4": 0.0,  # Wrist Roll
-                        "5": 0.0,  # Jaw
-                    }
-                )
-                response = await self.request_step(action)
+                actuator_values = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                response = await self.request_step(actuator_values)
                 if response is None:
                     self.loop_running = False
                     self.shutdown()
@@ -123,6 +106,7 @@ class Controller(Node):
         # Use the shared event loop to run our coroutine
         run_coroutine(self.run_loop(rate_hz))
         logger.info("Started control loop in shared event loop")
+        logger.info("Controller running. Press Ctrl+C to exit.")
 
     def stop_loop(self) -> None:
         self.loop_running = False
@@ -145,20 +129,12 @@ def main():
         controller = Controller(host=args.host, port=args.port)
 
         luckyrobots.register_node(controller)
-
         luckyrobots.start()
+        luckyrobots.wait_for_world_client(timeout=60.0)
 
-        logger.info("Waiting for Lucky World client to connect...")
-        if luckyrobots.wait_for_world_client(timeout=60.0):
-            controller.start_loop(rate_hz=args.rate)
-            logger.info("Controller running. Press Ctrl+C to exit.")
-            luckyrobots.spin()
-        else:
-            luckyrobots.shutdown()
-            raise Exception(
-                "No world client connected. Controller loop will not start."
-            )
+        controller.start_loop(rate_hz=args.rate)
 
+        luckyrobots.spin()
     except KeyboardInterrupt:
         logger.info("Received keyboard interrupt, shutting down...")
     except Exception as e:

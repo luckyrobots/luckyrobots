@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field, model_validator
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
 
 
 class CameraShape(BaseModel):
@@ -37,22 +37,3 @@ class ObservationModel(BaseModel):
 
     class Config:
         populate_by_name = True
-
-
-class ActionModel(BaseModel):
-    """Action to control the robot"""
-
-    joint_positions: Optional[Dict[str, float]] = Field(
-        None, description="Joint positions in radians"
-    )
-    joint_velocities: Optional[Dict[str, float]] = Field(
-        None, description="Joint velocities in radians/sec"
-    )
-
-    @model_validator(mode="after")
-    def check_at_least_one_exists(self):
-        if self.joint_positions is None and self.joint_velocities is None:
-            raise ValueError(
-                "At least one of joint_positions or joint_velocities must be provided"
-            )
-        return self
