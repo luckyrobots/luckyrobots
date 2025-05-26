@@ -2,7 +2,7 @@ so100:
   observation_types:
     - environment_state_pixels_agent_pos
   available_scenes:
-    - loft
+    - kitchen
   available_tasks:
     - pickandplace
   action_space:

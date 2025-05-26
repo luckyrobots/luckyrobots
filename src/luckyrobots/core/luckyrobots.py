@@ -12,7 +12,7 @@ import threading
 import time
 import numpy as np
 
-from typing import Dict, Optional
+from typing import Dict
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -202,7 +202,7 @@ class LuckyRobots(Node):
         task: str = "pickandplace",
         robot: str = "so100",
         render_mode: str = None,
-        binary_path: Optional[str] = None,
+        binary_path: str = None,
     ) -> None:
         """Start the LuckyRobots node"""
         if self._running:

@@ -13,9 +13,9 @@ def validate_params(scene: str = None, task: str = None, robot: str = None) -> b
 
     robot_config = get_robot_config(robot)
 
-    if scene is not None and scene not in robot_config["scenes"]:
+    if scene is not None and scene not in robot_config["available_scenes"]:
         raise ValueError(f"Scene {scene} not available in {robot} config")
-    if task is not None and task not in robot_config["tasks"]:
+    if task is not None and task not in robot_config["available_tasks"]:
         raise ValueError(f"Task {task} not available in {robot} config")
 
 
@@ -24,7 +24,7 @@ def get_robot_config(robot: str = None) -> dict:
     with open("src/luckyrobots/config/robots.yaml", "r") as f:
         config = yaml.safe_load(f)
         if robot is not None:
-            return config[robot]        
+            return config[robot]
         else:
             return config
 
