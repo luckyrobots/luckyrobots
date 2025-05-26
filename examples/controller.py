@@ -44,7 +44,7 @@ class Controller(Node):
             response = await self.reset_client.call(request)
             if response is not None:
                 if self.show_camera:
-                    show_camera_feed(response.observation_cameras)
+                    show_camera_feed(response.observation.observation_cameras)
                 return response
             else:
                 self.loop_running = False
@@ -62,7 +62,7 @@ class Controller(Node):
             response = await self.step_client.call(request)
             if response is not None:
                 if self.show_camera:
-                    show_camera_feed(response.observation_cameras)
+                    show_camera_feed(response.observation.observation_cameras)
                 return response
             else:
                 self.loop_running = False
@@ -99,7 +99,7 @@ class Controller(Node):
         await asyncio.sleep(1.0)
 
         response = await self.request_reset()
-        logger.info(f"Reset response: {response}")
+        logger.info(f"Reset Response Timestamp: {response.time_stamp}")
 
         try:
             while self.loop_running and not self._shutdown_event.is_set():
@@ -107,7 +107,7 @@ class Controller(Node):
 
                 actuator_values = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
                 response = await self.request_step(actuator_values)
-                logger.info(f"Step response: {response}")
+                logger.info(f"Step Response Timestamp: {response.time_stamp}")
 
                 # Calculate sleep time to maintain the desired rate
                 elapsed = time.time() - start_time
@@ -142,7 +142,7 @@ def main():
         "--rate", type=float, default=30.0, help="Control loop rate in Hz"
     )
     parser.add_argument(
-        "--show-camera", action="store_true", help="Enable camera feed display windows"
+        "--show-camera", action="store_true", default=True, help="Enable camera feed display windows"
     )
     args = parser.parse_args()
 

@@ -132,41 +132,94 @@ class LuckyRobots(Node):
         set_param("core/host", ip_address)
 
     @staticmethod
-    def show_camera_feed(observation_cameras: list[dict]) -> list[str]:
-        """Display the camera feed"""
+    def show_camera_feed(observation_cameras: list) -> list[str]:
+        """Display the camera feed and save images to disk"""
         processed_cameras = []
         current_cameras = set()
+        
+        # Create a directory for saved images
+        import os
+        from datetime import datetime
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        save_dir = f"camera_images_{timestamp}"
+        os.makedirs(save_dir, exist_ok=True)
+        print(f"Saving images to: {save_dir}")
 
-        for idx, camera in enumerate(observation_cameras):
-            if "imageData" not in camera:
-                continue
-
+        for i, camera in enumerate(observation_cameras):
             try:
-                camera_name = camera.get("cameraName", f"camera{idx}")
-                window_name = f"LuckyRobots - {camera_name}"
-                current_cameras.add(window_name)
-
-                # Decode base64 image data efficiently
-                image_data_b64 = camera["imageData"]
-                image_bytes = base64.b64decode(image_data_b64)
-
-                # Convert to numpy array and decode with OpenCV
+                # Get camera data
+                image_data = camera.image_data
+                camera_name = camera.camera_name
+                
+                print(f"Processing {camera_name}")
+                print(f"Base64 length: {len(image_data)}")
+                
+                # Decode the image data
+                image_bytes = base64.b64decode(image_data)
+                print(f"Decoded {len(image_bytes)} bytes")
+                
+                # Save raw image bytes first (for debugging)
+                raw_filename = os.path.join(save_dir, f"{camera_name}_raw.jpg")
+                with open(raw_filename, 'wb') as f:
+                    f.write(image_bytes)
+                print(f"💾 Saved raw image bytes to: {raw_filename}")
+                
+                # Decode with OpenCV
                 nparr = np.frombuffer(image_bytes, np.uint8)
                 image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-                if image is not None:
-                    cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
-                    cv2.imshow(window_name, image)
-                    processed_cameras.append(camera_name)
+                if image is None:
+                    logger.error(f"cv2.imdecode returned None for camera {camera_name}")
+                    continue
 
-                    del nparr, image
-                else:
-                    logger.error(f"Error decoding image for camera {camera_name}")
+                # Debug the image properties
+                print(f"Image shape: {image.shape}")
+                print(f"Image dtype: {image.dtype}")
+                print(f"Image min: {image.min()}, max: {image.max()}, mean: {image.mean():.2f}")
+                
+                # Save the decoded image
+                decoded_filename = os.path.join(save_dir, f"{camera_name}_decoded.jpg")
+                cv2.imwrite(decoded_filename, image)
+                print(f"💾 Saved decoded image to: {decoded_filename}")
+                
+                # Check if image is very dark and create enhanced version
+                if image.max() < 100:
+                    print("⚠️ Image is dark, creating enhanced version...")
+                    enhanced = cv2.convertScaleAbs(image, alpha=3.0, beta=50)
+                    enhanced_filename = os.path.join(save_dir, f"{camera_name}_enhanced.jpg")
+                    cv2.imwrite(enhanced_filename, enhanced)
+                    print(f"💾 Saved enhanced image to: {enhanced_filename}")
+                    
+                    # Display enhanced version too
+                    enhanced_window = f"LuckyRobots - {camera_name} - Enhanced"
+                    cv2.namedWindow(enhanced_window, cv2.WINDOW_NORMAL)
+                    cv2.imshow(enhanced_window, enhanced)
+                
+                # Create grayscale version for debugging
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                gray_filename = os.path.join(save_dir, f"{camera_name}_grayscale.jpg")
+                cv2.imwrite(gray_filename, gray)
+                print(f"💾 Saved grayscale image to: {gray_filename}")
+                
+                # Display the original image
+                window_name = f"LuckyRobots - {camera_name}"
+                current_cameras.add(window_name)
+                cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+                cv2.imshow(window_name, image)
+                
+                processed_cameras.append(camera_name)
+                print(f"✅ Successfully processed {camera_name}")
+                
+                del nparr, image
+                    
             except Exception as e:
-                logger.error(f"Error displaying camera {camera_name}: {e}")
+                logger.error(f"Error processing camera {i}: {e}")
+                import traceback
+                traceback.print_exc()
 
         # Clean up windows that are no longer active
-        windows_to_remove = current_cameras - processed_cameras
+        windows_to_remove = current_cameras - set(processed_cameras)
         for window_name in windows_to_remove:
             try:
                 cv2.destroyWindow(window_name)
@@ -174,10 +227,12 @@ class LuckyRobots(Node):
                 logger.error(f"Error destroying window {window_name}: {e}")
 
         if processed_cameras:
-            cv2.waitKey(1)
+            print(f"\n📁 All images saved to folder: {save_dir}")
+            print("Press any key in the image window to continue...")
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
-        logger.info(f"Displayed {len(processed_cameras)} cameras")
-
+        logger.info(f"Processed {len(processed_cameras)} cameras, images saved to {save_dir}")
         return processed_cameras
 
     def get_robot_config(self, robot: str = None) -> dict:
@@ -314,7 +369,7 @@ class LuckyRobots(Node):
         seed = getattr(request, "seed", None)
         options = getattr(request, "options", None)
         request_data = {
-            "type": "reset",
+            "request_type": "reset",
             "request_id": request_id,
             "seed": seed,
             "options": options,
@@ -327,8 +382,8 @@ class LuckyRobots(Node):
             return Reset.Response(
                 success=True,
                 message="Reset request processed",
-                type=response_data["type"],
-                id=response_data["iD"],
+                request_type=response_data["requestType"],
+                request_id=response_data["requestId"],
                 time_stamp=response_data["timeStamp"],
                 observation=ObservationModel(**response_data["observation"]),
                 info=response_data["info"],
@@ -341,7 +396,7 @@ class LuckyRobots(Node):
 
     async def _process_reset_response(self, message_json: dict) -> None:
         """Process a reset response from the world client"""
-        request_id = message_json.get("iD")
+        request_id = message_json.get("requestId")
 
         if not request_id:
             self.shutdown()
@@ -369,7 +424,7 @@ class LuckyRobots(Node):
         self._pending_steps[request_id] = response_future
 
         request_data = {
-            "type": "step",
+            "request_type": "step",
             "request_id": request_id,
             "actuator_values": request.actuator_values,
         }
@@ -381,8 +436,8 @@ class LuckyRobots(Node):
             return Step.Response(
                 success=True,
                 message="Step request processed",
-                type=response_data["type"],
-                id=response_data["iD"],
+                request_type=response_data["requestType"],
+                request_id=response_data["requestId"],
                 time_stamp=response_data["timeStamp"],
                 observation=ObservationModel(**response_data["observation"]),
                 info=response_data["info"],
@@ -395,7 +450,7 @@ class LuckyRobots(Node):
 
     async def _process_step_response(self, message_json: dict) -> None:
         """Process a step response from the world client"""
-        request_id = message_json.get("iD")
+        request_id = message_json.get("requestId")
 
         if not request_id:
             self.shutdown()
@@ -552,14 +607,17 @@ async def world_endpoint(websocket: WebSocket) -> None:
             try:
                 message_json = await websocket.receive_json()
 
+                with open("message_json.json", "w") as f:
+                    json.dump(message_json, f)
+
                 # Handle service responses
-                message_type = message_json.get("type")
-                if message_type == "reset_response":
+                request_type = message_json.get("requestType")
+                if request_type == "reset_response":
                     await app.lucky_robots._process_reset_response(message_json)
-                elif message_type == "step_response":
+                elif request_type == "step_response":
                     await app.lucky_robots._process_step_response(message_json)
-                elif message_type:
-                    logger.warning(f"Unknown message type: {message_type}")
+                elif request_type:
+                    logger.warning(f"Unknown message type: {request_type}")
                 else:
                     logger.debug("Received message without type field")
 

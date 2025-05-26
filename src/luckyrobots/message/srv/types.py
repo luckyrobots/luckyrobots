@@ -25,8 +25,8 @@ class ServiceResponse(BaseModel):
         default="", description="A message describing the service call"
     )
 
-    type: str = Field(description="Type of response (reset_response or step_response)")
-    id: str = Field(description="Unique identifier")
+    request_type: str = Field(description="Type of response (reset_response or step_response)")
+    request_id: str = Field(description="Unique identifier")
     time_stamp: str = Field(alias="timeStamp", description="Timestamp value")
 
     observation: ObservationModel = Field(description="Observation data")

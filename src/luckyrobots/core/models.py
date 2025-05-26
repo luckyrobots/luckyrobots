@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -15,11 +15,11 @@ class CameraData(BaseModel):
 
     camera_name: str = Field(alias="cameraName", description="Name of the camera")
     dtype: str = Field(description="Data type of the image")
-    shape: CameraShape = Field(description="Shape of the image")
-    file_path: str = Field(alias="filePath", description="Path to the image file")
+    shape: Union[CameraShape, Dict[str, Union[float, int]]] = Field(description="Shape of the image")
     time_stamp: Optional[str] = Field(
         None, alias="timeStamp", description="Camera timestamp"
     )
+    image_data: Optional[str] = Field(None, alias="imageData", description="Base64 encoded image data")
 
     class Config:
         populate_by_name = True

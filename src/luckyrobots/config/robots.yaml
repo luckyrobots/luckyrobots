@@ -6,14 +6,14 @@ so100:
   available_tasks:
     - pickandplace
   action_space:
-    joint_names:
+    actuator_names:
       - shoulder_pan
       - shoulder_lift
       - elbow_flex
       - wrist_flex
       - wrist_roll
       - gripper
-    joint_limits:
+    actuator_limits:
       - name: shoulder_pan
         lower: -1.57
         upper: 1.57
@@ -33,14 +33,14 @@ so100:
         lower: 0.0
         upper: 0.1
   observation_space:
-    joint_names:
+    actuator_names:
       - shoulder_pan
       - shoulder_lift
       - elbow_flex
       - wrist_flex
       - wrist_roll
       - gripper
-    joint_limits:
+    actuator_limits:
       - name: shoulder_pan
         lower: -1.57
         upper: 1.57
@@ -80,7 +80,7 @@ stretch_v1:
   action_space:
   observation_space:
 
-dji_mavic:
+dji300:
   observation_types:
     - environment_state_pixels_agent_pos
   available_scenes:
