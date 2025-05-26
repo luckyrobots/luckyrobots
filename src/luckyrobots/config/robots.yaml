@@ -62,11 +62,11 @@ so100:
   camera_config:
     laptop:
       camera_index: 0
-      fps: 30
+      fps: 60
       camera_resolution: [640, 480]
     phone:
       camera_index: 1
-      fps: 30
+      fps: 60
       camera_resolution: [640, 480]
 
 stretch_v1:
@@ -76,6 +76,16 @@ stretch_v1:
     - loft
   available_tasks:
     - pickandplace
+    - navigation
+  action_space:
+  observation_space:
+
+dji_mavic:
+  observation_types:
+    - environment_state_pixels_agent_pos
+  available_scenes:
+    - drone_flight
+  available_tasks:
     - navigation
   action_space:
   observation_space:

@@ -31,8 +31,8 @@ class ObservationModel(BaseModel):
     observation_state: Dict[str, float] = Field(
         alias="observationState", description="State values for actuators"
     )
-    observation_cameras: List[CameraData] = Field(
-        alias="observationCameras", description="List of camera data"
+    observation_cameras: Optional[List[CameraData]] = Field(
+        default=None, alias="observationCameras", description="List of camera data"
     )
 
     class Config:

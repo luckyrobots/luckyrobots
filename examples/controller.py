@@ -4,7 +4,8 @@ import logging
 import threading
 import argparse
 import numpy as np
-from luckyrobots import Node, LuckyRobots, Step, Reset, run_coroutine
+
+from luckyrobots import Node, LuckyRobots, Step, Reset, run_coroutine, show_camera_feed
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -19,12 +20,15 @@ class Controller(Node):
         namespace: str = "",
         host: str = None,
         port: int = None,
+        show_camera: bool = False,
     ) -> None:
         super().__init__(name, namespace, host, port)
 
-        logger.info(f"Controller node {self.full_name} created")
-        self._shutdown_event = threading.Event()
+        self.show_camera = show_camera
+
         self.loop_running = False
+        self._shutdown_event = threading.Event()
+        logger.info(f"Controller node {self.full_name} created")
 
     async def _setup_async(self) -> None:
         self.reset_client = self.create_client(Reset, "/reset")
@@ -33,70 +37,42 @@ class Controller(Node):
     async def request_reset(
         self, seed: int | None = None, options: dict | None = None
     ) -> Reset.Response:
+        """Send a reset request to the luckyrobots core"""
         request = Reset.Request(seed=seed, options=options)
 
         try:
-            response = await self.reset_client.call(request, timeout=30.0)
-            return response
+            response = await self.reset_client.call(request)
+            if response is not None:
+                if self.show_camera:
+                    show_camera_feed(response.observation_cameras)
+                return response
+            else:
+                self.loop_running = False
+                self.shutdown()
+                raise Exception("Failed to reset robot, control loop will not start")
         except Exception as e:
             logger.error(f"Error resetting scene: {e}")
             return None
 
     async def request_step(self, actuator_values: np.ndarray) -> Step.Response:
+        """Send a step request to the luckyrobots core"""
         request = Step.Request(actuator_values=actuator_values)
 
         try:
             response = await self.step_client.call(request)
-            return response
+            if response is not None:
+                if self.show_camera:
+                    show_camera_feed(response.observation_cameras)
+                return response
+            else:
+                self.loop_running = False
+                self.shutdown()
+                raise Exception("Step request failed, control loop will not step")
         except Exception as e:
             logger.error(f"Error stepping robot: {e}")
             return None
 
-    async def run_loop(self, rate_hz: float = 1.0) -> None:
-        logger.info("Starting control loop")
-        if self.loop_running:
-            logger.warning("Control loop already running")
-            return
-
-        self.loop_running = True
-        period = 1.0 / rate_hz
-
-        logger.info(f"Starting control loop at {rate_hz} Hz")
-
-        # Wait for a moment to ensure LuckyRobots core is fully initialized
-        await asyncio.sleep(1.0)
-
-        # Attempt to reset the robot
-        response = await self.request_reset()
-        if response is None:
-            self.loop_running = False
-            self.shutdown()
-            raise Exception("Failed to reset robot, control loop will not start")
-
-        try:
-            while self.loop_running and not self._shutdown_event.is_set():
-                # start_time = time.time()
-
-                actuator_values = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-                response = await self.request_step(actuator_values)
-                if response is None:
-                    self.loop_running = False
-                    self.shutdown()
-                    raise Exception("Step request failed, control loop will not step")
-
-                logger.info(f"Step info: {response.info}")
-
-                # # Calculate sleep time to maintain the desired rate
-                # elapsed = time.time() - start_time
-                # sleep_time = max(0, period - elapsed)
-                # await asyncio.sleep(sleep_time)
-        except Exception as e:
-            logger.error(f"Error in control loop: {e}")
-        finally:
-            self.loop_running = False
-            logger.info("Control loop ended")
-
-    def start_loop(self, rate_hz: float = 1.0) -> None:
+    def start_loop(self, rate_hz: float) -> None:
         if self.loop_running:
             logger.warning("Control loop is already running")
             return
@@ -107,6 +83,41 @@ class Controller(Node):
         run_coroutine(self.run_loop(rate_hz))
         logger.info("Started control loop in shared event loop")
         logger.info("Controller running. Press Ctrl+C to exit.")
+
+    async def run_loop(self, rate_hz: float) -> None:
+        logger.info("Starting control loop")
+        if self.loop_running:
+            logger.warning("Control loop already running")
+            return
+
+        period = 1.0 / rate_hz
+        self.loop_running = True
+
+        logger.info(f"Starting control loop at {rate_hz} Hz")
+
+        # Wait for a moment to ensure LuckyRobots core is fully initialized
+        await asyncio.sleep(1.0)
+
+        response = await self.request_reset()
+        logger.info(f"Reset response: {response}")
+
+        try:
+            while self.loop_running and not self._shutdown_event.is_set():
+                start_time = time.time()
+
+                actuator_values = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                response = await self.request_step(actuator_values)
+                logger.info(f"Step response: {response}")
+
+                # Calculate sleep time to maintain the desired rate
+                elapsed = time.time() - start_time
+                sleep_time = max(0, period - elapsed)
+                await asyncio.sleep(sleep_time)
+        except Exception as e:
+            logger.error(f"Error in control loop: {e}")
+        finally:
+            self.loop_running = False
+            logger.info("Control loop ended")
 
     def stop_loop(self) -> None:
         self.loop_running = False
@@ -119,17 +130,30 @@ def main():
     parser.add_argument("--host", type=str, default=None, help="Host to connect to")
     parser.add_argument("--port", type=int, default=None, help="Port to connect to")
     parser.add_argument(
-        "--rate", type=float, default=1.0, help="Control loop rate in Hz"
+        "--scene", type=str, default="kitchen", help="Scene to connect to"
+    )
+    parser.add_argument(
+        "--task", type=str, default="pickandplace", help="Task to connect to"
+    )
+    parser.add_argument(
+        "--robot", type=str, default="so100", help="Robot to connect to"
+    )
+    parser.add_argument(
+        "--rate", type=float, default=30.0, help="Control loop rate in Hz"
+    )
+    parser.add_argument(
+        "--show-camera", action="store_true", help="Enable camera feed display windows"
     )
     args = parser.parse_args()
 
     try:
         luckyrobots = LuckyRobots(host=args.host, port=args.port)
-
-        controller = Controller(host=args.host, port=args.port)
+        controller = Controller(
+            host=args.host, port=args.port, show_camera=args.show_camera
+        )
 
         luckyrobots.register_node(controller)
-        luckyrobots.start()
+        luckyrobots.start(scene=args.scene, task=args.task, robot=args.robot)
         luckyrobots.wait_for_world_client(timeout=60.0)
 
         controller.start_loop(rate_hz=args.rate)
