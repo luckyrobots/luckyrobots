@@ -221,6 +221,7 @@ class LuckyRobots(Node):
         """Wait for the world client to connect to the websocket server"""
         start_time = time.time()
 
+        logger.info(f"Waiting for world client to connect for {timeout} seconds")
         while not self.world_client and time.time() - start_time < timeout:
             time.sleep(0.5)  # Check every half second
 

@@ -106,6 +106,7 @@ class Controller(Node):
         # Use the shared event loop to run our coroutine
         run_coroutine(self.run_loop(rate_hz))
         logger.info("Started control loop in shared event loop")
+        logger.info("Controller running. Press Ctrl+C to exit.")
 
     def stop_loop(self) -> None:
         self.loop_running = False
@@ -128,20 +129,12 @@ def main():
         controller = Controller(host=args.host, port=args.port)
 
         luckyrobots.register_node(controller)
-
         luckyrobots.start()
+        luckyrobots.wait_for_world_client(timeout=60.0)
 
-        logger.info("Waiting for Lucky World client to connect...")
-        if luckyrobots.wait_for_world_client(timeout=60.0):
-            controller.start_loop(rate_hz=args.rate)
-            logger.info("Controller running. Press Ctrl+C to exit.")
-            luckyrobots.spin()
-        else:
-            luckyrobots.shutdown()
-            raise Exception(
-                "No world client connected. Controller loop will not start."
-            )
+        controller.start_loop(rate_hz=args.rate)
 
+        luckyrobots.spin()
     except KeyboardInterrupt:
         logger.info("Received keyboard interrupt, shutting down...")
     except Exception as e:
