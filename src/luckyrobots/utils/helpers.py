@@ -26,26 +26,3 @@ def get_robot_config(robot: str = None) -> dict:
             return config
         else:
             return config[robot]
-
-
-def extract_observation_from_message(message_json: dict, state_only: bool = True):
-    """
-    Extract the observation array (or full observation) from a websocket message_json.
-    Args:
-        message_json (dict): The message received from websocket (e.g., via await websocket.receive_json()).
-        state_only (bool): If True, return only the observationState dict/array. If False, return the full observation dict.
-    Returns:
-        dict or None: The observationState dict (default) or full observation dict, or None if not found.
-    """
-    observation = message_json.get("observation", {})
-    if not observation:
-        return None
-    if state_only:
-        return observation.get("observationState")
-    return observation
-
-# Example usage:
-# message_json = await websocket.receive_json()
-# obs_array = extract_observation_from_message(message_json)
-# Log: Added extract_observation_from_message to help users extract observation arrays from websocket messages. Function is flexible for full or partial extraction.
-
