@@ -1,5 +1,4 @@
 import cv2
-import base64
 import json
 import msgpack
 import asyncio
@@ -10,7 +9,6 @@ import platform
 import signal
 import threading
 import time
-import numpy as np
 
 from typing import Dict
 
@@ -31,7 +29,7 @@ from ..utils.event_loop import (
     initialize_event_loop,
     shutdown_event_loop,
 )
-from ..utils.helpers import validate_params, get_robot_config
+from ..utils.helpers import validate_params, get_robot_config, process_images
 
 # Configure logging
 logging.basicConfig(
@@ -131,113 +129,14 @@ class LuckyRobots(Node):
         LuckyRobots.host = ip_address
         set_param("core/host", ip_address)
 
-    @staticmethod
-    def show_camera_feed(observation_cameras: list) -> list[str]:
-        """Display the camera feed and save images to disk"""
-        processed_cameras = []
-        current_cameras = set()
-        
-        # Create a directory for saved images
-        import os
-        from datetime import datetime
-        
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        save_dir = f"camera_images_{timestamp}"
-        os.makedirs(save_dir, exist_ok=True)
-        print(f"Saving images to: {save_dir}")
-
-        for i, camera in enumerate(observation_cameras):
-            try:
-                # Get camera data
-                image_data = camera.image_data
-                camera_name = camera.camera_name
-                
-                print(f"Processing {camera_name}")
-                print(f"Base64 length: {len(image_data)}")
-                
-                # Decode the image data
-                image_bytes = base64.b64decode(image_data)
-                print(f"Decoded {len(image_bytes)} bytes")
-                
-                # Save raw image bytes first (for debugging)
-                raw_filename = os.path.join(save_dir, f"{camera_name}_raw.jpg")
-                with open(raw_filename, 'wb') as f:
-                    f.write(image_bytes)
-                print(f"💾 Saved raw image bytes to: {raw_filename}")
-                
-                # Decode with OpenCV
-                nparr = np.frombuffer(image_bytes, np.uint8)
-                image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-                if image is None:
-                    logger.error(f"cv2.imdecode returned None for camera {camera_name}")
-                    continue
-
-                # Debug the image properties
-                print(f"Image shape: {image.shape}")
-                print(f"Image dtype: {image.dtype}")
-                print(f"Image min: {image.min()}, max: {image.max()}, mean: {image.mean():.2f}")
-                
-                # Save the decoded image
-                decoded_filename = os.path.join(save_dir, f"{camera_name}_decoded.jpg")
-                cv2.imwrite(decoded_filename, image)
-                print(f"💾 Saved decoded image to: {decoded_filename}")
-                
-                # Check if image is very dark and create enhanced version
-                if image.max() < 100:
-                    print("⚠️ Image is dark, creating enhanced version...")
-                    enhanced = cv2.convertScaleAbs(image, alpha=3.0, beta=50)
-                    enhanced_filename = os.path.join(save_dir, f"{camera_name}_enhanced.jpg")
-                    cv2.imwrite(enhanced_filename, enhanced)
-                    print(f"💾 Saved enhanced image to: {enhanced_filename}")
-                    
-                    # Display enhanced version too
-                    enhanced_window = f"LuckyRobots - {camera_name} - Enhanced"
-                    cv2.namedWindow(enhanced_window, cv2.WINDOW_NORMAL)
-                    cv2.imshow(enhanced_window, enhanced)
-                
-                # Create grayscale version for debugging
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                gray_filename = os.path.join(save_dir, f"{camera_name}_grayscale.jpg")
-                cv2.imwrite(gray_filename, gray)
-                print(f"💾 Saved grayscale image to: {gray_filename}")
-                
-                # Display the original image
-                window_name = f"LuckyRobots - {camera_name}"
-                current_cameras.add(window_name)
-                cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-                cv2.imshow(window_name, image)
-                
-                processed_cameras.append(camera_name)
-                print(f"✅ Successfully processed {camera_name}")
-                
-                del nparr, image
-                    
-            except Exception as e:
-                logger.error(f"Error processing camera {i}: {e}")
-                import traceback
-                traceback.print_exc()
-
-        # Clean up windows that are no longer active
-        windows_to_remove = current_cameras - set(processed_cameras)
-        for window_name in windows_to_remove:
-            try:
-                cv2.destroyWindow(window_name)
-            except Exception as e:
-                logger.error(f"Error destroying window {window_name}: {e}")
-
-        if processed_cameras:
-            print(f"\n📁 All images saved to folder: {save_dir}")
-            print("Press any key in the image window to continue...")
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-
-        logger.info(f"Processed {len(processed_cameras)} cameras, images saved to {save_dir}")
-        return processed_cameras
-
     def get_robot_config(self, robot: str = None) -> dict:
         """Get the configuration for the LuckyRobots node"""
         return get_robot_config(robot)
+    
+    @staticmethod
+    def process_images(observation_cameras: list) -> dict:
+        """Process the images from the observation cameras"""
+        return process_images(observation_cameras)
 
     def register_node(self, node: Node) -> None:
         """Register a node with the LuckyRobots node"""
@@ -352,14 +251,16 @@ class LuckyRobots(Node):
             logger.info("World client connected successfully")
             return True
         else:
+            logger.error("No world client connected after 60 seconds")
             self.shutdown()
-            raise Exception(f"No world client connected after {timeout} seconds")
+            raise
 
     async def handle_reset(self, request: Reset.Request) -> Reset.Response:
         """Handle the reset request by forwarding to the world client"""
         if self.world_client is None:
+            logger.error("No world client connection available")
             self.shutdown()
-            raise Exception("No world client connection available")
+            raise
 
         request_id = uuid.uuid4().hex
         shared_loop = get_event_loop()
@@ -382,25 +283,26 @@ class LuckyRobots(Node):
             return Reset.Response(
                 success=True,
                 message="Reset request processed",
-                request_type=response_data["requestType"],
-                request_id=response_data["requestId"],
-                time_stamp=response_data["timeStamp"],
-                observation=ObservationModel(**response_data["observation"]),
-                info=response_data["info"],
+                request_type=response_data["RequestType"],
+                request_id=response_data["RequestID"],
+                time_stamp=response_data["TimeStamp"],
+                observation=ObservationModel(**response_data["Observation"]),
+                info=response_data["Info"],
             )
         except Exception as e:
             self._pending_resets.pop(request_id, None)
-            self.shutdown()
             logger.error(f"Error processing reset request: {e}")
+            self.shutdown()
             raise
 
     async def _process_reset_response(self, message_json: dict) -> None:
         """Process a reset response from the world client"""
-        request_id = message_json.get("requestId")
+        request_id = message_json.get("RequestID")
 
         if not request_id:
+            logger.error(f"Invalid reset response for id: {request_id}")
             self.shutdown()
-            raise Exception(f"Invalid reset response for id: {request_id}")
+            raise
 
         future = self._pending_resets[request_id]
         shared_loop = get_event_loop()
@@ -413,8 +315,9 @@ class LuckyRobots(Node):
     async def handle_step(self, request: Step.Request) -> Step.Response:
         """Handle the step request by forwarding to the world client"""
         if self.world_client is None:   
+            logger.error("No world client connection available")
             self.shutdown()
-            raise Exception("No world client connection available")
+            raise
 
         request_id = uuid.uuid4().hex
         shared_loop = get_event_loop()
@@ -436,25 +339,26 @@ class LuckyRobots(Node):
             return Step.Response(
                 success=True,
                 message="Step request processed",
-                request_type=response_data["requestType"],
-                request_id=response_data["requestId"],
-                time_stamp=response_data["timeStamp"],
-                observation=ObservationModel(**response_data["observation"]),
-                info=response_data["info"],
+                request_type=response_data["RequestType"],
+                request_id=response_data["RequestID"],
+                time_stamp=response_data["TimeStamp"],
+                observation=ObservationModel(**response_data["Observation"]),
+                info=response_data["Info"],
             )
         except Exception as e:
             self._pending_steps.pop(request_id, None)
-            self.shutdown()
             logger.error(f"Error processing step request: {e}")
+            self.shutdown()
             raise
 
     async def _process_step_response(self, message_json: dict) -> None:
         """Process a step response from the world client"""
-        request_id = message_json.get("requestId")
+        request_id = message_json.get("RequestID")
 
         if not request_id:
+            logger.error(f"Invalid step response for id: {request_id}")
             self.shutdown()
-            raise Exception(f"Invalid step response for id: {request_id}")
+            raise
 
         future = self._pending_steps[request_id]
         shared_loop = get_event_loop()
@@ -476,6 +380,7 @@ class LuckyRobots(Node):
         try:
             self._shutdown_event.wait()
         except KeyboardInterrupt:
+            logger.info("Keyboard interrupt received. Shutting down...")
             self.shutdown()
 
         logger.info("LuckyRobots stopped spinning")
@@ -607,11 +512,8 @@ async def world_endpoint(websocket: WebSocket) -> None:
             try:
                 message_json = await websocket.receive_json()
 
-                with open("message_json.json", "w") as f:
-                    json.dump(message_json, f)
-
                 # Handle service responses
-                request_type = message_json.get("requestType")
+                request_type = message_json.get("RequestType")
                 if request_type == "reset_response":
                     await app.lucky_robots._process_reset_response(message_json)
                 elif request_type == "step_response":

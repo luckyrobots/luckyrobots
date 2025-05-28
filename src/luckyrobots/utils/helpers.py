@@ -1,5 +1,8 @@
 import yaml
 import time
+import base64
+import numpy as np
+import cv2
 
 
 def validate_params(scene: str = None, task: str = None, robot: str = None) -> bool:
@@ -27,6 +30,22 @@ def get_robot_config(robot: str = None) -> dict:
             return config[robot]
         else:
             return config
+        
+
+def process_images(observation_cameras: list) -> dict:
+    """Process the images from the observation cameras"""
+    processed_cameras = {}
+    for camera in observation_cameras:
+        image_data = camera.image_data
+        camera_name = camera.camera_name
+        
+        image_bytes = base64.b64decode(image_data)
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        processed_cameras[camera_name] = image
+        
+    return processed_cameras
 
 
 def measure_fps(

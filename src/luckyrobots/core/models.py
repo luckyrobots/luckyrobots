@@ -29,10 +29,10 @@ class ObservationModel(BaseModel):
     """Observation model that matches the JSON structure"""
 
     observation_state: Dict[str, float] = Field(
-        alias="observationState", description="State values for actuators"
+        alias="ObservationState", description="State values for actuators"
     )
     observation_cameras: Optional[List[CameraData]] = Field(
-        default=None, alias="observationCameras", description="List of camera data"
+        default=None, alias="ObservationCameras", description="List of camera data"
     )
 
     class Config:

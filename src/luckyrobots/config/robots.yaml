@@ -1,6 +1,6 @@
 so100:
   observation_types:
-    - environment_state_pixels_agent_pos
+    - pixels_agent_pos
   available_scenes:
     - kitchen
   available_tasks:
@@ -71,7 +71,7 @@ so100:
 
 stretch_v1:
   observation_types:
-    - environment_state_pixels_agent_pos
+    - pixels_agent_pos
   available_scenes:
     - loft
   available_tasks:
@@ -82,7 +82,7 @@ stretch_v1:
 
 dji300:
   observation_types:
-    - environment_state_pixels_agent_pos
+    - pixels_agent_pos
   available_scenes:
     - drone_flight
   available_tasks:

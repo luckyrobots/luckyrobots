@@ -413,10 +413,11 @@ class Transporter:
         )
 
         # Schedule the send operation in the event loop
-        try:
-            run_coroutine(self._send_message(transport_message))
-        except Exception:
-            pass
+        if self._connection:
+            try:
+                run_coroutine(self._send_message(transport_message))
+            except Exception:
+                pass
 
         self._connection = None
         self._response_futures.clear()

@@ -5,12 +5,32 @@ import threading
 import argparse
 import numpy as np
 
-from luckyrobots import Node, LuckyRobots, Step, Reset, run_coroutine, show_camera_feed
+from luckyrobots import Node, LuckyRobots, Step, Reset, run_coroutine, process_images
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("controller")
+
+
+def sample_action() -> list[float]:
+    """Sample a single action within the robot's limits."""
+    # Actuator limits from robots.yaml
+    limits = {
+        'shoulder_pan': (-1.57, 1.57),
+        'shoulder_lift': (-1.57, 1.57),
+        'elbow_flex': (-1.57, 1.57),
+        'wrist_flex': (-1.57, 1.57),
+        'wrist_roll': (-1.57, 1.57),
+        'gripper': (0.0, 0.1)
+    }
+    
+    # Sample each actuator value within its limits
+    action = [
+        np.random.uniform(low, high)
+        for low, high in limits.values()
+    ]
+    return action
 
 
 class Controller(Node):
@@ -44,7 +64,7 @@ class Controller(Node):
             response = await self.reset_client.call(request)
             if response is not None:
                 if self.show_camera:
-                    show_camera_feed(response.observation.observation_cameras)
+                    process_images(response.observation.observation_cameras)
                 return response
             else:
                 self.loop_running = False
@@ -59,10 +79,16 @@ class Controller(Node):
         request = Step.Request(actuator_values=actuator_values)
 
         try:
+            start_time = time.perf_counter()
             response = await self.step_client.call(request)
+            end_time = time.perf_counter()
+            elapsed_seconds = end_time - start_time
+            elapsed_ms = elapsed_seconds * 1000  # Convert to milliseconds
+            frequency_hz = 1.0 / elapsed_seconds if elapsed_seconds > 0 else 0  # Convert to Hz
+            logger.info(f"Message Response: {elapsed_ms:.3f} ms ({frequency_hz:.1f} Hz)")
             if response is not None:
                 if self.show_camera:
-                    show_camera_feed(response.observation.observation_cameras)
+                    process_images(response.observation.observation_cameras)
                 return response
             else:
                 self.loop_running = False
@@ -99,20 +125,18 @@ class Controller(Node):
         await asyncio.sleep(1.0)
 
         response = await self.request_reset()
-        logger.info(f"Reset Response Timestamp: {response.time_stamp}")
 
         try:
             while self.loop_running and not self._shutdown_event.is_set():
-                start_time = time.time()
+                # start_time = time.time()
 
-                actuator_values = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                actuator_values = sample_action()
                 response = await self.request_step(actuator_values)
-                logger.info(f"Step Response Timestamp: {response.time_stamp}")
 
-                # Calculate sleep time to maintain the desired rate
-                elapsed = time.time() - start_time
-                sleep_time = max(0, period - elapsed)
-                await asyncio.sleep(sleep_time)
+                # # Calculate sleep time to maintain the desired rate
+                # elapsed = time.time() - start_time
+                # sleep_time = max(0, period - elapsed)
+                # await asyncio.sleep(sleep_time)
         except Exception as e:
             logger.error(f"Error in control loop: {e}")
         finally:
