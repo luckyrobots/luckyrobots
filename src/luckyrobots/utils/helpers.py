@@ -3,6 +3,7 @@ import time
 import base64
 import numpy as np
 import cv2
+import pkg_resources
 from collections import deque
 
 
@@ -21,11 +22,12 @@ def validate_params(scene: str = None, task: str = None, robot: str = None) -> b
         raise ValueError(f"Scene {scene} not available in {robot} config")
     if task is not None and task not in robot_config["available_tasks"]:
         raise ValueError(f"Task {task} not available in {robot} config")
-
+    
 
 def get_robot_config(robot: str = None) -> dict:
     """Get the configuration for the robot"""
-    with open("src/luckyrobots/config/robots.yaml", "r") as f:
+    config_path = pkg_resources.resource_filename('luckyrobots', 'config/robots.yaml')
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
         if robot is not None:
             return config[robot]
