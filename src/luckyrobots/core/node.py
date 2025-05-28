@@ -9,7 +9,6 @@ from ..message.srv.client import ServiceClient
 from ..message.srv.service import ServiceServer, ServiceError
 from ..message.transporter import Transporter
 from ..utils.event_loop import run_coroutine
-from .parameters import get_param, has_param, set_param
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -28,8 +27,8 @@ class Node:
         )
 
         # Get host and port from parameters if not provided
-        self.host = host or get_param("core/host", "localhost")
-        self.port = port or get_param("core/port", 3000)
+        self.host = host
+        self.port = port
 
         # Create a unique ID for this node instance
         self.instance_id = str(uuid.uuid4())

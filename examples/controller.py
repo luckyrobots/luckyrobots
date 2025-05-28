@@ -5,32 +5,20 @@ import threading
 import argparse
 import numpy as np
 
-from luckyrobots import Node, LuckyRobots, Step, Reset, run_coroutine, process_images
+from luckyrobots import (
+    Node,
+    LuckyRobots,
+    Step,
+    Reset,
+    FPS,
+    run_coroutine,
+    process_images,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("controller")
-
-
-def sample_action() -> list[float]:
-    """Sample a single action within the robot's limits."""
-    # Actuator limits from robots.yaml
-    limits = {
-        'shoulder_pan': (-1.57, 1.57),
-        'shoulder_lift': (-1.57, 1.57),
-        'elbow_flex': (-1.57, 1.57),
-        'wrist_flex': (-1.57, 1.57),
-        'wrist_roll': (-1.57, 1.57),
-        'gripper': (0.0, 0.1)
-    }
-    
-    # Sample each actuator value within its limits
-    action = [
-        np.random.uniform(low, high)
-        for low, high in limits.values()
-    ]
-    return action
 
 
 class Controller(Node):
@@ -41,10 +29,14 @@ class Controller(Node):
         host: str = None,
         port: int = None,
         show_camera: bool = False,
+        robot: str = None,
     ) -> None:
         super().__init__(name, namespace, host, port)
 
+        self.fps = FPS()
+
         self.show_camera = show_camera
+        self.robot_config = LuckyRobots.get_robot_config(robot)
 
         self.loop_running = False
         self._shutdown_event = threading.Event()
@@ -79,13 +71,7 @@ class Controller(Node):
         request = Step.Request(actuator_values=actuator_values)
 
         try:
-            start_time = time.perf_counter()
             response = await self.step_client.call(request)
-            end_time = time.perf_counter()
-            elapsed_seconds = end_time - start_time
-            elapsed_ms = elapsed_seconds * 1000  # Convert to milliseconds
-            frequency_hz = 1.0 / elapsed_seconds if elapsed_seconds > 0 else 0  # Convert to Hz
-            logger.info(f"Message Response: {elapsed_ms:.3f} ms ({frequency_hz:.1f} Hz)")
             if response is not None:
                 if self.show_camera:
                     process_images(response.observation.observation_cameras)
@@ -97,6 +83,15 @@ class Controller(Node):
         except Exception as e:
             logger.error(f"Error stepping robot: {e}")
             return None
+
+    def sample_action(self) -> np.ndarray:
+        """Sample a single action within the robot's joint limits"""
+        # Extract lower and upper limits from the joint configuration
+        limits = self.robot_config["action_space"]["actuator_limits"]
+        lower_limits = np.array([joint["lower"] for joint in limits])
+        upper_limits = np.array([joint["upper"] for joint in limits])
+
+        return np.random.uniform(low=lower_limits, high=upper_limits)
 
     def start_loop(self, rate_hz: float) -> None:
         if self.loop_running:
@@ -125,18 +120,20 @@ class Controller(Node):
         await asyncio.sleep(1.0)
 
         response = await self.request_reset()
+        self.fps.measure()
 
         try:
             while self.loop_running and not self._shutdown_event.is_set():
-                # start_time = time.time()
+                start_time = time.perf_counter()
 
-                actuator_values = sample_action()
+                actuator_values = self.sample_action()
                 response = await self.request_step(actuator_values)
+                self.fps.measure()
 
-                # # Calculate sleep time to maintain the desired rate
-                # elapsed = time.time() - start_time
-                # sleep_time = max(0, period - elapsed)
-                # await asyncio.sleep(sleep_time)
+                # Calculate sleep time to maintain the desired rate
+                elapsed = time.perf_counter() - start_time
+                sleep_time = max(0, period - elapsed)
+                await asyncio.sleep(sleep_time)
         except Exception as e:
             logger.error(f"Error in control loop: {e}")
         finally:
@@ -151,8 +148,8 @@ class Controller(Node):
 
 def main():
     parser = argparse.ArgumentParser(description="Keyboard Teleop for LuckyRobots")
-    parser.add_argument("--host", type=str, default=None, help="Host to connect to")
-    parser.add_argument("--port", type=int, default=None, help="Port to connect to")
+    parser.add_argument("--host", type=str, default="localhost", help="Host to connect to")
+    parser.add_argument("--port", type=int, default=3000, help="Port to connect to")
     parser.add_argument(
         "--scene", type=str, default="kitchen", help="Scene to connect to"
     )
@@ -163,19 +160,25 @@ def main():
         "--robot", type=str, default="so100", help="Robot to connect to"
     )
     parser.add_argument(
-        "--rate", type=float, default=30.0, help="Control loop rate in Hz"
+        "--rate", type=float, default=10.0, help="Control loop rate in Hz"
     )
     parser.add_argument(
-        "--show-camera", action="store_true", default=True, help="Enable camera feed display windows"
+        "--show-camera",
+        action="store_true",
+        default=False,
+        help="Enable camera feed display windows",
     )
     args = parser.parse_args()
 
     try:
-        luckyrobots = LuckyRobots(host=args.host, port=args.port)
         controller = Controller(
-            host=args.host, port=args.port, show_camera=args.show_camera
+            host=args.host,
+            port=args.port,
+            show_camera=args.show_camera,
+            robot=args.robot,
         )
 
+        luckyrobots = LuckyRobots(args.host, args.port)
         luckyrobots.register_node(controller)
         luckyrobots.start(scene=args.scene, task=args.task, robot=args.robot)
         luckyrobots.wait_for_world_client(timeout=60.0)

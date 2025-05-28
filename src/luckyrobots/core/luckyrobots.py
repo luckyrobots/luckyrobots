@@ -3,7 +3,6 @@ import json
 import msgpack
 import asyncio
 import logging
-import os
 import uuid
 import platform
 import signal
@@ -23,15 +22,17 @@ from ..runtime.run_executable import is_luckyworld_running, run_luckyworld_execu
 from ..utils.library_dev import library_dev
 from ..core.models import ObservationModel
 from .node import Node
-from .parameters import load_from_file, set_param
 from ..utils.event_loop import (
     get_event_loop,
     initialize_event_loop,
     shutdown_event_loop,
 )
-from ..utils.helpers import validate_params, get_robot_config, process_images
+from ..utils.helpers import (
+    validate_params,
+    get_robot_config,
+    process_images,
+)
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
@@ -79,8 +80,6 @@ class LuckyRobots(Node):
         super().__init__("lucky_robots_manager", "", self.host, self.port)
         app.lucky_robots = self
 
-        self._load_default_params()
-
     def _is_websocket_server_running(self) -> bool:
         """Check if the websocket server is already running"""
         try:
@@ -108,31 +107,16 @@ class LuckyRobots(Node):
         # Give the server time to start
         time.sleep(0.5)
 
-    def _load_default_params(self) -> None:
-        """Load the default parameters for the LuckyRobots node"""
-        set_param("core/host", self.host)
-        set_param("core/port", self.port)
-
-        param_files = [
-            "luckyrobots_params.json",
-            os.path.expanduser("~/.luckyrobots/params.json"),
-        ]
-
-        for param_file in param_files:
-            if os.path.exists(param_file):
-                load_from_file(param_file)
-                logger.info(f"Loaded parameters from {param_file}")
-
     @staticmethod
     def set_host(ip_address: str) -> None:
         """Set the host address for the LuckyRobots node"""
         LuckyRobots.host = ip_address
-        set_param("core/host", ip_address)
 
-    def get_robot_config(self, robot: str = None) -> dict:
+    @staticmethod
+    def get_robot_config(robot: str = None) -> dict:
         """Get the configuration for the LuckyRobots node"""
         return get_robot_config(robot)
-    
+
     @staticmethod
     def process_images(observation_cameras: list) -> dict:
         """Process the images from the observation cameras"""
@@ -241,10 +225,10 @@ class LuckyRobots(Node):
 
     def wait_for_world_client(self, timeout: float = 60.0) -> bool:
         """Wait for the world client to connect to the websocket server"""
-        start_time = time.time()
+        start_time = time.perf_counter()
 
         logger.info(f"Waiting for world client to connect for {timeout} seconds")
-        while not self.world_client and time.time() - start_time < timeout:
+        while not self.world_client and time.perf_counter() - start_time < timeout:
             time.sleep(0.5)
 
         if self.world_client:
@@ -310,11 +294,13 @@ class LuckyRobots(Node):
         shared_loop.call_soon_threadsafe(
             lambda: future.set_result(message_json) if not future.done() else None
         )
-        shared_loop.call_soon_threadsafe(lambda: self._pending_resets.pop(request_id, None))
+        shared_loop.call_soon_threadsafe(
+            lambda: self._pending_resets.pop(request_id, None)
+        )
 
     async def handle_step(self, request: Step.Request) -> Step.Response:
         """Handle the step request by forwarding to the world client"""
-        if self.world_client is None:   
+        if self.world_client is None:
             logger.error("No world client connection available")
             self.shutdown()
             raise
@@ -366,7 +352,9 @@ class LuckyRobots(Node):
         shared_loop.call_soon_threadsafe(
             lambda: future.set_result(message_json) if not future.done() else None
         )
-        shared_loop.call_soon_threadsafe(lambda: self._pending_steps.pop(request_id, None))
+        shared_loop.call_soon_threadsafe(
+            lambda: self._pending_steps.pop(request_id, None)
+        )
 
     def spin(self) -> None:
         """Spin the LuckyRobots node to keep it running"""

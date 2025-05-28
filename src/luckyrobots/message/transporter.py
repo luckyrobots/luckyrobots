@@ -358,7 +358,7 @@ class Transporter:
             data = {"value": request}
 
         # Generate a unique message ID
-        message_id = f"{self.node_name}_{service_name}_{time.time()}_{uuid.uuid4().hex}"
+        message_id = f"{self.node_name}_{service_name}_{time.perf_counter()}_{uuid.uuid4().hex}"
 
         # Create a future for the response within the same event loop
         shared_loop = get_event_loop()

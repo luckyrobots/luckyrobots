@@ -3,6 +3,7 @@ import time
 import base64
 import numpy as np
 import cv2
+from collections import deque
 
 
 def validate_params(scene: str = None, task: str = None, robot: str = None) -> bool:
@@ -30,7 +31,7 @@ def get_robot_config(robot: str = None) -> dict:
             return config[robot]
         else:
             return config
-        
+
 
 def process_images(observation_cameras: list) -> dict:
     """Process the images from the observation cameras"""
@@ -38,30 +39,38 @@ def process_images(observation_cameras: list) -> dict:
     for camera in observation_cameras:
         image_data = camera.image_data
         camera_name = camera.camera_name
-        
+
         image_bytes = base64.b64decode(image_data)
         nparr = np.frombuffer(image_bytes, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
+
         processed_cameras[camera_name] = image
-        
+
+        cv2.imshow(camera_name, image)
+        cv2.waitKey(1)
+
     return processed_cameras
 
 
-def measure_fps(
-    last_frame_time: float, frame_times: list[float], frame_window: int = 10
-) -> tuple[float, list[float]]:
-    """Calculate the FPS for request/response time"""
-    fps = 0
-    current_time = time.time()
-
-    frame_delta = current_time - last_frame_time
-    frame_times.append(frame_delta)
-    last_frame_time = current_time
-
-    if len(frame_times) % 30 == 0 or (frame_times and len(frame_times) >= frame_window):
-        if len(frame_times) > 1:
-            avg_frame_time = sum(frame_times) / len(frame_times)
+class FPS:
+    def __init__(self, frame_window: int = 30):
+        self.frame_window = frame_window
+        self.frame_times = deque(maxlen=frame_window)  # Automatically maintains size
+        self.last_frame_time = time.perf_counter()
+        
+    def measure(self) -> float:
+        current_time = time.perf_counter()
+        frame_delta = current_time - self.last_frame_time
+        self.last_frame_time = current_time
+        
+        # Add frame time to rolling window
+        self.frame_times.append(frame_delta)
+        
+        # Calculate FPS from average frame time
+        if len(self.frame_times) >= 2:  # Need at least 2 samples
+            avg_frame_time = sum(self.frame_times) / len(self.frame_times)
             fps = 1.0 / avg_frame_time if avg_frame_time > 0 else 0
-
-    return fps, frame_times
+        else:
+            fps = 0
+            
+        print(f"FPS: {fps}")
