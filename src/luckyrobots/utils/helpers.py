@@ -5,6 +5,65 @@ import numpy as np
 import cv2
 import importlib.resources
 from collections import deque
+import os
+import pkg_resources
+
+
+def get_robot_config(robot: str = None) -> dict:
+    """Get the configuration for the robot"""
+    try:
+        # Try using importlib.resources (Python 3.9+)
+        try:
+            with importlib.resources.files('luckyrobots.config').joinpath('robots.yaml').open('r') as f:
+                config = yaml.safe_load(f)
+        except AttributeError:
+            # Fallback for older Python versions
+            with importlib.resources.open_text('luckyrobots.config', 'robots.yaml') as f:
+                config = yaml.safe_load(f)
+                
+        if robot is not None:
+            if robot not in config:
+                raise ValueError(f"Robot '{robot}' not found in configuration. Available robots: {list(config.keys())}")
+            return config[robot]
+        else:
+            return config
+            
+    except (FileNotFoundError, ModuleNotFoundError):
+        # Fallback: try pkg_resources
+        try:
+            yaml_content = pkg_resources.resource_string('luckyrobots', 'config/robots.yaml').decode('utf-8')
+            config = yaml.safe_load(yaml_content)
+            
+            if robot is not None:
+                if robot not in config:
+                    raise ValueError(f"Robot '{robot}' not found in configuration. Available robots: {list(config.keys())}")
+                return config[robot]
+            else:
+                return config
+                
+        except Exception as e:
+            # Final fallback: look for file relative to this module
+            try:
+                current_dir = os.path.dirname(__file__)
+                yaml_path = os.path.join(current_dir, '..', 'config', 'robots.yaml')
+                yaml_path = os.path.normpath(yaml_path)
+                
+                with open(yaml_path, 'r') as f:
+                    config = yaml.safe_load(f)
+                    
+                if robot is not None:
+                    if robot not in config:
+                        raise ValueError(f"Robot '{robot}' not found in configuration. Available robots: {list(config.keys())}")
+                    return config[robot]
+                else:
+                    return config
+                    
+            except Exception as final_e:
+                raise FileNotFoundError(
+                    f"Could not locate robots.yaml configuration file. "
+                    f"Tried importlib.resources, pkg_resources, and relative path. "
+                    f"Last error: {final_e}"
+                )
 
 
 def validate_params(scene: str = None, task: str = None, robot: str = None) -> bool:
@@ -22,16 +81,6 @@ def validate_params(scene: str = None, task: str = None, robot: str = None) -> b
         raise ValueError(f"Scene {scene} not available in {robot} config")
     if task is not None and task not in robot_config["available_tasks"]:
         raise ValueError(f"Task {task} not available in {robot} config")
-    
-
-def get_robot_config(robot: str = None) -> dict:
-    """Get the configuration for the robot"""
-    with importlib.resources.files('luckyrobots').joinpath('config/robots.yaml').open('r') as f:
-        config = yaml.safe_load(f)
-        if robot is not None:
-            return config[robot]
-        else:
-            return config
 
 
 def process_images(observation_cameras: list) -> dict:
