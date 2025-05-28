@@ -11,8 +11,9 @@ import pkg_resources
 
 def get_robot_config(robot: str = None) -> dict:
     """Get the configuration for the robot"""
+    
+    # Method 1: Try using importlib.resources (Python 3.9+)
     try:
-        # Try using importlib.resources (Python 3.9+)
         try:
             with importlib.resources.files('luckyrobots.config').joinpath('robots.yaml').open('r') as f:
                 config = yaml.safe_load(f)
@@ -28,26 +29,82 @@ def get_robot_config(robot: str = None) -> dict:
         else:
             return config
             
-    except (FileNotFoundError, ModuleNotFoundError):
-        # Fallback: try pkg_resources
-        try:
-            yaml_content = pkg_resources.resource_string('luckyrobots', 'config/robots.yaml').decode('utf-8')
-            config = yaml.safe_load(yaml_content)
+    except (FileNotFoundError, ModuleNotFoundError, ImportError) as e:
+        print(f"Method 1 failed: {e}")
+        pass
+
+    # Method 2: Try pkg_resources
+    try:
+        yaml_content = pkg_resources.resource_string('luckyrobots', 'config/robots.yaml').decode('utf-8')
+        config = yaml.safe_load(yaml_content)
+        
+        if robot is not None:
+            if robot not in config:
+                raise ValueError(f"Robot '{robot}' not found in configuration. Available robots: {list(config.keys())}")
+            return config[robot]
+        else:
+            return config
             
+    except Exception as e:
+        print(f"Method 2 failed: {e}")
+        pass
+
+    # Method 3: Try installed package location
+    try:
+        import luckyrobots
+        package_dir = os.path.dirname(luckyrobots.__file__)
+        yaml_path = os.path.join(package_dir, 'config', 'robots.yaml')
+        
+        if os.path.exists(yaml_path):
+            with open(yaml_path, 'r') as f:
+                config = yaml.safe_load(f)
+                
             if robot is not None:
                 if robot not in config:
                     raise ValueError(f"Robot '{robot}' not found in configuration. Available robots: {list(config.keys())}")
                 return config[robot]
             else:
                 return config
+        else:
+            print(f"Method 3: Config file not found at {yaml_path}")
+            
+    except Exception as e:
+        print(f"Method 3 failed: {e}")
+        pass
+
+    # Method 4: Try relative to this file (development mode)
+    try:
+        current_dir = os.path.dirname(__file__)
+        yaml_path = os.path.join(current_dir, '..', 'config', 'robots.yaml')
+        yaml_path = os.path.normpath(yaml_path)
+        
+        if os.path.exists(yaml_path):
+            with open(yaml_path, 'r') as f:
+                config = yaml.safe_load(f)
                 
-        except Exception as e:
-            # Final fallback: look for file relative to this module
-            try:
-                current_dir = os.path.dirname(__file__)
-                yaml_path = os.path.join(current_dir, '..', 'config', 'robots.yaml')
-                yaml_path = os.path.normpath(yaml_path)
-                
+            if robot is not None:
+                if robot not in config:
+                    raise ValueError(f"Robot '{robot}' not found in configuration. Available robots: {list(config.keys())}")
+                return config[robot]
+            else:
+                return config
+        else:
+            print(f"Method 4: Config file not found at {yaml_path}")
+            
+    except Exception as e:
+        print(f"Method 4 failed: {e}")
+        pass
+
+    # Method 5: Search in common locations
+    search_paths = [
+        os.path.join(os.path.expanduser('~'), '.luckyrobots', 'config', 'robots.yaml'),
+        '/usr/local/share/luckyrobots/config/robots.yaml',
+        '/opt/luckyrobots/config/robots.yaml',
+    ]
+    
+    for yaml_path in search_paths:
+        try:
+            if os.path.exists(yaml_path):
                 with open(yaml_path, 'r') as f:
                     config = yaml.safe_load(f)
                     
@@ -57,13 +114,17 @@ def get_robot_config(robot: str = None) -> dict:
                     return config[robot]
                 else:
                     return config
-                    
-            except Exception as final_e:
-                raise FileNotFoundError(
-                    f"Could not locate robots.yaml configuration file. "
-                    f"Tried importlib.resources, pkg_resources, and relative path. "
-                    f"Last error: {final_e}"
-                )
+        except Exception as e:
+            print(f"Search path {yaml_path} failed: {e}")
+            continue
+
+    # If all methods fail, raise a comprehensive error
+    raise FileNotFoundError(
+        f"Could not locate robots.yaml configuration file. "
+        f"Tried importlib.resources, pkg_resources, installed package location, "
+        f"relative path, and common system locations. "
+        f"Please ensure the luckyrobots package is properly installed or the config file exists."
+    )
 
 
 def validate_params(scene: str = None, task: str = None, robot: str = None) -> bool:
