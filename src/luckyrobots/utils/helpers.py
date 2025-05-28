@@ -3,7 +3,7 @@ import time
 import base64
 import numpy as np
 import cv2
-import pkg_resources
+import importlib.resources
 from collections import deque
 
 
@@ -26,8 +26,7 @@ def validate_params(scene: str = None, task: str = None, robot: str = None) -> b
 
 def get_robot_config(robot: str = None) -> dict:
     """Get the configuration for the robot"""
-    config_path = pkg_resources.resource_filename('luckyrobots', 'config/robots.yaml')
-    with open(config_path, "r") as f:
+    with importlib.resources.files('luckyrobots').joinpath('config/robots.yaml').open('r') as f:
         config = yaml.safe_load(f)
         if robot is not None:
             return config[robot]

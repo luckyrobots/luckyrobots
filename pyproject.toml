@@ -43,7 +43,9 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/luckyrobots"]
 include-packages = ["src/luckyrobots"]
-include = ["src/luckyrobots/config/*.yaml"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"src/luckyrobots/config/*.yaml" = "luckyrobots/config"
 
 [project.optional-dependencies]
 dev = [
