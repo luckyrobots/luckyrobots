@@ -406,20 +406,23 @@ class Transporter:
         """Shutdown the transport layer"""
         self._should_run = False
 
-        # Send a node shutdown message
-        transport_message = TransportMessage(
-            msg_type=MessageType.NODE_SHUTDOWN,
-            node_name=self.node_name,
-            uuid=self.uuid,
-            topic_or_service="",
-        )
-
-        # Schedule the send operation in the event loop
         if self._connection:
+            transport_message = TransportMessage(
+                msg_type=MessageType.NODE_SHUTDOWN,
+                node_name=self.node_name,
+                uuid=self.uuid,
+                topic_or_service="",
+            )
+
             try:
-                run_coroutine(self._send_message(transport_message))
+                loop = get_event_loop()
+                if loop and loop.is_running():
+                    future = asyncio.run_coroutine_threadsafe(
+                        self._send_message(transport_message), loop
+                    )
+                    future.result(timeout=2.0)  # Short timeout
             except Exception:
-                pass
+                pass  # Ignore errors during shutdown
 
         self._connection = None
         self._response_futures.clear()

@@ -74,9 +74,14 @@ def run_coroutine(coro, timeout=None):
 def shutdown_event_loop():
     global _event_loop, _event_loop_thread
 
-    if _event_loop is not None:
+    if _event_loop is not None and _ready_event.is_set():
         logger.info("Shutting down event loop")
-        _event_loop.call_soon_threadsafe(_event_loop.stop)
+        try:
+            _event_loop.call_soon_threadsafe(_event_loop.stop)
+        except RuntimeError:
+            # Event loop already closed
+            pass
+
         if _event_loop_thread is not None:
             _event_loop_thread.join(timeout=5.0)
 

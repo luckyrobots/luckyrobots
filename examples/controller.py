@@ -56,19 +56,19 @@ class Controller(Node):
 
         try:
             response = await self.reset_client.call(request)
-            if response is not None:
-                if self.show_camera:
-                    for camera in response.observation.observation_cameras:
-                        cv2.imshow(camera.camera_name, camera.image_data)
-                        cv2.waitKey(1)
-                return response
-            else:
-                self.loop_running = False
-                self.shutdown()
-                raise Exception("Failed to reset robot, control loop will not start")
+            if response is None:
+                raise Exception("Reset request returned None")
+
+            if self.show_camera:
+                for camera in response.observation.observation_cameras:
+                    cv2.imshow(camera.camera_name, camera.image_data)
+                    cv2.waitKey(1)
+            return response
+
         except Exception as e:
             logger.error(f"Error resetting scene: {e}")
-            return None
+            self.loop_running = False
+            raise  # Re-raise to let caller handle
 
     async def request_step(self, actuator_values: np.ndarray) -> Step.Response:
         """Send a step request to the luckyrobots core"""
@@ -76,19 +76,19 @@ class Controller(Node):
 
         try:
             response = await self.step_client.call(request)
-            if response is not None:
-                if self.show_camera:
-                    for camera in response.observation.observation_cameras:
-                        cv2.imshow(camera.camera_name, camera.image_data)
-                        cv2.waitKey(1)
-                return response
-            else:
-                self.loop_running = False
-                self.shutdown()
-                raise Exception("Step request failed, control loop will not step")
+            if response is None:
+                raise Exception("Step request returned None")
+
+            if self.show_camera:
+                for camera in response.observation.observation_cameras:
+                    cv2.imshow(camera.camera_name, camera.image_data)
+                    cv2.waitKey(1)
+            return response
+
         except Exception as e:
             logger.error(f"Error stepping robot: {e}")
-            return None
+            self.loop_running = False
+            raise  # Re-raise to let caller handle
 
     def sample_action(self) -> np.ndarray:
         """Sample a single action within the robot's actuator limits"""

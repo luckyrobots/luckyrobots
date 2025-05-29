@@ -25,7 +25,6 @@ from .node import Node
 from ..utils.event_loop import (
     get_event_loop,
     initialize_event_loop,
-    shutdown_event_loop,
 )
 from ..utils.helpers import (
     validate_params,
@@ -401,28 +400,46 @@ class LuckyRobots(Node):
 
     def _cleanup_camera_windows(self) -> None:
         """Clean up all OpenCV windows and reset tracking"""
-        cv2.destroyAllWindows()
-        cv2.waitKey(1)
+        try:
+            # Only cleanup if we're in the main thread to avoid Qt warnings
+            if threading.current_thread() == threading.main_thread():
+                cv2.destroyAllWindows()
+                cv2.waitKey(1)
+            else:
+                # If not in main thread, just skip OpenCV cleanup
+                # The windows will close when the main thread exits anyway
+                pass
+        except Exception:
+            # Ignore any errors during cleanup
+            pass
 
     def shutdown(self) -> None:
         """Shutdown the LuckyRobots node and clean up resources"""
         if not self._running:
             return
 
+        logger.info("Starting LuckyRobots shutdown")
         self._running = False
 
-        # Shutdown all nodes
-        for node in self._nodes.values():
+        # 1. Shutdown nodes first (they depend on transport)
+        for node_name, node in self._nodes.items():
             try:
                 node.shutdown()
             except Exception as e:
-                logger.error(f"Error shutting down node {node.full_name}: {e}")
+                logger.error(f"Error shutting down node {node_name}: {e}")
 
-        super().shutdown()
+        # 2. Shutdown self (transport layer)
+        try:
+            super().shutdown()
+        except Exception as e:
+            logger.error(f"Error shutting down LuckyRobots transport: {e}")
+
+        # 3. Clean up UI resources
         self._cleanup_camera_windows()
-        self._stop_websocket_server()
-        shutdown_event_loop()
+
+        # 4. Set shutdown event
         self._shutdown_event.set()
+
         logger.info("LuckyRobots shutdown complete")
 
 
