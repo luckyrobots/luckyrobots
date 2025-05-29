@@ -30,7 +30,6 @@ from ..utils.event_loop import (
 from ..utils.helpers import (
     validate_params,
     get_robot_config,
-    process_images,
 )
 
 logging.basicConfig(
@@ -117,11 +116,6 @@ class LuckyRobots(Node):
         """Get the configuration for the LuckyRobots node"""
         return get_robot_config(robot)
 
-    @staticmethod
-    def process_images(observation_cameras: list) -> dict:
-        """Process the images from the observation cameras"""
-        return process_images(observation_cameras)
-
     def register_node(self, node: Node) -> None:
         """Register a node with the LuckyRobots node"""
         self._nodes[node.full_name] = node
@@ -139,6 +133,7 @@ class LuckyRobots(Node):
         scene: str = "kitchen",
         task: str = "pickandplace",
         robot: str = "so100",
+        observation_type: str = "pixels_agent_pos",
         render_mode: str = None,
         binary_path: str = None,
     ) -> None:
@@ -147,7 +142,8 @@ class LuckyRobots(Node):
             logger.warning("LuckyRobots is already running")
             return
 
-        validate_params(scene, task, robot)
+        validate_params(scene, task, robot, observation_type)
+        self.process_cameras = "pixels" in observation_type
 
         # if (
         #     not is_luckyworld_running()
@@ -264,13 +260,17 @@ class LuckyRobots(Node):
             await self.world_client.send_text(json.dumps(request_data))
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
 
+            observation = ObservationModel(**response_data["Observation"])
+            if self.process_cameras:
+                observation.process_all_cameras()
+
             return Reset.Response(
                 success=True,
                 message="Reset request processed",
                 request_type=response_data["RequestType"],
                 request_id=response_data["RequestID"],
                 time_stamp=response_data["TimeStamp"],
-                observation=ObservationModel(**response_data["Observation"]),
+                observation=observation,
                 info=response_data["Info"],
             )
         except Exception as e:
@@ -322,13 +322,17 @@ class LuckyRobots(Node):
             await self.world_client.send_text(json.dumps(request_data))
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
 
+            observation = ObservationModel(**response_data["Observation"])
+            if self.process_cameras:
+                observation.process_all_cameras()
+
             return Step.Response(
                 success=True,
                 message="Step request processed",
                 request_type=response_data["RequestType"],
                 request_id=response_data["RequestID"],
                 time_stamp=response_data["TimeStamp"],
-                observation=ObservationModel(**response_data["Observation"]),
+                observation=observation,
                 info=response_data["Info"],
             )
         except Exception as e:

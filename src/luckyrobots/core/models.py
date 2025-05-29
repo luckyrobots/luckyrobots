@@ -1,5 +1,8 @@
 from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field
+import base64
+import cv2
+import numpy as np
 
 
 class CameraShape(BaseModel):
@@ -21,9 +24,16 @@ class CameraData(BaseModel):
     time_stamp: Optional[str] = Field(
         None, alias="timeStamp", description="Camera timestamp"
     )
-    image_data: Optional[str] = Field(
-        None, alias="imageData", description="Base64 encoded image data"
-    )
+    image_data: Optional[str] = Field(None, alias="imageData", description="Image data")
+
+    def process_image(self) -> None:
+        """Process the base64 image data into a numpy array"""
+        if self.image_data is None:
+            return None
+
+        image_bytes = base64.b64decode(self.image_data)
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        self.image_data = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     class Config:
         populate_by_name = True
@@ -38,6 +48,14 @@ class ObservationModel(BaseModel):
     observation_cameras: Optional[List[CameraData]] = Field(
         default=None, alias="ObservationCameras", description="List of camera data"
     )
+
+    def process_all_cameras(self) -> None:
+        """Process all camera images in the observation"""
+        if self.observation_cameras is None:
+            return
+
+        for camera in self.observation_cameras:
+            camera.process_image()
 
     class Config:
         populate_by_name = True

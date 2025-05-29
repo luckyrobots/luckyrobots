@@ -6,7 +6,6 @@ from .utils.check_updates import check_updates
 from .utils.event_loop import run_coroutine
 from .utils.helpers import FPS
 
-process_images = LuckyRobots.process_images
 
 __all__ = [
     "LuckyRobots",
@@ -17,5 +16,4 @@ __all__ = [
     "FPS",
     "check_updates",
     "run_coroutine",
-    "process_images",
 ]

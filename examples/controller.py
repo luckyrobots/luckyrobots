@@ -4,15 +4,15 @@ import logging
 import threading
 import argparse
 import numpy as np
+import cv2
 
 from luckyrobots import (
     Node,
     LuckyRobots,
-    Step,
-    Reset,
     FPS,
+    Reset,
+    Step,
     run_coroutine,
-    process_images,
 )
 
 logging.basicConfig(
@@ -28,8 +28,8 @@ class Controller(Node):
         namespace: str = "",
         host: str = None,
         port: int = None,
-        show_camera: bool = False,
         robot: str = None,
+        show_camera: bool = False,
     ) -> None:
         super().__init__(name, namespace, host, port)
 
@@ -37,6 +37,8 @@ class Controller(Node):
 
         self.show_camera = show_camera
         self.robot_config = LuckyRobots.get_robot_config(robot)
+
+        self.old_image_data = None
 
         self.loop_running = False
         self._shutdown_event = threading.Event()
@@ -56,7 +58,9 @@ class Controller(Node):
             response = await self.reset_client.call(request)
             if response is not None:
                 if self.show_camera:
-                    process_images(response.observation.observation_cameras)
+                    for camera in response.observation.observation_cameras:
+                        cv2.imshow(camera.camera_name, camera.image_data)
+                        cv2.waitKey(1)
                 return response
             else:
                 self.loop_running = False
@@ -74,7 +78,9 @@ class Controller(Node):
             response = await self.step_client.call(request)
             if response is not None:
                 if self.show_camera:
-                    process_images(response.observation.observation_cameras)
+                    for camera in response.observation.observation_cameras:
+                        cv2.imshow(camera.camera_name, camera.image_data)
+                        cv2.waitKey(1)
                 return response
             else:
                 self.loop_running = False
@@ -85,11 +91,11 @@ class Controller(Node):
             return None
 
     def sample_action(self) -> np.ndarray:
-        """Sample a single action within the robot's joint limits"""
-        # Extract lower and upper limits from the joint configuration
+        """Sample a single action within the robot's actuator limits"""
+        # Extract lower and upper limits from the actuator configuration
         limits = self.robot_config["action_space"]["actuator_limits"]
-        lower_limits = np.array([joint["lower"] for joint in limits])
-        upper_limits = np.array([joint["upper"] for joint in limits])
+        lower_limits = np.array([actuator["lower"] for actuator in limits])
+        upper_limits = np.array([actuator["upper"] for actuator in limits])
 
         return np.random.uniform(low=lower_limits, high=upper_limits)
 
@@ -102,11 +108,9 @@ class Controller(Node):
 
         # Use the shared event loop to run our coroutine
         run_coroutine(self.run_loop(rate_hz))
-        logger.info("Started control loop in shared event loop")
         logger.info("Controller running. Press Ctrl+C to exit.")
 
     async def run_loop(self, rate_hz: float) -> None:
-        logger.info("Starting control loop")
         if self.loop_running:
             logger.warning("Control loop already running")
             return
@@ -148,7 +152,9 @@ class Controller(Node):
 
 def main():
     parser = argparse.ArgumentParser(description="Keyboard Teleop for LuckyRobots")
-    parser.add_argument("--host", type=str, default="localhost", help="Host to connect to")
+    parser.add_argument(
+        "--host", type=str, default="localhost", help="Host to connect to"
+    )
     parser.add_argument("--port", type=int, default=3000, help="Port to connect to")
     parser.add_argument(
         "--scene", type=str, default="kitchen", help="Scene to connect to"
@@ -160,12 +166,18 @@ def main():
         "--robot", type=str, default="so100", help="Robot to connect to"
     )
     parser.add_argument(
+        "--observation-type",
+        type=str,
+        default="pixels_agent_pos",
+        help="Observation type to use for the robot",
+    )
+    parser.add_argument(
         "--rate", type=float, default=10.0, help="Control loop rate in Hz"
     )
     parser.add_argument(
         "--show-camera",
         action="store_true",
-        default=False,
+        default=True,
         help="Enable camera feed display windows",
     )
     args = parser.parse_args()
@@ -174,13 +186,18 @@ def main():
         controller = Controller(
             host=args.host,
             port=args.port,
-            show_camera=args.show_camera,
             robot=args.robot,
+            show_camera=args.show_camera,
         )
 
         luckyrobots = LuckyRobots(args.host, args.port)
         luckyrobots.register_node(controller)
-        luckyrobots.start(scene=args.scene, task=args.task, robot=args.robot)
+        luckyrobots.start(
+            scene=args.scene,
+            task=args.task,
+            robot=args.robot,
+            observation_type=args.observation_type,
+        )
         luckyrobots.wait_for_world_client(timeout=60.0)
 
         controller.start_loop(rate_hz=args.rate)
