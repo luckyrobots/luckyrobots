@@ -15,23 +15,23 @@ so100:
       - gripper
     actuator_limits:
       - name: shoulder_pan
-        lower: -1.57
-        upper: 1.57
+        lower: -2.2
+        upper: 2.2
       - name: shoulder_lift
-        lower: -1.57
-        upper: 1.57
+        lower: -3.14158
+        upper: 0.2
       - name: elbow_flex
-        lower: -1.57
-        upper: 1.57
-      - name: wrist_flex
-        lower: -1.57
-        upper: 1.57
-      - name: wrist_roll
-        lower: -1.57
-        upper: 1.57
-      - name: gripper
         lower: 0.0
-        upper: 0.1
+        upper: 3.14158
+      - name: wrist_flex
+        lower: -2.0
+        upper: 1.8
+      - name: wrist_roll
+        lower: -3.14158
+        upper: 3.14158
+      - name: gripper
+        lower: -0.2
+        upper: 2.0
   observation_space:
     actuator_names:
       - shoulder_pan
@@ -42,23 +42,23 @@ so100:
       - gripper
     actuator_limits:
       - name: shoulder_pan
-        lower: -1.57
-        upper: 1.57
+        lower: -2.2
+        upper: 2.2
       - name: shoulder_lift
-        lower: -1.57
-        upper: 1.57
+        lower: -3.14158
+        upper: 0.2
       - name: elbow_flex
-        lower: -1.57
-        upper: 1.57
-      - name: wrist_flex
-        lower: -1.57
-        upper: 1.57
-      - name: wrist_roll
-        lower: -1.57
-        upper: 1.57
-      - name: gripper
         lower: 0.0
-        upper: 0.1
+        upper: 3.14158
+      - name: wrist_flex
+        lower: -2.0
+        upper: 1.8
+      - name: wrist_roll
+        lower: -3.14158
+        upper: 3.14158
+      - name: gripper
+        lower: -0.2
+        upper: 2.0
   camera_config:
     laptop:
       camera_index: 0
