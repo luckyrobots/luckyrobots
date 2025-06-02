@@ -8,6 +8,7 @@ import platform
 import signal
 import threading
 import time
+import traceback
 
 from typing import Dict
 
@@ -156,6 +157,8 @@ class LuckyRobots(Node):
         # ):
         #     logger.error("LuckyWorld is not running, starting it now...")
         #     run_luckyworld_executable(scene, task, robot, binary_path)
+
+        print("Starting LuckyRobots node...")
 
         library_dev()
 
@@ -498,25 +501,80 @@ async def world_endpoint(websocket: WebSocket) -> None:
     try:
         while True:
             try:
-                message_json = await websocket.receive_json()
+                message = await websocket.receive()
 
-                # Handle service responses
-                request_type = message_json.get("RequestType")
-                if request_type == "reset_response":
-                    await app.lucky_robots._process_reset_response(message_json)
-                elif request_type == "step_response":
-                    await app.lucky_robots._process_step_response(message_json)
-                elif request_type:
-                    logger.warning(f"Unknown message type: {request_type}")
-                else:
-                    logger.debug("Received message without type field")
+                if message["type"] == "websocket.disconnect":
+                    code = message.get("code", 1000) 
+                    logger.info(f"World client initiated disconnect with code: {code}")
+                    break 
 
-            except json.JSONDecodeError:
-                logger.error("Received invalid JSON from world client")
+                elif message["type"] == "websocket.receive":
+                    message_data = None
+                    payload_for_log = "" # For logging snippets
+
+                    if "bytes" in message and message["bytes"] is not None:
+                        raw_payload_bytes = message["bytes"]
+                        payload_for_log = str(raw_payload_bytes)[:200]
+                        try:
+                            message_data = msgpack.unpackb(raw_payload_bytes, raw=False)
+                            # print(message_data)
+                        except msgpack.UnpackValueError:
+                            try:
+                                message_data = json.loads(raw_payload_bytes.decode('utf-8'))
+                            except (json.JSONDecodeError, UnicodeDecodeError) as json_byte_err:
+                                logger.error(f"Byte message from world client is not valid msgpack or JSON. Error: {json_byte_err}. Data: {payload_for_log}")
+                                continue 
+                    elif "text" in message and message["text"] is not None:
+                        raw_payload_text = message["text"]
+                        payload_for_log = str(raw_payload_text)[:200]
+                        try:
+                            message_data = json.loads(raw_payload_text)
+                        except json.JSONDecodeError as json_text_err:
+                            logger.error(f"Text message from world client is not valid JSON. Error: {json_text_err}. Data: {payload_for_log}")
+                            continue
+                    else:
+                        logger.warning(f"Received 'websocket.receive' message without 'text' or 'bytes' content, or with None value: {message}")
+                        continue
+
+                    if message_data is None:
+                        # This case implies parsing failed and wasn't caught by 'continue' above, or no payload.
+                        logger.error(f"Failed to parse message from world client (message_data is None). Original payload snippet: {payload_for_log if payload_for_log else 'N/A'}")
+                        continue
+
+                    if not isinstance(message_data, dict):
+                        logger.error(f"Parsed message is not a dictionary. Type: {type(message_data)}, Data: {str(message_data)[:200]}. Snippet: {payload_for_log}")
+                        continue
+                    
+                    # Handle service responses
+                    request_type = message_data.get("RequestType")
+                    if request_type == "reset_response":
+                        await app.lucky_robots._process_reset_response(message_data)
+                    elif request_type == "step_response":
+                        await app.lucky_robots._process_step_response(message_data)
+                    elif request_type:
+                        logger.warning(f"Unknown message type: {request_type} in parsed data: {str(message_data)[:200]}")
+                    else:
+                        logger.debug(f"Received message without RequestType field: {str(message_data)[:200]}")
+                
+                else: 
+                    logger.warning(f"Received unhandled WebSocket message type: {message['type']}. Message: {message}")
+                    continue
+
+            except WebSocketDisconnect as e: 
+                logger.info(f"WebSocket connection closed (inner catch). Code: {e.code}")
+                break 
             except Exception as e:
-                logger.error(f"Error processing message from world client: {e}")
-                app.lucky_robots.shutdown()
-    except WebSocketDisconnect:
-        logger.info("World client disconnected")
-        if hasattr(app, "lucky_robots"):
+                tb_str = traceback.format_exc(limit=10)
+                logger.error(f"Error processing message or during websocket operation. Type: {type(e)}, Error: {e}, Traceback: {tb_str}")
+                break 
+    
+    except WebSocketDisconnect as e:
+        logger.info(f"World client connection ended (outer catch). Code: {e.code if hasattr(e, 'code') else 'N/A'}")
+    except Exception as e:
+        tb_str = traceback.format_exc(limit=10)
+        logger.error(f"Critical error in world_endpoint. Type: {type(e)}, Error: {e}, Traceback: {tb_str}")
+    finally:
+        if hasattr(app, "lucky_robots") and hasattr(app.lucky_robots, 'world_client') and app.lucky_robots.world_client == websocket:
+            logger.info("Clearing world_client for this websocket connection.")
             app.lucky_robots.world_client = None
+        logger.info("world_endpoint processing finished for a client.")
