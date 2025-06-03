@@ -1,26 +1,35 @@
 # Python cache files
 __pycache__/
 *.py[cod]
-/examples/LuckEWorld.app
-.DS_Store
-.DS_Store
-/src/luckyrobots/__pycache__
-/src/luckyrobots/node_modules
-/src/luckyrobots/__pycache__
-/dist
-/dist
-/examples/Binary
-/src/luckyrobots/__pycache__
-/playground
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
 .env
-generated.tfvars
-terraform.tfstate
-terraform.tfstate.backup
-.terraform/
-.terraform.lock.hcl
-crash.log
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.history
+.venv
+env/
+venv/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# LLM Context
+repomix-output.xml

@@ -5,13 +5,6 @@ import threading
 import argparse
 import numpy as np
 import cv2
-import sys
-import os
-
-# Add the 'src' directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
-)
 
 from luckyrobots import (
     Node,
@@ -44,6 +37,8 @@ class Controller(Node):
 
         self.show_camera = show_camera
         self.robot_config = LuckyRobots.get_robot_config(robot)
+
+        self.old_image_data = None
 
         self.old_image_data = None
 
@@ -98,6 +93,8 @@ class Controller(Node):
             raise  # Re-raise to let caller handle
 
     def sample_action(self) -> np.ndarray:
+        """Sample a single action within the robot's actuator limits"""
+        # Extract lower and upper limits from the actuator configuration
         """Sample a single action within the robot's actuator limits"""
         # Extract lower and upper limits from the actuator configuration
         limits = self.robot_config["action_space"]["actuator_limits"]
@@ -162,6 +159,9 @@ def main():
     parser.add_argument(
         "--host", type=str, default="localhost", help="Host to connect to"
     )
+    parser.add_argument(
+        "--host", type=str, default="localhost", help="Host to connect to"
+    )
     parser.add_argument("--port", type=int, default=3000, help="Port to connect to")
     parser.add_argument(
         "--scene", type=str, default="kitchen", help="Scene to connect to"
@@ -179,11 +179,18 @@ def main():
         help="Observation type to use for the robot",
     )
     parser.add_argument(
+        "--observation-type",
+        type=str,
+        default="pixels_agent_pos",
+        help="Observation type to use for the robot",
+    )
+    parser.add_argument(
         "--rate", type=float, default=10.0, help="Control loop rate in Hz"
     )
     parser.add_argument(
         "--show-camera",
         action="store_true",
+        default=True,
         default=True,
         help="Enable camera feed display windows",
     )
@@ -194,11 +201,18 @@ def main():
             host=args.host,
             port=args.port,
             robot=args.robot,
+            robot=args.robot,
             show_camera=args.show_camera,
         )
 
         luckyrobots = LuckyRobots(args.host, args.port)
         luckyrobots.register_node(controller)
+        luckyrobots.start(
+            scene=args.scene,
+            task=args.task,
+            robot=args.robot,
+            observation_type=args.observation_type,
+        )
         luckyrobots.start(
             scene=args.scene,
             task=args.task,

@@ -6,6 +6,7 @@ from .utils.check_updates import check_updates
 from .utils.event_loop import run_coroutine
 from .utils.helpers import FPS
 
+
 __all__ = [
     "LuckyRobots",
     "Node",
