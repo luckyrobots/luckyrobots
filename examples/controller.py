@@ -159,9 +159,6 @@ def main():
     parser.add_argument(
         "--host", type=str, default="localhost", help="Host to connect to"
     )
-    parser.add_argument(
-        "--host", type=str, default="localhost", help="Host to connect to"
-    )
     parser.add_argument("--port", type=int, default=3000, help="Port to connect to")
     parser.add_argument(
         "--scene", type=str, default="kitchen", help="Scene to connect to"
@@ -179,18 +176,11 @@ def main():
         help="Observation type to use for the robot",
     )
     parser.add_argument(
-        "--observation-type",
-        type=str,
-        default="pixels_agent_pos",
-        help="Observation type to use for the robot",
-    )
-    parser.add_argument(
         "--rate", type=float, default=10.0, help="Control loop rate in Hz"
     )
     parser.add_argument(
         "--show-camera",
         action="store_true",
-        default=True,
         default=True,
         help="Enable camera feed display windows",
     )
@@ -200,7 +190,6 @@ def main():
         controller = Controller(
             host=args.host,
             port=args.port,
-            robot=args.robot,
             robot=args.robot,
             show_camera=args.show_camera,
         )
