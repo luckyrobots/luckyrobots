@@ -3,7 +3,7 @@ import json
 import msgpack
 import asyncio
 import logging
-import uuid
+import secrets
 import platform
 import signal
 import threading
@@ -26,12 +26,10 @@ from .node import Node
 from ..utils.event_loop import (
     get_event_loop,
     initialize_event_loop,
-    shutdown_event_loop,
 )
 from ..utils.helpers import (
     validate_params,
     get_robot_config,
-    process_images,
 )
 
 logging.basicConfig(
@@ -118,11 +116,6 @@ class LuckyRobots(Node):
         """Get the configuration for the LuckyRobots node"""
         return get_robot_config(robot)
 
-    @staticmethod
-    def process_images(observation_cameras: list) -> dict:
-        """Process the images from the observation cameras"""
-        return process_images(observation_cameras)
-
     def register_node(self, node: Node) -> None:
         """Register a node with the LuckyRobots node"""
         self._nodes[node.full_name] = node
@@ -140,6 +133,7 @@ class LuckyRobots(Node):
         scene: str = "kitchen",
         task: str = "pickandplace",
         robot: str = "so100",
+        observation_type: str = "pixels_agent_pos",
         render_mode: str = None,
         binary_path: str = None,
     ) -> None:
@@ -148,7 +142,8 @@ class LuckyRobots(Node):
             logger.warning("LuckyRobots is already running")
             return
 
-        validate_params(scene, task, robot)
+        validate_params(scene, task, robot, observation_type)
+        self.process_cameras = "pixels" in observation_type
 
         # if (
         #     not is_luckyworld_running()
@@ -157,8 +152,6 @@ class LuckyRobots(Node):
         # ):
         #     logger.error("LuckyWorld is not running, starting it now...")
         #     run_luckyworld_executable(scene, task, robot, binary_path)
-
-        print("Starting LuckyRobots node...")
 
         library_dev()
 
@@ -249,7 +242,7 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-        request_id = uuid.uuid4().hex
+        request_id = secrets.token_hex(4)
         shared_loop = get_event_loop()
         response_future = shared_loop.create_future()
         self._pending_resets[request_id] = response_future
@@ -267,13 +260,17 @@ class LuckyRobots(Node):
             await self.world_client.send_text(json.dumps(request_data))
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
 
+            observation = ObservationModel(**response_data["Observation"])
+            if self.process_cameras:
+                observation.process_all_cameras()
+
             return Reset.Response(
                 success=True,
                 message="Reset request processed",
                 request_type=response_data["RequestType"],
                 request_id=response_data["RequestID"],
                 time_stamp=response_data["TimeStamp"],
-                observation=ObservationModel(**response_data["Observation"]),
+                observation=observation,
                 info=response_data["Info"],
             )
         except Exception as e:
@@ -282,25 +279,6 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-    async def _process_reset_response(self, message_json: dict) -> None:
-        """Process a reset response from the world client"""
-        request_id = message_json.get("RequestID")
-
-        if not request_id:
-            logger.error(f"Invalid reset response for id: {request_id}")
-            self.shutdown()
-            raise
-
-        future = self._pending_resets[request_id]
-        shared_loop = get_event_loop()
-
-        shared_loop.call_soon_threadsafe(
-            lambda: future.set_result(message_json) if not future.done() else None
-        )
-        shared_loop.call_soon_threadsafe(
-            lambda: self._pending_resets.pop(request_id, None)
-        )
-
     async def handle_step(self, request: Step.Request) -> Step.Response:
         """Handle the step request by forwarding to the world client"""
         if self.world_client is None:
@@ -308,7 +286,7 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-        request_id = uuid.uuid4().hex
+        request_id = secrets.token_hex(4)
         shared_loop = get_event_loop()
         response_future = shared_loop.create_future()
         self._pending_steps[request_id] = response_future
@@ -325,13 +303,17 @@ class LuckyRobots(Node):
             await self.world_client.send_text(json.dumps(request_data))
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
 
+            observation = ObservationModel(**response_data["Observation"])
+            if self.process_cameras:
+                observation.process_all_cameras()
+
             return Step.Response(
                 success=True,
                 message="Step request processed",
                 request_type=response_data["RequestType"],
                 request_id=response_data["RequestID"],
                 time_stamp=response_data["TimeStamp"],
-                observation=ObservationModel(**response_data["Observation"]),
+                observation=observation,
                 info=response_data["Info"],
             )
         except Exception as e:
@@ -339,25 +321,6 @@ class LuckyRobots(Node):
             logger.error(f"Error processing step request: {e}")
             self.shutdown()
             raise
-
-    async def _process_step_response(self, message_json: dict) -> None:
-        """Process a step response from the world client"""
-        request_id = message_json.get("RequestID")
-
-        if not request_id:
-            logger.error(f"Invalid step response for id: {request_id}")
-            self.shutdown()
-            raise
-
-        future = self._pending_steps[request_id]
-        shared_loop = get_event_loop()
-
-        shared_loop.call_soon_threadsafe(
-            lambda: future.set_result(message_json) if not future.done() else None
-        )
-        shared_loop.call_soon_threadsafe(
-            lambda: self._pending_steps.pop(request_id, None)
-        )
 
     def spin(self) -> None:
         """Spin the LuckyRobots node to keep it running"""
@@ -400,28 +363,46 @@ class LuckyRobots(Node):
 
     def _cleanup_camera_windows(self) -> None:
         """Clean up all OpenCV windows and reset tracking"""
-        cv2.destroyAllWindows()
-        cv2.waitKey(1)
+        try:
+            # Only cleanup if we're in the main thread to avoid Qt warnings
+            if threading.current_thread() == threading.main_thread():
+                cv2.destroyAllWindows()
+                cv2.waitKey(1)
+            else:
+                # If not in main thread, just skip OpenCV cleanup
+                # The windows will close when the main thread exits anyway
+                pass
+        except Exception:
+            # Ignore any errors during cleanup
+            pass
 
     def shutdown(self) -> None:
         """Shutdown the LuckyRobots node and clean up resources"""
         if not self._running:
             return
 
+        logger.info("Starting LuckyRobots shutdown")
         self._running = False
 
-        # Shutdown all nodes
-        for node in self._nodes.values():
+        # 1. Shutdown nodes first (they depend on transport)
+        for node_name, node in self._nodes.items():
             try:
                 node.shutdown()
             except Exception as e:
-                logger.error(f"Error shutting down node {node.full_name}: {e}")
+                logger.error(f"Error shutting down node {node_name}: {e}")
 
-        super().shutdown()
+        # 2. Shutdown self (transport layer)
+        try:
+            super().shutdown()
+        except Exception as e:
+            logger.error(f"Error shutting down LuckyRobots transport: {e}")
+
+        # 3. Clean up UI resources
         self._cleanup_camera_windows()
-        self._stop_websocket_server()
-        shutdown_event_loop()
+
+        # 4. Set shutdown event
         self._shutdown_event.set()
+
         logger.info("LuckyRobots shutdown complete")
 
 
@@ -490,91 +471,63 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
 
 
 @app.websocket("/world")
-async def world_endpoint(websocket: WebSocket) -> None:
-    """WebSocket endpoint for world client communication"""
+async def world_endpoint_fixed(websocket: WebSocket) -> None:
+    """WebSocket endpoint with lambda closure bug fixes"""
     await websocket.accept()
 
     if hasattr(app, "lucky_robots"):
         app.lucky_robots.world_client = websocket
         logger.info("World client connected")
 
+    lucky_robots = app.lucky_robots
+    pending_resets = lucky_robots._pending_resets
+    pending_steps = lucky_robots._pending_steps
+
     try:
         while True:
             try:
-                message = await websocket.receive()
+                message_bytes = await websocket.receive_bytes()
+                message_data = msgpack.unpackb(message_bytes)
+                request_type = message_data.get("RequestType")
+                request_id = message_data.get("RequestID")
+                shared_loop = get_event_loop()
 
-                if message["type"] == "websocket.disconnect":
-                    code = message.get("code", 1000) 
-                    logger.info(f"World client initiated disconnect with code: {code}")
-                    break 
+                if request_type == "reset_response":
+                    future = pending_resets.get(request_id)
+                    shared_loop.call_soon_threadsafe(
+                        lambda: future.set_result(message_data)
+                        if not future.done()
+                        else None
+                    )
+                    shared_loop.call_soon_threadsafe(
+                        lambda: pending_resets.pop(request_id, None)
+                    )
+                elif request_type == "step_response":
+                    future = pending_steps.get(request_id)
+                    shared_loop.call_soon_threadsafe(
+                        lambda: future.set_result(message_data)
+                        if not future.done()
+                        else None
+                    )
+                    shared_loop.call_soon_threadsafe(
+                        lambda: pending_resets.pop(request_id, None)
+                        if request_type == "reset_response"
+                        else pending_steps.pop(request_id, None)
+                    )
+                else:
+                    logger.warning(f"Unhandled message type: {request_type}")
 
-                elif message["type"] == "websocket.receive":
-                    message_data = None
-                    payload_for_log = "" # For logging snippets
-
-                    if "bytes" in message and message["bytes"] is not None:
-                        raw_payload_bytes = message["bytes"]
-                        payload_for_log = str(raw_payload_bytes)[:200]
-                        try:
-                            message_data = msgpack.unpackb(raw_payload_bytes, raw=False)
-                            # print(message_data)
-                        except msgpack.UnpackValueError:
-                            try:
-                                message_data = json.loads(raw_payload_bytes.decode('utf-8'))
-                            except (json.JSONDecodeError, UnicodeDecodeError) as json_byte_err:
-                                logger.error(f"Byte message from world client is not valid msgpack or JSON. Error: {json_byte_err}. Data: {payload_for_log}")
-                                continue 
-                    elif "text" in message and message["text"] is not None:
-                        raw_payload_text = message["text"]
-                        payload_for_log = str(raw_payload_text)[:200]
-                        try:
-                            message_data = json.loads(raw_payload_text)
-                        except json.JSONDecodeError as json_text_err:
-                            logger.error(f"Text message from world client is not valid JSON. Error: {json_text_err}. Data: {payload_for_log}")
-                            continue
-                    else:
-                        logger.warning(f"Received 'websocket.receive' message without 'text' or 'bytes' content, or with None value: {message}")
-                        continue
-
-                    if message_data is None:
-                        # This case implies parsing failed and wasn't caught by 'continue' above, or no payload.
-                        logger.error(f"Failed to parse message from world client (message_data is None). Original payload snippet: {payload_for_log if payload_for_log else 'N/A'}")
-                        continue
-
-                    if not isinstance(message_data, dict):
-                        logger.error(f"Parsed message is not a dictionary. Type: {type(message_data)}, Data: {str(message_data)[:200]}. Snippet: {payload_for_log}")
-                        continue
-                    
-                    # Handle service responses
-                    request_type = message_data.get("RequestType")
-                    if request_type == "reset_response":
-                        await app.lucky_robots._process_reset_response(message_data)
-                    elif request_type == "step_response":
-                        await app.lucky_robots._process_step_response(message_data)
-                    elif request_type:
-                        logger.warning(f"Unknown message type: {request_type} in parsed data: {str(message_data)[:200]}")
-                    else:
-                        logger.debug(f"Received message without RequestType field: {str(message_data)[:200]}")
-                
-                else: 
-                    logger.warning(f"Received unhandled WebSocket message type: {message['type']}. Message: {message}")
-                    continue
-
-            except WebSocketDisconnect as e: 
-                logger.info(f"WebSocket connection closed (inner catch). Code: {e.code}")
-                break 
+            except WebSocketDisconnect as e:
+                logger.info(f"WebSocket disconnected. Code: {e.code}")
+                break
             except Exception as e:
-                tb_str = traceback.format_exc(limit=10)
-                logger.error(f"Error processing message or during websocket operation. Type: {type(e)}, Error: {e}, Traceback: {tb_str}")
-                break 
-    
-    except WebSocketDisconnect as e:
-        logger.info(f"World client connection ended (outer catch). Code: {e.code if hasattr(e, 'code') else 'N/A'}")
+                logger.error(f"Message processing error: {type(e).__name__}: {e}")
+                break
+
+    except WebSocketDisconnect:
+        pass
     except Exception as e:
-        tb_str = traceback.format_exc(limit=10)
-        logger.error(f"Critical error in world_endpoint. Type: {type(e)}, Error: {e}, Traceback: {tb_str}")
+        logger.error(f"Critical error in world_endpoint: {type(e).__name__}: {e}")
     finally:
-        if hasattr(app, "lucky_robots") and hasattr(app.lucky_robots, 'world_client') and app.lucky_robots.world_client == websocket:
-            logger.info("Clearing world_client for this websocket connection.")
+        if hasattr(app, "lucky_robots") and app.lucky_robots.world_client == websocket:
             app.lucky_robots.world_client = None
-        logger.info("world_endpoint processing finished for a client.")
