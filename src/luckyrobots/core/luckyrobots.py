@@ -3,11 +3,12 @@ import json
 import msgpack
 import asyncio
 import logging
-import uuid
+import secrets
 import platform
 import signal
 import threading
 import time
+import traceback
 
 from typing import Dict
 
@@ -241,7 +242,7 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-        request_id = uuid.uuid4().hex
+        request_id = secrets.token_hex(4)
         shared_loop = get_event_loop()
         response_future = shared_loop.create_future()
         self._pending_resets[request_id] = response_future
@@ -278,25 +279,6 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-    async def _process_reset_response(self, message_json: dict) -> None:
-        """Process a reset response from the world client"""
-        request_id = message_json.get("RequestID")
-
-        if not request_id:
-            logger.error(f"Invalid reset response for id: {request_id}")
-            self.shutdown()
-            raise
-
-        future = self._pending_resets[request_id]
-        shared_loop = get_event_loop()
-
-        shared_loop.call_soon_threadsafe(
-            lambda: future.set_result(message_json) if not future.done() else None
-        )
-        shared_loop.call_soon_threadsafe(
-            lambda: self._pending_resets.pop(request_id, None)
-        )
-
     async def handle_step(self, request: Step.Request) -> Step.Response:
         """Handle the step request by forwarding to the world client"""
         if self.world_client is None:
@@ -304,7 +286,7 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-        request_id = uuid.uuid4().hex
+        request_id = secrets.token_hex(4)
         shared_loop = get_event_loop()
         response_future = shared_loop.create_future()
         self._pending_steps[request_id] = response_future
@@ -339,25 +321,6 @@ class LuckyRobots(Node):
             logger.error(f"Error processing step request: {e}")
             self.shutdown()
             raise
-
-    async def _process_step_response(self, message_json: dict) -> None:
-        """Process a step response from the world client"""
-        request_id = message_json.get("RequestID")
-
-        if not request_id:
-            logger.error(f"Invalid step response for id: {request_id}")
-            self.shutdown()
-            raise
-
-        future = self._pending_steps[request_id]
-        shared_loop = get_event_loop()
-
-        shared_loop.call_soon_threadsafe(
-            lambda: future.set_result(message_json) if not future.done() else None
-        )
-        shared_loop.call_soon_threadsafe(
-            lambda: self._pending_steps.pop(request_id, None)
-        )
 
     def spin(self) -> None:
         """Spin the LuckyRobots node to keep it running"""
@@ -508,36 +471,63 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
 
 
 @app.websocket("/world")
-async def world_endpoint(websocket: WebSocket) -> None:
-    """WebSocket endpoint for world client communication"""
+async def world_endpoint_fixed(websocket: WebSocket) -> None:
+    """WebSocket endpoint with lambda closure bug fixes"""
     await websocket.accept()
 
     if hasattr(app, "lucky_robots"):
         app.lucky_robots.world_client = websocket
         logger.info("World client connected")
 
+    lucky_robots = app.lucky_robots
+    pending_resets = lucky_robots._pending_resets
+    pending_steps = lucky_robots._pending_steps
+
     try:
         while True:
             try:
-                message_json = await websocket.receive_json()
+                message_bytes = await websocket.receive_bytes()
+                message_data = msgpack.unpackb(message_bytes)
+                request_type = message_data.get("RequestType")
+                request_id = message_data.get("RequestID")
+                shared_loop = get_event_loop()
 
-                # Handle service responses
-                request_type = message_json.get("RequestType")
                 if request_type == "reset_response":
-                    await app.lucky_robots._process_reset_response(message_json)
+                    future = pending_resets.get(request_id)
+                    shared_loop.call_soon_threadsafe(
+                        lambda: future.set_result(message_data)
+                        if not future.done()
+                        else None
+                    )
+                    shared_loop.call_soon_threadsafe(
+                        lambda: pending_resets.pop(request_id, None)
+                    )
                 elif request_type == "step_response":
-                    await app.lucky_robots._process_step_response(message_json)
-                elif request_type:
-                    logger.warning(f"Unknown message type: {request_type}")
+                    future = pending_steps.get(request_id)
+                    shared_loop.call_soon_threadsafe(
+                        lambda: future.set_result(message_data)
+                        if not future.done()
+                        else None
+                    )
+                    shared_loop.call_soon_threadsafe(
+                        lambda: pending_resets.pop(request_id, None)
+                        if request_type == "reset_response"
+                        else pending_steps.pop(request_id, None)
+                    )
                 else:
-                    logger.debug("Received message without type field")
+                    logger.warning(f"Unhandled message type: {request_type}")
 
-            except json.JSONDecodeError:
-                logger.error("Received invalid JSON from world client")
+            except WebSocketDisconnect as e:
+                logger.info(f"WebSocket disconnected. Code: {e.code}")
+                break
             except Exception as e:
-                logger.error(f"Error processing message from world client: {e}")
-                app.lucky_robots.shutdown()
+                logger.error(f"Message processing error: {type(e).__name__}: {e}")
+                break
+
     except WebSocketDisconnect:
-        logger.info("World client disconnected")
-        if hasattr(app, "lucky_robots"):
+        pass
+    except Exception as e:
+        logger.error(f"Critical error in world_endpoint: {type(e).__name__}: {e}")
+    finally:
+        if hasattr(app, "lucky_robots") and app.lucky_robots.world_client == websocket:
             app.lucky_robots.world_client = None

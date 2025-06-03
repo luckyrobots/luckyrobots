@@ -1,38 +1,38 @@
 from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field
-import base64
-import cv2
 import numpy as np
+import cv2
 
 
 class CameraShape(BaseModel):
     """Shape of camera images"""
 
-    image_width: float = Field(description="Width of the image")
-    image_height: float = Field(description="Height of the image")
+    width: float = Field(description="Width of the image")
+    height: float = Field(description="Height of the image")
     channel: int = Field(description="Number of color channels")
 
 
 class CameraData(BaseModel):
     """Camera data in observations"""
 
-    camera_name: str = Field(alias="cameraName", description="Name of the camera")
+    camera_name: str = Field(alias="CameraName", description="Name of the camera")
     dtype: str = Field(description="Data type of the image")
     shape: Union[CameraShape, Dict[str, Union[float, int]]] = Field(
         description="Shape of the image"
     )
     time_stamp: Optional[str] = Field(
-        None, alias="timeStamp", description="Camera timestamp"
+        None, alias="TimeStamp", description="Camera timestamp"
     )
-    image_data: Optional[str] = Field(None, alias="imageData", description="Image data")
+    image_data: Optional[bytes] = Field(
+        None, alias="ImageData", description="Image data"
+    )
 
     def process_image(self) -> None:
         """Process the base64 image data into a numpy array"""
         if self.image_data is None:
             return None
 
-        image_bytes = base64.b64decode(self.image_data)
-        nparr = np.frombuffer(image_bytes, np.uint8)
+        nparr = np.frombuffer(self.image_data, np.uint8)
         self.image_data = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     class Config:
