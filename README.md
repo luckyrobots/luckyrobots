@@ -31,12 +31,18 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
 
 ## Quick Start
 
-1. **Install**
+1. **Create conda environment (recommended)**
+   ```bash
+   conda create -n luckyrobots python
+   conda activate luckyrobots
+   ```
+
+2. **Install**
    ```bash
    pip install luckyrobots
    ```
 
-2. **Run Example**
+3. **Run Example**
    ```bash
    git clone https://github.com/luckyrobots/luckyrobots.git
    cd luckyrobots/examples
@@ -65,10 +71,10 @@ class RobotController(Node):
         camera_data = observation.observation_cameras
 
 # Start simulation
-lr = LuckyRobots()
+luckyrobots = LuckyRobots()
 controller = RobotController()
-lr.register_node(controller)
-lr.start(scene="kitchen", robot="so100", task="pickandplace")
+luckyrobots.register_node(controller)
+luckyrobots.start(scene="kitchen", robot="so100", task="pickandplace")
 ```
 
 ## Available Robots & Environments
