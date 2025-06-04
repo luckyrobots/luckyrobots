@@ -470,7 +470,7 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
 
 
 @app.websocket("/world")
-async def world_endpoint_fixed(websocket: WebSocket) -> None:
+async def world_endpoint(websocket: WebSocket) -> None:
     """WebSocket endpoint with lambda closure bug fixes"""
     await websocket.accept()
 
