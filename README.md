@@ -24,6 +24,11 @@ https://github.com/user-attachments/assets/0ab2953d-b188-4af7-a225-71decdd2378c
 
 Hyperrealistic robotics simulation framework with Python API for embodied AI training and testing.
 
+<p align="center">
+  <img width="49%" alt="Bedroom environment in Lucky World" src="https://github.com/user-attachments/assets/279a7864-9a8b-453e-8567-3a174f5db8ab" />
+  <img width="49%" alt="Open floor plan in Lucky World" src="https://github.com/user-attachments/assets/68c72b97-98ab-42b0-a065-8a4247b014c7" />
+</p>
+
 ## Quick Start
 
 1. **Install**
