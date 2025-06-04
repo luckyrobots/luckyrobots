@@ -8,7 +8,6 @@ import platform
 import signal
 import threading
 import time
-import traceback
 
 from typing import Dict
 

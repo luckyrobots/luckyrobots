@@ -40,8 +40,6 @@ class Controller(Node):
 
         self.old_image_data = None
 
-        self.old_image_data = None
-
         self.loop_running = False
         self._shutdown_event = threading.Event()
         logger.info(f"Controller node {self.full_name} created")
@@ -93,8 +91,6 @@ class Controller(Node):
             raise  # Re-raise to let caller handle
 
     def sample_action(self) -> np.ndarray:
-        """Sample a single action within the robot's actuator limits"""
-        # Extract lower and upper limits from the actuator configuration
         """Sample a single action within the robot's actuator limits"""
         # Extract lower and upper limits from the actuator configuration
         limits = self.robot_config["action_space"]["actuator_limits"]
@@ -181,7 +177,7 @@ def main():
     parser.add_argument(
         "--show-camera",
         action="store_true",
-        default=True,
+        default=False,
         help="Enable camera feed display windows",
     )
     args = parser.parse_args()
@@ -196,12 +192,6 @@ def main():
 
         luckyrobots = LuckyRobots(args.host, args.port)
         luckyrobots.register_node(controller)
-        luckyrobots.start(
-            scene=args.scene,
-            task=args.task,
-            robot=args.robot,
-            observation_type=args.observation_type,
-        )
         luckyrobots.start(
             scene=args.scene,
             task=args.task,
