@@ -1,8 +1,8 @@
 """
-Publisher/subscriber implementation with integrated WebSocket communication.
+Publisher/subscriber implementation with WebSocket transport.
 
 This module provides Publisher and Subscriber classes for implementing
-publisher/subscriber patterns with integrated WebSocket transport for distributed
+publisher/subscriber patterns with WebSocket transport for distributed
 communication.
 """
 
@@ -36,6 +36,7 @@ class Publisher:
         logger.debug(f"Created publisher for topic: {topic}")
 
     def __del__(self):
+        """Delete the publisher"""
         with Publisher._lock:
             if self.topic in Publisher._publishers_by_topic:
                 if self in Publisher._publishers_by_topic[self.topic]:
@@ -60,25 +61,29 @@ class Publisher:
                 )
 
         # Note: Remote publishing is handled by the Node class, which
-        # wraps this publish method to also publish to the WebSocket transport
+        # wraps this publish method to publish to the WebSocket transport
 
     def add_subscriber(self, subscriber: Callable[[Any], None]) -> None:
+        """Add a subscriber to the publisher"""
         if subscriber not in self._subscribers:
             self._subscribers.append(subscriber)
             logger.debug(f"Added subscriber to topic: {self.topic}")
 
     def remove_subscriber(self, subscriber: Callable[[Any], None]) -> None:
+        """Remove a subscriber from the publisher"""
         if subscriber in self._subscribers:
             self._subscribers.remove(subscriber)
             logger.debug(f"Removed subscriber from topic: {self.topic}")
 
     @classmethod
     def get_publishers_for_topic(cls, topic: str) -> List["Publisher"]:
+        """Get all publishers for a given topic"""
         with cls._lock:
             return cls._publishers_by_topic.get(topic, [])
 
     @classmethod
     def get_all_topics(cls) -> List[str]:
+        """Get all topics"""
         with cls._lock:
             return list(cls._publishers_by_topic.keys())
 
@@ -112,6 +117,7 @@ class Subscriber:
         logger.debug(f"Created subscriber for topic: {topic}")
 
     def __del__(self):
+        """Delete the subscriber"""
         # Unsubscribe from all publishers
         publishers = Publisher.get_publishers_for_topic(self.topic)
         for publisher in publishers:
@@ -126,6 +132,7 @@ class Subscriber:
                     del Subscriber._subscribers_by_topic[self.topic]
 
     def _connect_to_publishers(self) -> None:
+        """Connect to all publishers for a given topic"""
         publishers = Publisher.get_publishers_for_topic(self.topic)
         for publisher in publishers:
             if publisher.message_type == self.message_type:
@@ -133,5 +140,6 @@ class Subscriber:
 
     @classmethod
     def get_subscribers_for_topic(cls, topic: str) -> List["Subscriber"]:
+        """Get all subscribers for a given topic"""
         with cls._lock:
             return cls._subscribers_by_topic.get(topic, [])

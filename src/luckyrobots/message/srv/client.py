@@ -20,6 +20,7 @@ class ServiceClient(Generic[T, R]):
         self._service: Optional[ServiceServer] = None
 
     async def connect(self, retry_count: int = 3, retry_delay: float = 1.0) -> bool:
+        """Connect to the service server"""
         for attempt in range(retry_count):
             self._service = ServiceServer.get_service(self.service_name)
             if self._service is not None:
@@ -33,6 +34,7 @@ class ServiceClient(Generic[T, R]):
     async def call(
         self, request: T, service_name: str = None, timeout: float = 30.0
     ) -> R:
+        """Call the service server"""
         # Default to the client's service name if none provided
         if service_name is None:
             service_name = self.service_name

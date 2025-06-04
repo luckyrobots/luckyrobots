@@ -45,6 +45,7 @@ class Controller(Node):
         logger.info(f"Controller node {self.full_name} created")
 
     async def _setup_async(self) -> None:
+        """Setup the controller node"""
         self.reset_client = self.create_client(Reset, "/reset")
         self.step_client = self.create_client(Step, "/step")
 
@@ -100,6 +101,7 @@ class Controller(Node):
         return np.random.uniform(low=lower_limits, high=upper_limits)
 
     def start_loop(self, rate_hz: float) -> None:
+        """Start the control loop"""
         if self.loop_running:
             logger.warning("Control loop is already running")
             return
@@ -111,6 +113,7 @@ class Controller(Node):
         logger.info("Controller running. Press Ctrl+C to exit.")
 
     async def run_loop(self, rate_hz: float) -> None:
+        """Run the control loop"""
         if self.loop_running:
             logger.warning("Control loop already running")
             return
@@ -145,6 +148,7 @@ class Controller(Node):
             logger.info("Control loop ended")
 
     def stop_loop(self) -> None:
+        """Stop the control loop"""
         self.loop_running = False
         self._shutdown_event.set()
         logger.info("Control loop stop requested")

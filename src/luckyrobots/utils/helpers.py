@@ -5,7 +5,10 @@ from collections import deque
 
 
 def validate_params(
-    scene: str = None, task: str = None, robot: str = None, observation_type: str = None
+    scene: str = None,
+    task: str = None,
+    robot: str = None,
+    observation_type: str = None,
 ) -> bool:
     """Validate the parameters passed into Lucky World"""
     robot_config = get_robot_config(robot)
@@ -19,14 +22,11 @@ def validate_params(
     if observation_type is None:
         raise ValueError("Observation type is required")
 
-    if scene is not None and scene not in robot_config["available_scenes"]:
+    if scene not in robot_config["available_scenes"]:
         raise ValueError(f"Scene {scene} not available in {robot} config")
-    if task is not None and task not in robot_config["available_tasks"]:
+    if task not in robot_config["available_tasks"]:
         raise ValueError(f"Task {task} not available in {robot} config")
-    if (
-        observation_type is not None
-        and observation_type not in robot_config["observation_types"]
-    ):
+    if observation_type not in robot_config["observation_types"]:
         raise ValueError(
             f"Observation type {observation_type} not available in {robot} config"
         )
@@ -47,7 +47,7 @@ def get_robot_config(robot: str = None) -> dict:
 class FPS:
     def __init__(self, frame_window: int = 30):
         self.frame_window = frame_window
-        self.frame_times = deque(maxlen=frame_window)  # Automatically maintains size
+        self.frame_times = deque(maxlen=frame_window)
         self.last_frame_time = time.perf_counter()
 
     def measure(self) -> float:

@@ -1,3 +1,10 @@
+"""
+PyDantic models for the LuckyRobots framework.
+
+This module contains the PyDantic models that are used to define
+the data structures being sent over the WebSocket transport.
+"""
+
 from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 import numpy as np
