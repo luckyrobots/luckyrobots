@@ -1,3 +1,11 @@
+"""
+Node class for the LuckyRobots framework.
+
+This module contains the Node class that is used to create a node in the
+LuckyRobots framework. A node is a component that can publish messages,
+subscribe to messages, and call services.
+"""
+
 import asyncio
 import logging
 import threading
@@ -52,6 +60,7 @@ class Node:
         logger.info(f"Created node: {self.full_name} (ID: {self.instance_id})")
 
     def get_qualified_name(self, name: str) -> str:
+        """Get the qualified name for a given name"""
         if name.startswith("/"):
             return name
 
@@ -60,6 +69,7 @@ class Node:
     def create_publisher(
         self, message_type: Type, topic: str, queue_size: int = 10
     ) -> Publisher:
+        """Create a publisher for a given topic"""
         qualified_topic = self.get_qualified_name(topic)
         publisher = Publisher(qualified_topic, message_type, queue_size)
         self._publishers[qualified_topic] = publisher
@@ -85,6 +95,7 @@ class Node:
         callback: Callable[[Any], None],
         queue_size: int = 10,
     ) -> Subscriber:
+        """Create a subscriber for a given topic"""
         qualified_topic = self.get_qualified_name(topic)
         subscriber = Subscriber(qualified_topic, message_type, callback, queue_size)
         self._subscribers[qualified_topic] = subscriber
@@ -108,6 +119,7 @@ class Node:
         return subscriber
 
     def create_client(self, service_type: Type, service_name: str) -> ServiceClient:
+        """Create a client for a given service"""
         qualified_name = self.get_qualified_name(service_name)
         client = ServiceClient(service_type, qualified_name)
         self._clients[qualified_name] = client
@@ -169,6 +181,7 @@ class Node:
     async def create_service(
         self, service_type: Type, service_name: str, handler: Callable[[Any], Any]
     ) -> ServiceServer:
+        """Create a service for a given service name"""
         qualified_name = self.get_qualified_name(service_name)
         service = ServiceServer(service_type, qualified_name, handler)
         self._services[qualified_name] = service
@@ -228,26 +241,14 @@ class Node:
         host: str = "localhost",
         port: int = 3000,
     ) -> ServiceClient:
+        """Create a service client for a given service name"""
         qualified_name = self.get_qualified_name(service_name)
         client = ServiceClient(service_type, qualified_name, host, port)
         self._clients[qualified_name] = client
         return client
 
-    def get_param(self, name: str, default: Any = None) -> Any:
-        # Try node-specific parameter first
-        node_param = f"{self.full_name}/{name}"
-        if has_param(node_param):
-            return get_param(node_param)
-
-        # Fall back to global parameter
-        return get_param(name, default)
-
-    def set_param(self, name: str, value: Any) -> None:
-        # Always set as node-specific parameter
-        node_param = f"{self.full_name}/{name}"
-        set_param(node_param, value)
-
     def start(self) -> None:
+        """Start the node"""
         self._running = True
         run_coroutine(self._setup_async())
         logger.info(f"Node {self.full_name} started")
@@ -256,11 +257,13 @@ class Node:
         pass
 
     def spin(self) -> None:
+        """Spin the node"""
         logger.info(f"Node {self.full_name} spinning")
         self._shutdown_event.wait()
         logger.info(f"Node {self.full_name} stopped spinning")
 
     def shutdown(self) -> None:
+        """Shutdown the node"""
         self._running = False
 
         # Shutdown WebSocket transporter

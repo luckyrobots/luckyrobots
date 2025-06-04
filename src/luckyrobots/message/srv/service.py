@@ -58,10 +58,12 @@ class ServiceServer(Generic[T, R]):
         logger.debug(f"Created service: {service_name}")
 
     def set_handler(self, handler: Callable[[T], R]) -> None:
+        """Set the handler for the service"""
         self._handler = handler
         logger.debug(f"Set handler for service: {self.service_name}")
 
     async def call(self, request: T, service_name: str, timeout: float = 30.0) -> R:
+        """Call the service"""
         if self.service_name != service_name:
             raise ValueError(
                 f"Service name mismatch. Expected {self.service_name}, got {service_name}"
@@ -88,17 +90,7 @@ class ServiceServer(Generic[T, R]):
             )
 
     async def _run_handler(self, request: T) -> R:
-        """Run the server handler and handle exceptions.
-
-        Args:
-            request: The request to send to the server
-
-        Returns:
-            The response from the server
-
-        Raises:
-            ServiceHandlerError: If the server handler raises an exception
-        """
+        """Run the server handler and handle exceptions"""
         try:
             # If handler is already a coroutine function, await it
             if asyncio.iscoroutinefunction(self._handler):
@@ -124,16 +116,20 @@ class ServiceServer(Generic[T, R]):
 
     @classmethod
     def get_service(cls, service_name: str) -> Optional["ServiceServer"]:
+        """Get a service by name"""
         return cls._services.get(service_name)
 
     @classmethod
     def get_all_services(cls) -> List[str]:
+        """Get all services"""
         return list(cls._services.keys())
 
 
 def get_service(name: str) -> Optional[ServiceServer]:
+    """External helper function to get a service by name"""
     return ServiceServer.get_service(name)
 
 
 def get_all_services() -> List[str]:
+    """External helper function to get all services"""
     return ServiceServer.get_all_services()

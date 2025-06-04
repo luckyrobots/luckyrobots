@@ -11,6 +11,7 @@ _ready_event = threading.Event()
 
 
 def initialize_event_loop():
+    """Initialize the event loop"""
     global _event_loop, _event_loop_thread
 
     # If already initialized, return the existing loop
@@ -18,6 +19,7 @@ def initialize_event_loop():
         return _event_loop
 
     def run_event_loop():
+        """Run the event loop"""
         logger.info("Event loop thread started")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

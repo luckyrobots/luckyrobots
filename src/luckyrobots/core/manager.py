@@ -82,11 +82,13 @@ class Manager:
                 logger.debug(f"Node {node_name} unsubscribed from topic: {topic}")
 
     async def register_service(self, node_name: str, service_name: str):
+        """Register a service with the manager"""
         async with self.lock:
             self.services[service_name] = node_name
             logger.debug(f"Service registered: {service_name} by node {node_name}")
 
     async def unregister_service(self, node_name: str, service_name: str):
+        """Unregister a service from the manager"""
         async with self.lock:
             if (
                 service_name in self.services
@@ -133,6 +135,7 @@ class Manager:
                     logger.error(f"Error sending to node {node_name}: {e}")
 
     async def _route_service_request(self, message: TransportMessage):
+        """Route a service request to the appropriate node"""
         service_name = message.topic_or_service
         requester_node = message.node_name
 
@@ -193,6 +196,7 @@ class Manager:
                     )
 
     async def _route_service_response(self, message: TransportMessage):
+        """Route a service response to the appropriate node"""
         service_name = message.topic_or_service
         message_id = message.message_id
 

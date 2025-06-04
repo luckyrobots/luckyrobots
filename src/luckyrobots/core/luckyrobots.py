@@ -18,7 +18,7 @@ from websocket import create_connection
 from .manager import Manager
 from ..message.transporter import MessageType, TransportMessage
 from ..message.srv.types import Reset, Step
-from ..runtime.run_executable import is_luckyworld_running, run_luckyworld_executable
+from ..utils.run_executable import is_luckyworld_running, run_luckyworld_executable
 from ..utils.library_dev import library_dev
 from ..core.models import ObservationModel
 from .node import Node
@@ -133,7 +133,6 @@ class LuckyRobots(Node):
         task: str = "pickandplace",
         robot: str = "so100",
         observation_type: str = "pixels_agent_pos",
-        render_mode: str = None,
         binary_path: str = None,
     ) -> None:
         """Start the LuckyRobots node"""
@@ -471,7 +470,7 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
 
 @app.websocket("/world")
 async def world_endpoint(websocket: WebSocket) -> None:
-    """WebSocket endpoint with lambda closure bug fixes"""
+    """WebSocket endpoint for world client communication"""
     await websocket.accept()
 
     if hasattr(app, "lucky_robots"):
