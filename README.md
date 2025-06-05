@@ -8,13 +8,11 @@
 
 <div align="center">
 
-[![GitHub stars](https://img.shields.io/github/stars/luckyrobots/luckyrobots?style=social)](https://github.com/luckyrobots/luckyrobots/stargazers)
 [![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
 [![Documentation](https://img.shields.io/badge/docs-read%20the%20docs-blue)](https://luckyrobots.readthedocs.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/pypi/pyversions/luckyrobots)](https://pypi.org/project/luckyrobots/)
 [![Status](https://img.shields.io/badge/Status-Alpha-orange)](https://pypi.org/project/luckyrobots/)
-[![Examples](https://img.shields.io/badge/Examples-View_Code-green)](https://github.com/luckyrobots/luckyrobots/tree/main/examples)
 [![Discord](https://dcbadge.vercel.app/api/server/5CH3wx3tAs?style=flat)](https://discord.gg/5CH3wx3tAs)
 
 </div>
