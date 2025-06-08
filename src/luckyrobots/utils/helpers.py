@@ -6,8 +6,8 @@ from collections import deque
 
 def validate_params(
     scene: str = None,
-    task: str = None,
     robot: str = None,
+    task: str = None,
     observation_type: str = None,
 ) -> bool:
     """Validate the parameters passed into Lucky World"""
@@ -15,10 +15,10 @@ def validate_params(
 
     if scene is None:
         raise ValueError("Scene is required")
-    if task is None:
-        raise ValueError("Task is required")
     if robot is None:
         raise ValueError("Robot is required")
+    if task is None:
+        raise ValueError("Task is required")
     if observation_type is None:
         raise ValueError("Observation type is required")
 

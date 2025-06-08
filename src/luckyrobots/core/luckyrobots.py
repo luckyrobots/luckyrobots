@@ -1,4 +1,5 @@
 import cv2
+import sys
 import json
 import msgpack
 import asyncio
@@ -129,27 +130,23 @@ class LuckyRobots(Node):
 
     def start(
         self,
-        scene: str = "kitchen",
-        task: str = "pickandplace",
+        scene: str = "ArmLevel",
         robot: str = "so100",
+        task: str = "pickandplace",
         observation_type: str = "pixels_agent_pos",
-        binary_path: str = None,
+        game_path: str = None,
     ) -> None:
         """Start the LuckyRobots node"""
         if self._running:
             logger.warning("LuckyRobots is already running")
             return
 
-        validate_params(scene, task, robot, observation_type)
+        validate_params(scene, robot, task, observation_type)
         self.process_cameras = "pixels" in observation_type
 
-        # if (
-        #     not is_luckyworld_running()
-        #     and "--lr-no-executable" not in sys.argv
-        #     and render_mode is not None
-        # ):
-        #     logger.error("LuckyWorld is not running, starting it now...")
-        #     run_luckyworld_executable(scene, task, robot, binary_path)
+        if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
+            logger.warning("LuckyWorld is not running, starting it now...")
+            run_luckyworld_executable(scene, robot, task, game_path)
 
         library_dev()
 

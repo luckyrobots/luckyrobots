@@ -59,11 +59,11 @@ class RobotController(Node):
     async def control_loop(self):
         # Reset environment
         reset_response = await self.reset_client.call(Reset.Request())
-        
+
         # Send actions
         actuator_values = np.array([0.1, 0.2, -0.1, 0.0, 0.5, 1.0])
         step_response = await self.step_client.call(Step.Request(actuator_values=actuator_values))
-        
+
         # Access observations
         observation = step_response.observation
         joint_states = observation.observation_state

@@ -161,7 +161,7 @@ def main():
     )
     parser.add_argument("--port", type=int, default=3000, help="Port to connect to")
     parser.add_argument(
-        "--scene", type=str, default="kitchen", help="Scene to connect to"
+        "--scene", type=str, default="ArmLevel", help="Scene to connect to"
     )
     parser.add_argument(
         "--task", type=str, default="pickandplace", help="Task to connect to"
@@ -174,6 +174,12 @@ def main():
         type=str,
         default="pixels_agent_pos",
         help="Observation type to use for the robot",
+    )
+    parser.add_argument(
+        "--game-path",
+        type=str,
+        default=None,
+        help="Path to the game executable",
     )
     parser.add_argument(
         "--rate", type=float, default=10.0, help="Control loop rate in Hz"
@@ -198,9 +204,10 @@ def main():
         luckyrobots.register_node(controller)
         luckyrobots.start(
             scene=args.scene,
-            task=args.task,
             robot=args.robot,
+            task=args.task,
             observation_type=args.observation_type,
+            game_path=args.game_path,
         )
         luckyrobots.wait_for_world_client(timeout=60.0)
 

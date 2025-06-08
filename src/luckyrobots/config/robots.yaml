@@ -2,7 +2,7 @@ so100:
   observation_types:
     - pixels_agent_pos
   available_scenes:
-    - kitchen
+    - ArmLevel
   available_tasks:
     - pickandplace
   action_space:

@@ -7,7 +7,7 @@ System Overview
 LuckyRobots uses a distributed node architecture with WebSocket transport:
 
 - **Manager Node**: Central message routing
-- **LuckyRobots Node**: Simulation interface  
+- **LuckyRobots Node**: Simulation interface
 - **Controller Nodes**: User-defined controllers
 - **WebSocket Transport**: Inter-node communication
 - **Lucky World**: Physics simulation backend

@@ -25,17 +25,17 @@ Here's a simple example showing how to create a robot controller:
             # Reset the environment
             await self.reset_client.call(Reset.Request())
             print("Environment reset!")
-            
+
             # Run 10 steps with random actions
             for i in range(10):
                 # Sample random action (6 values for so100 robot)
                 action = np.random.uniform(-1, 1, size=6)
-                
+
                 # Send action to robot
                 response = await self.step_client.call(
                     Step.Request(actuator_values=action.tolist())
                 )
-                
+
                 print(f"Step {i+1}: Action sent, got observation")
                 await asyncio.sleep(0.1)  # Small delay
 
@@ -46,8 +46,8 @@ Here's a simple example showing how to create a robot controller:
 
     # Start simulation
     luckyrobots.start(
-        scene="kitchen", 
-        robot="so100", 
+        scene="kitchen",
+        robot="so100",
         task="pickandplace"
     )
 
@@ -79,7 +79,7 @@ Access robot-specific settings for proper action limits:
 
         async def control_loop(self):
             await self.reset_client.call(Reset.Request())
-            
+
             for step in range(20):
                 action = self.sample_valid_action()
                 await self.step_client.call(
@@ -103,11 +103,11 @@ Get sensor data from the robot:
             # Reset and get initial observation
             reset_response = await self.reset_client.call(Reset.Request())
             observation = reset_response.observation
-            
+
             # Print joint states
             joint_states = observation.observation_state
             print(f"Joint positions: {joint_states}")
-            
+
             # Check for cameras
             if observation.observation_cameras:
                 print(f"Found {len(observation.observation_cameras)} cameras")
@@ -155,13 +155,13 @@ Put it all together:
         async def move_robot(self):
             # Reset
             await self.reset_client.call(Reset.Request())
-            
+
             # Move for 5 steps
             for i in range(5):
                 action = [0.1, 0.0, 0.0, 0.0, 0.0, 1.0]  # Simple action
                 await self.step_client.call(Step.Request(actuator_values=action))
                 await asyncio.sleep(0.5)
-            
+
             print("Robot movement complete!")
 
     def main():
@@ -169,7 +169,7 @@ Put it all together:
         luckyrobots = LuckyRobots()
         luckyrobots.register_node(robot)
         luckyrobots.start(scene="kitchen", robot="so100", task="pickandplace")
-        
+
         # Run the robot
         run_coroutine(robot.move_robot())
 
@@ -195,7 +195,7 @@ Example showing how to access camera data from observations:
                 for camera in observation.observation_cameras:
                     print(f"Camera: {camera.camera_name}")
                     print(f"Image shape: {camera.shape}")
-                    
+
                     # Display image (if image_data is processed)
                     if hasattr(camera, 'image_data') and camera.image_data is not None:
                         cv2.imshow(camera.camera_name, camera.image_data)
@@ -204,7 +204,7 @@ Example showing how to access camera data from observations:
         async def run_with_cameras(self):
             reset_response = await self.reset_client.call(Reset.Request())
             await self.process_cameras(reset_response.observation)
-            
+
             for i in range(50):
                 action = [0.1, 0.0, 0.0, 0.0, 0.0, 1.0]  # Simple action
                 step_response = await self.step_client.call(
@@ -225,7 +225,7 @@ The included controller example supports command line arguments:
     # With camera display
     python controller.py --show-camera --rate 30
 
-    # Custom host/port  
+    # Custom host/port
     python controller.py --host 192.168.1.100 --port 3001
 
 Service and Publisher Examples
@@ -241,21 +241,21 @@ Creating custom services and publishers:
         async def _setup_async(self):
             # Create a custom service
             await self.create_service(
-                MyServiceType, 
-                "my_service", 
+                MyServiceType,
+                "my_service",
                 self.handle_my_service
             )
-            
+
             # Create a publisher
             self.my_publisher = self.create_publisher(
-                MyMessageType, 
+                MyMessageType,
                 "my_topic"
             )
-            
+
             # Create a subscriber
             self.my_subscriber = self.create_subscription(
                 MyMessageType,
-                "other_topic", 
+                "other_topic",
                 self.handle_message
             )
 
