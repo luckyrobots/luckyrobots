@@ -7,40 +7,51 @@ import tempfile
 import signal
 import threading
 import time
-
-import psutil
 import logging
+from typing import Optional
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger("executable")
+logger = logging.getLogger("luckyworld")
 
 LOCK_FILE = os.path.join(tempfile.gettempdir(), "luckyworld_lock")
-_process = None  # Global variable to store the process
-_monitor_thread = None  # Global variable to store the monitor thread
+_process = None
+_monitor_thread = None
 _shutdown_event = threading.Event()
 
 
 def cleanup():
     """Cleanup function to be called when the script exits"""
     global _process, _monitor_thread
-    if _process is not None:
-        try:
-            # Try to terminate the process gracefully
-            _process.terminate()
-            _process.wait(timeout=5)  # Wait up to 5 seconds for graceful termination
-        except subprocess.TimeoutExpired:
-            # If process doesn't terminate gracefully, force kill it
-            _process.kill()
-        except Exception as e:
-            logger.error(f"Error during cleanup: {e}")
 
+    logger.info("Cleaning up LuckyWorld...")
+
+    # Stop monitoring first
     if _monitor_thread is not None and _monitor_thread.is_alive():
         _shutdown_event.set()
-        _monitor_thread.join(timeout=5)
+        _monitor_thread.join(timeout=3)
 
+    # Terminate process
+    if _process is not None:
+        try:
+            if _process.poll() is None:  # Process is still running
+                logger.info("Terminating LuckyWorld process...")
+                _process.terminate()
+                _process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            logger.warning("Process didn't terminate gracefully, force killing...")
+            _process.kill()
+            try:
+                _process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                logger.error("Failed to kill process")
+        except Exception as e:
+            logger.error(f"Error during process cleanup: {e}")
+
+    # Always remove lock file
     remove_lock_file()
+    logger.info("Cleanup complete")
 
 
 def monitor_process():
@@ -49,162 +60,242 @@ def monitor_process():
     try:
         while not _shutdown_event.is_set():
             if _process is None or _process.poll() is not None:
-                logger.error("LuckyWorld process has terminated unexpectedly")
-                # Signal the main process to exit
-                os.kill(os.getpid(), signal.SIGTERM)
+                logger.warning("LuckyWorld process has terminated")
+                # Don't kill the main process, just break out of monitoring
                 break
-            time.sleep(1)  # Check every second
+            time.sleep(1)
     except Exception as e:
         logger.error(f"Error in process monitor: {e}")
-        os.kill(os.getpid(), signal.SIGTERM)
+    finally:
+        # Ensure cleanup happens when monitoring stops
+        if not _shutdown_event.is_set():
+            logger.info("Process monitor detected termination, cleaning up...")
+            remove_lock_file()
 
 
 def is_luckyworld_running() -> bool:
-    """Check if LuckyWorld is running by checking the lock file or process name"""
-    # Check for the lock file
-    if os.path.exists(LOCK_FILE):
-        with open(LOCK_FILE, "r") as f:
-            pid = int(f.read().strip())
-        if psutil.pid_exists(pid):
-            # Double-check if the process is actually LuckyWorld
-            try:
-                process = psutil.Process(pid)
-                if "LuckyWorld" in process.name():
-                    return True
-            except psutil.NoSuchProcess:
-                pass  # Process doesn't exist, continue to remove lock file
-
-        # If we reach here, the lock file is stale
-        remove_lock_file()
-
-    # Check for any running LuckyWorld processes
-    for proc in psutil.process_iter(["name"]):
-        if "LuckyWorld" in proc.info["name"]:
-            create_lock_file(proc.pid)
-            return True
-
-    return False
+    """Check if LuckyWorld is running by checking the lock file"""
+    return os.path.exists(LOCK_FILE)
 
 
 def create_lock_file(pid: int) -> None:
-    """Create a lock file with the process ID to prevent multiple instances of LuckyWorld from running"""
+    """Create a lock file with the process ID"""
     with open(LOCK_FILE, "w") as f:
         f.write(str(pid))
 
 
 def remove_lock_file() -> None:
-    """Remove the lock file to allow LuckyWorld to run again"""
-    if os.path.exists(LOCK_FILE):
-        os.remove(LOCK_FILE)
+    """Remove the lock file"""
+    try:
+        if os.path.exists(LOCK_FILE):
+            os.remove(LOCK_FILE)
+            logger.debug("Lock file removed successfully")
+        else:
+            logger.debug("Lock file doesn't exist, nothing to remove")
+    except Exception as e:
+        logger.error(f"Error removing lock file: {e}")
 
 
-def run_luckyworld_executable(
-    scene: str, robot: str, task: str = None, pkg_path: str = None
-) -> None:
-    """Run the LuckyWorld executable"""
-    global _process, _monitor_thread
+def signal_handler(signum, frame):
+    """Handle termination signals"""
+    logger.info(f"Received signal {signum}, shutting down...")
+    cleanup()
+    sys.exit(0)
+
+
+def find_luckyworld_executable() -> Optional[str]:
+    """Automatically find LuckyWorld executable in common locations"""
     is_wsl = "microsoft" in platform.uname().release.lower()
 
+    # 1. Check environment variable first (highest priority)
+    env_path = os.environ.get("LUCKYWORLD_PATH")
+    if env_path:
+        logger.info(f"Using LUCKYWORLD_PATH environment variable: {env_path}")
+        if os.path.exists(env_path):
+            return env_path
+        else:
+            logger.warning(f"LUCKYWORLD_PATH points to non-existent file: {env_path}")
+
+    # 2. Check LUCKYWORLD_HOME environment variable
+    env_home = os.environ.get("LUCKYWORLD_HOME")
+    if env_home:
+        logger.info(f"Using LUCKYWORLD_HOME environment variable: {env_home}")
+        if platform.system() == "Linux" and not is_wsl:
+            env_executable = os.path.join(env_home, "LuckyWorld.sh")
+        elif platform.system() == "Darwin":
+            env_executable = os.path.join(
+                env_home, "LuckyWorld.app", "Contents", "MacOS", "LuckyWorld"
+            )
+        else:
+            env_executable = os.path.join(env_home, "LuckyWorldV2.exe")
+
+        if os.path.exists(env_executable):
+            return env_executable
+        else:
+            logger.warning(
+                f"LUCKYWORLD_HOME does not contain executable: {env_executable}"
+            )
+
+    # 3. System installation paths
     if platform.system() == "Linux" and not is_wsl:
-        platform_name = "linux"
+        system_paths = [
+            "/opt/LuckyWorld/LuckyWorld.sh",
+            "/usr/local/bin/LuckyWorld.sh",
+            os.path.expanduser("~/.local/share/LuckyWorld/LuckyWorld.sh"),
+            os.path.expanduser("~/LuckyWorld/LuckyWorld.sh"),
+        ]
     elif platform.system() == "Darwin":
-        platform_name = "mac"
-    else:
-        platform_name = "win"
-
-    if pkg_path is None:
-        pkg_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "examples", "Binary", platform_name
-        )
-
-    if platform_name == "mac":
-        executable_path = os.path.join(
-            pkg_path, "LuckyWorld.app", "Contents", "MacOS", "LuckyWorld"
-        )
-    elif platform_name == "linux":
-        executable_path = os.path.join(pkg_path, "LuckyWorld.sh")
+        system_paths = [
+            "/Applications/LuckyWorld/LuckyWorld.app/Contents/MacOS/LuckyWorld",
+            os.path.expanduser(
+                "~/Applications/LuckyWorld/LuckyWorld.app/Contents/MacOS/LuckyWorld"
+            ),
+        ]
     else:  # Windows or WSL2
-        executable_path = os.path.join(pkg_path, "LuckyWorldV2.exe")
+        system_paths = [
+            "C:\\Program Files\\LuckyWorld\\LuckyWorldV2.exe",
+            "C:\\Program Files (x86)\\LuckyWorld\\LuckyWorldV2.exe",
+            os.path.expanduser("~\\AppData\\Local\\LuckyWorld\\LuckyWorldV2.exe"),
+        ]
 
-    # Check if the executable exists
-    if not os.path.exists(executable_path):
-        logger.error(f"Error: Executable not found at {executable_path}")
-        sys.exit(1)
-        return
+        if is_wsl:
+            system_paths.extend(
+                [
+                    "/mnt/c/Program Files/LuckyWorld/LuckyWorldV2.exe",
+                    "/mnt/c/Program Files (x86)/LuckyWorld/LuckyWorldV2.exe",
+                ]
+            )
+
+    for path in system_paths:
+        if os.path.exists(path):
+            logger.info(f"Found LuckyWorld at: {path}")
+            return path
+
+    return None
+
+
+def launch_luckyworld(
+    scene: str = "ArmLevel",
+    robot: str = "so100",
+    task: Optional[str] = None,
+    executable_path: Optional[str] = None,
+    headless: bool = False,
+    windowed: bool = True,
+    verbose: bool = False,
+) -> bool:
+    """Launch LuckyWorld with simplified parameters"""
+    global _process, _monitor_thread
+
+    # Check if already running
+    if is_luckyworld_running():
+        logger.error("LuckyWorld is already running. Stop the existing instance first.")
+        return False
+
+    # Find executable if not provided
+    if executable_path is None:
+        executable_path = find_luckyworld_executable()
+        if executable_path is None:
+            logger.error(
+                "Could not find LuckyWorld executable. Please provide the path manually."
+            )
+            logger.info("You can set the path using environment variables:")
+            logger.info("  LUCKYWORLD_PATH=/full/path/to/LuckyWorldV2.exe")
+            logger.info("  LUCKYWORLD_HOME=/path/to/luckyworld/directory")
+            logger.info("Or check these common locations:")
+            logger.info("  Development: Build/Windows/LuckyWorldV2.exe")
+            logger.info("  Windows: C:\\Program Files\\LuckyWorld\\LuckyWorldV2.exe")
+            logger.info("  WSL2: /mnt/c/Program Files/LuckyWorld/LuckyWorldV2.exe")
+            return False
+
+    if not os.path.exists(executable_path) or not executable_path.endswith(".exe"):
+        logger.error(f"Executable not found at: {executable_path}")
+        return False
 
     try:
-        # Set execute permissions (only needed on Unix systems)
+        # Set execute permissions on Unix systems
         if platform.system() != "Windows":
             os.chmod(executable_path, 0o755)
 
-        logger.info(f"Running executable at: {executable_path}")
-        verbose = "--lr-verbose" in sys.argv
+        logger.info(f"Launching LuckyWorld: {executable_path}")
 
-        # Build command as separate arguments
+        # Build command
         command = [executable_path]
-        if scene:
-            command.append(f"-Scene={scene}")
-        if robot:
-            command.append(f"-Robot={robot}")
-        if task:  # Task is optional
+        command.append(f"-Scene={scene}")
+        command.append(f"-Robot={robot}")
+
+        if task:
             command.append(f"-Task={task}")
 
-        # Log the full command for debugging
-        logger.info(f"Full command: {' '.join(command)}")
+        if headless:
+            command.append("-Headless")
+        else:
+            if windowed:
+                command.append("-windowed")
+            else:
+                command.append("-fullscreen")
 
-        # Run the executable as a detached process
+        command.append("-Realtime")
+
+        logger.info(f"Command: {' '.join(command)}")
+
+        # Launch process
         if platform.system() == "Windows":
-            # Only use creationflags when actually running on Windows
             DETACHED_PROCESS = 0x00000008
             _process = subprocess.Popen(
                 command,
                 creationflags=DETACHED_PROCESS,
                 close_fds=True,
-                stdout=subprocess.DEVNULL if not verbose else None,
-                stderr=subprocess.DEVNULL if not verbose else None,
+                stdout=None if verbose else subprocess.DEVNULL,
+                stderr=None if verbose else subprocess.DEVNULL,
             )
         else:
-            # For Unix-based systems (macOS, Linux, WSL2)
-            # Use start_new_session to detach the process
             _process = subprocess.Popen(
                 command,
                 start_new_session=True,
-                stdout=subprocess.DEVNULL if not verbose else None,
-                stderr=subprocess.DEVNULL if not verbose else None,
+                stdout=None if verbose else subprocess.DEVNULL,
+                stderr=None if verbose else subprocess.DEVNULL,
             )
 
-        # Start the monitor thread
+        # Start monitoring
         _shutdown_event.clear()
         _monitor_thread = threading.Thread(target=monitor_process, daemon=True)
         _monitor_thread.start()
 
         create_lock_file(_process.pid)
 
-        logger.info(
-            f"LuckyWorld application started successfully (PID: {_process.pid})"
-        )
-        if verbose:
-            logger.info(f"Arguments: scene={scene}, robot={robot}, task={task}")
+        logger.info(f"LuckyWorld started successfully (PID: {_process.pid})")
+        logger.info(f"Scene: {scene}, Robot: {robot}, Task: {task or 'None'}")
 
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Error: Failed to start LuckyWorld application. {e}")
-        cleanup()
-        sys.exit(1)
-    except PermissionError as e:
-        logger.error(
-            f"Error: Permission denied. Unable to execute {executable_path}. {e}"
-        )
-        cleanup()
-        sys.exit(1)
-    except FileNotFoundError as e:
-        logger.error(f"Error: File not found. {e}")
-        cleanup()
-        sys.exit(1)
+        return True
+
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+        logger.error(f"Failed to launch LuckyWorld: {e}")
         cleanup()
-        sys.exit(1)
+        return False
 
 
-# Register cleanup function to be called on exit
+def stop_luckyworld() -> bool:
+    """Stop the running LuckyWorld instance"""
+    global _process
+
+    if not is_luckyworld_running():
+        logger.info("LuckyWorld is not running")
+        return True
+
+    try:
+        if _process:
+            logger.info("Stopping LuckyWorld...")
+            _process.terminate()
+            _process.wait(timeout=10)
+            logger.info("LuckyWorld stopped successfully")
+        cleanup()
+        return True
+    except Exception as e:
+        logger.error(f"Error stopping LuckyWorld: {e}")
+        return False
+
+
+# Register cleanup and signal handlers
 atexit.register(cleanup)
+signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
