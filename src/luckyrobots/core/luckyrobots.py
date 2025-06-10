@@ -157,8 +157,6 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-        library_dev()
-
         self._setup_signal_handlers()
 
         # Start all registered nodes
