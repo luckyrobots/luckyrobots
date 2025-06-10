@@ -157,6 +157,12 @@ class Controller(Node):
 def main():
     parser = argparse.ArgumentParser(description="Keyboard Teleop for LuckyRobots")
     parser.add_argument(
+        "--executable-path",
+        type=str,
+        default=None,
+        help="Path to the game executable",
+    )
+    parser.add_argument(
         "--host", type=str, default="localhost", help="Host to connect to"
     )
     parser.add_argument("--port", type=int, default=3000, help="Port to connect to")
@@ -174,12 +180,6 @@ def main():
         type=str,
         default="pixels_agent_pos",
         help="Observation type to use for the robot",
-    )
-    parser.add_argument(
-        "--game-path",
-        type=str,
-        default=None,
-        help="Path to the game executable",
     )
     parser.add_argument(
         "--rate", type=float, default=10.0, help="Control loop rate in Hz"
@@ -203,11 +203,11 @@ def main():
         luckyrobots = LuckyRobots(args.host, args.port)
         luckyrobots.register_node(controller)
         luckyrobots.start(
+            executable_path=args.executable_path,
             scene=args.scene,
             robot=args.robot,
             task=args.task,
             observation_type=args.observation_type,
-            game_path=args.game_path,
         )
         luckyrobots.wait_for_world_client(timeout=60.0)
 

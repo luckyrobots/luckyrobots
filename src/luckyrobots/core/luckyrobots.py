@@ -19,8 +19,7 @@ from websocket import create_connection
 from .manager import Manager
 from ..message.transporter import MessageType, TransportMessage
 from ..message.srv.types import Reset, Step
-from ..utils.run_executable import is_luckyworld_running, run_luckyworld_executable
-from ..utils.library_dev import library_dev
+from ..utils.sim_manager import launch_luckyworld, stop_luckyworld
 from ..core.models import ObservationModel
 from .node import Node
 from ..utils.event_loop import (
@@ -130,11 +129,12 @@ class LuckyRobots(Node):
 
     def start(
         self,
-        scene: str = "ArmLevel",
-        robot: str = "so100",
-        task: str = "pickandplace",
+        scene: str,
+        robot: str,
+        task: str = None,
+        executable_path: str = None,
         observation_type: str = "pixels_agent_pos",
-        game_path: str = None,
+        headless: bool = False,
     ) -> None:
         """Start the LuckyRobots node"""
         if self._running:
@@ -144,11 +144,17 @@ class LuckyRobots(Node):
         validate_params(scene, robot, task, observation_type)
         self.process_cameras = "pixels" in observation_type
 
-        if not is_luckyworld_running() and "--lr-no-executable" not in sys.argv:
-            logger.warning("LuckyWorld is not running, starting it now...")
-            run_luckyworld_executable(scene, robot, task, game_path)
-
-        library_dev()
+        # success = launch_luckyworld(
+        #     scene=scene,
+        #     robot=robot,
+        #     task=task,
+        #     executable_path=executable_path,
+        #     headless=headless,
+        # )
+        # if not success:
+        #     logger.error("Failed to launch LuckyWorld")
+        #     self.shutdown()
+        #     raise
 
         self._setup_signal_handlers()
 
@@ -214,7 +220,7 @@ class LuckyRobots(Node):
         for line in final_messages:
             print(line)
 
-    def wait_for_world_client(self, timeout: float = 60.0) -> bool:
+    def wait_for_world_client(self, timeout: float = 120.0) -> bool:
         """Wait for the world client to connect to the websocket server"""
         start_time = time.perf_counter()
 
@@ -386,16 +392,23 @@ class LuckyRobots(Node):
             except Exception as e:
                 logger.error(f"Error shutting down node {node_name}: {e}")
 
-        # 2. Shutdown self (transport layer)
+        # 2. Stop LuckyWorld executable (before transport shutdown)
+        try:
+            logger.info("Stopping LuckyWorld executable...")
+            stop_luckyworld()
+        except Exception as e:
+            logger.error(f"Error stopping LuckyWorld executable: {e}")
+
+        # 3. Shutdown self (transport layer)
         try:
             super().shutdown()
         except Exception as e:
             logger.error(f"Error shutting down LuckyRobots transport: {e}")
 
-        # 3. Clean up UI resources
+        # 4. Clean up UI resources
         self._cleanup_camera_windows()
 
-        # 4. Set shutdown event
+        # 5. Set shutdown event
         self._shutdown_event.set()
 
         logger.info("LuckyRobots shutdown complete")
@@ -472,7 +485,6 @@ async def world_endpoint(websocket: WebSocket) -> None:
 
     if hasattr(app, "lucky_robots"):
         app.lucky_robots.world_client = websocket
-        logger.info("World client connected")
 
     lucky_robots = app.lucky_robots
     pending_resets = lucky_robots._pending_resets
