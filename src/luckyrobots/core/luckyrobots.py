@@ -19,8 +19,7 @@ from websocket import create_connection
 from .manager import Manager
 from ..message.transporter import MessageType, TransportMessage
 from ..message.srv.types import Reset, Step
-from ..utils.run_executable import launch_luckyworld, stop_luckyworld
-from ..utils.library_dev import library_dev
+from ..utils.sim_manager import launch_luckyworld, stop_luckyworld
 from ..core.models import ObservationModel
 from .node import Node
 from ..utils.event_loop import (
@@ -145,17 +144,17 @@ class LuckyRobots(Node):
         validate_params(scene, robot, task, observation_type)
         self.process_cameras = "pixels" in observation_type
 
-        success = launch_luckyworld(
-            scene=scene,
-            robot=robot,
-            task=task,
-            executable_path=executable_path,
-            headless=headless,
-        )
-        if not success:
-            logger.error("Failed to launch LuckyWorld")
-            self.shutdown()
-            raise
+        # success = launch_luckyworld(
+        #     scene=scene,
+        #     robot=robot,
+        #     task=task,
+        #     executable_path=executable_path,
+        #     headless=headless,
+        # )
+        # if not success:
+        #     logger.error("Failed to launch LuckyWorld")
+        #     self.shutdown()
+        #     raise
 
         self._setup_signal_handlers()
 
@@ -221,7 +220,7 @@ class LuckyRobots(Node):
         for line in final_messages:
             print(line)
 
-    def wait_for_world_client(self, timeout: float = 60.0) -> bool:
+    def wait_for_world_client(self, timeout: float = 120.0) -> bool:
         """Wait for the world client to connect to the websocket server"""
         start_time = time.perf_counter()
 
@@ -486,7 +485,6 @@ async def world_endpoint(websocket: WebSocket) -> None:
 
     if hasattr(app, "lucky_robots"):
         app.lucky_robots.world_client = websocket
-        logger.info("World client connected")
 
     lucky_robots = app.lucky_robots
     pending_resets = lucky_robots._pending_resets
