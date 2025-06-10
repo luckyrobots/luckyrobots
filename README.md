@@ -43,7 +43,7 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
    pip install luckyrobots
    ```
 
-. **Run Example**
+**Run Example**
    ```bash
    git clone https://github.com/luckyrobots/luckyrobots.git
    cd luckyrobots/examples
