@@ -144,17 +144,17 @@ class LuckyRobots(Node):
         validate_params(scene, robot, task, observation_type)
         self.process_cameras = "pixels" in observation_type
 
-        # success = launch_luckyworld(
-        #     scene=scene,
-        #     robot=robot,
-        #     task=task,
-        #     executable_path=executable_path,
-        #     headless=headless,
-        # )
-        # if not success:
-        #     logger.error("Failed to launch LuckyWorld")
-        #     self.shutdown()
-        #     raise
+        success = launch_luckyworld(
+            scene=scene,
+            robot=robot,
+            task=task,
+            executable_path=executable_path,
+            headless=headless,
+        )
+        if not success:
+            logger.error("Failed to launch LuckyWorld")
+            self.shutdown()
+            raise
 
         self._setup_signal_handlers()
 

@@ -249,7 +249,7 @@ class Transporter:
             await self._connected.wait()
 
         try:
-            await self._connection.send(msgpack.dumps(message.dict()))
+            await self._connection.send(msgpack.dumps(message.model_dump()))
         except websockets.ConnectionClosed:
             logger.warning("Could not send message, connection closed")
             self._connected.clear()

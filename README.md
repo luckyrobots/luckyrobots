@@ -31,7 +31,7 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
 ## Quick Start
 
 1. **Download Lucky World Executable from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest)**
-   
+
 2. **Create conda environment (recommended)**
    ```bash
    conda create -n luckyrobots python
