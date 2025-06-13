@@ -10,9 +10,11 @@ import time
 import logging
 from typing import Optional
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("luckyworld")
 
 LOCK_FILE = os.path.join(tempfile.gettempdir(), "luckyworld_lock")
@@ -285,8 +287,16 @@ def stop_luckyworld() -> bool:
     try:
         if _process:
             logger.info("Stopping LuckyWorld...")
+            # First try graceful termination
             _process.terminate()
-            _process.wait(timeout=10)
+            try:
+                _process.wait(timeout=60)
+            except TimeoutError:
+                # If graceful termination fails, force kill
+                logger.info("Graceful termination failed, forcing process kill...")
+                _process.kill()
+                _process.wait(timeout=60)
+            
             logger.info("LuckyWorld stopped successfully")
         cleanup()
         return True

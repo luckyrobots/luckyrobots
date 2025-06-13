@@ -1,5 +1,5 @@
+import os
 import cv2
-import sys
 import json
 import msgpack
 import asyncio
@@ -31,9 +31,11 @@ from ..utils.helpers import (
     get_robot_config,
 )
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("luckyrobots")
 
 # FastAPI app and manager instances
@@ -220,7 +222,7 @@ class LuckyRobots(Node):
         for line in final_messages:
             print(line)
 
-    def wait_for_world_client(self, timeout: float = 120.0) -> bool:
+    def wait_for_world_client(self, timeout: float = 240.0) -> bool:
         """Wait for the world client to connect to the websocket server"""
         start_time = time.perf_counter()
 
@@ -232,7 +234,7 @@ class LuckyRobots(Node):
             logger.info("World client connected successfully")
             return True
         else:
-            logger.error("No world client connected after 60 seconds")
+            logger.error("No world client connected after 240 seconds")
             self.shutdown()
             raise
 

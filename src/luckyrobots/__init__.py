@@ -1,3 +1,10 @@
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("luckyrobots")
+except PackageNotFoundError:
+    __version__ = "unknown"
+
 from .core.node import Node
 from .core.luckyrobots import LuckyRobots
 from .core.models import ObservationModel
@@ -16,4 +23,5 @@ __all__ = [
     "FPS",
     "check_updates",
     "run_coroutine",
+    "__version__",
 ]

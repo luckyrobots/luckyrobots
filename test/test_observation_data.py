@@ -1,230 +1,308 @@
 """
 Test observation data processing and camera data handling.
 
-This tests the critical data processing pipeline - ensuring observations
-and camera data are properly parsed and processed.
+This module tests the critical data processing pipeline - ensuring observations
+and camera data are properly parsed and processed from the real simulator.
 """
 
+import pytest
+import asyncio
 import numpy as np
-import cv2
-from unittest.mock import patch
 
-from luckyrobots.core.models import ObservationModel, CameraData, CameraShape
+from luckyrobots import LuckyRobots
+from luckyrobots.message.srv.types import Reset, Step
+from luckyrobots.core.models import CameraData
+
+# Test configuration
+TEST_SCENE = "ArmLevel"
+TEST_ROBOT = "so100"
+TEST_TASK = "pickandplace"
+SIMULATOR_CONNECTION_TIMEOUT = 30
 
 
+@pytest.mark.simulator
 class TestObservationData:
-    """Test observation and camera data processing."""
+    """Test observation and camera data processing with real simulator data."""
 
-    def test_observation_model_creation(self):
-        """Test creating observation model with valid data."""
-        observation_state = {
-            "0": 0.5,
-            "1": -1.0,
-            "2": 1.5,
-            "3": -0.5,
-            "4": 0.0,
-            "5": 1.0,
-        }
+    @pytest.mark.asyncio
+    async def test_observation_structure_after_reset(
+        self, luckyrobots_instance, simulator_assertions, robot_config
+    ):
+        """Test observation data structure after reset"""
+        response = await luckyrobots_instance.handle_reset(Reset.Request(seed=42))
+        observation = response.observation
 
-        observation = ObservationModel(
-            ObservationState=observation_state, ObservationCameras=None
+        # Test basic structure
+        simulator_assertions.assert_observation_valid(observation, robot_config)
+
+        # Verify actuator states match robot configuration
+        expected_actuators = len(robot_config["observation_space"]["actuator_names"])
+        assert len(observation.observation_state) == expected_actuators
+
+        # Verify all state values are numeric and finite
+        for key, value in observation.observation_state.items():
+            assert isinstance(value, (int, float))
+            assert not (value != value)  # Check for NaN
+            assert abs(value) < float("inf")  # Check for infinity
+
+    @pytest.mark.asyncio
+    async def test_observation_structure_after_step(
+        self, luckyrobots_instance, simulator_assertions, robot_config
+    ):
+        """Test observation data structure after step"""
+        # Reset first
+        await luckyrobots_instance.handle_reset(Reset.Request(seed=42))
+
+        # Take a step
+        num_actuators = len(robot_config["action_space"]["actuator_names"])
+        actuator_values = [0.05] * num_actuators  # Small movement
+
+        response = await luckyrobots_instance.handle_step(
+            Step.Request(actuator_values=actuator_values)
+        )
+        observation = response.observation
+
+        # Same structural tests as reset
+        simulator_assertions.assert_observation_valid(observation, robot_config)
+
+        # Verify state values are within expected ranges
+        actuator_limits = robot_config["observation_space"]["actuator_limits"]
+        state_values = list(observation.observation_state.values())
+
+        for i, (value, limit) in enumerate(zip(state_values, actuator_limits)):
+            assert (
+                limit["lower"] <= value <= limit["upper"]
+            ), f"Actuator {i} value {value} outside limits [{limit['lower']}, {limit['upper']}]"
+
+    @pytest.mark.asyncio
+    async def test_observation_consistency_across_resets(self, luckyrobots_instance):
+        """Test that observations are consistent across resets with same seed"""
+        seed = 123
+
+        # First reset
+        response1 = await luckyrobots_instance.handle_reset(Reset.Request(seed=seed))
+        state1 = response1.observation.observation_state
+
+        await asyncio.sleep(0.5)  # Brief pause
+
+        # Second reset with same seed
+        response2 = await luckyrobots_instance.handle_reset(Reset.Request(seed=seed))
+        state2 = response2.observation.observation_state
+
+        # States should be identical with same seed
+        assert state1 == state2
+
+    @pytest.mark.asyncio
+    async def test_state_changes_after_actions(
+        self, luckyrobots_instance, robot_config
+    ):
+        """Test that robot state changes after taking actions"""
+        # Reset to known state
+        reset_response = await luckyrobots_instance.handle_reset(Reset.Request(seed=42))
+        initial_state = reset_response.observation.observation_state.copy()
+
+        # Take a meaningful action
+        num_actuators = len(robot_config["action_space"]["actuator_names"])
+
+        # Move first actuator significantly
+        actuator_values = [0.0] * num_actuators
+        actuator_values[0] = 0.3  # Significant movement
+
+        step_response = await luckyrobots_instance.handle_step(
+            Step.Request(actuator_values=actuator_values)
+        )
+        final_state = step_response.observation.observation_state
+
+        # At least one state value should have changed
+        state_changed = any(
+            abs(initial_state[key] - final_state[key]) > 1e-6
+            for key in initial_state.keys()
         )
 
-        assert observation.observation_state == observation_state
-        assert observation.observation_cameras is None
+        # If no immediate change, take a few more steps to allow physics to settle
+        if not state_changed:
+            for i in range(5):
+                await asyncio.sleep(0.2)
+                step_response = await luckyrobots_instance.handle_step(
+                    Step.Request(actuator_values=actuator_values)
+                )
+                final_state = step_response.observation.observation_state
+                state_changed = any(
+                    abs(initial_state[key] - final_state[key]) > 1e-6
+                    for key in initial_state.keys()
+                )
+                if state_changed:
+                    break
 
-    def test_observation_model_with_cameras(self):
-        """Test observation model with camera data."""
-        observation_state = {"shoulder_pan": 0.0}
+        # We should see some change eventually
+        assert state_changed, "Robot state did not change after taking actions"
 
-        camera_data = CameraData(
-            CameraName="test_camera",
-            dtype="uint8",
-            shape={"width": 640, "height": 480, "channel": 3},
-            TimeStamp="2024-01-01T00:00:00Z",
-            ImageData=b"test_image_data",
-        )
+    @pytest.mark.asyncio
+    async def test_observation_data_types(self, luckyrobots_instance, robot_config):
+        """Test that observation data types are correct"""
+        response = await luckyrobots_instance.handle_reset(Reset.Request(seed=42))
+        observation = response.observation
 
-        observation = ObservationModel(
-            ObservationState=observation_state, ObservationCameras=[camera_data]
-        )
+        # Check observation state data types
+        for key, value in observation.observation_state.items():
+            assert isinstance(key, str), f"Observation key {key} is not a string"
+            assert isinstance(
+                value, (int, float)
+            ), f"Observation value {value} is not numeric"
 
-        assert len(observation.observation_cameras) == 1
-        assert observation.observation_cameras[0].camera_name == "test_camera"
+        # Check camera data types if present
+        if observation.observation_cameras:
+            for camera in observation.observation_cameras:
+                assert isinstance(camera.camera_name, str)
+                assert isinstance(camera.dtype, str)
 
-    def test_camera_data_creation(self):
-        """Test creating camera data with valid parameters."""
-        camera = CameraData(
-            CameraName="laptop",
-            dtype="uint8",
-            shape={"width": 640, "height": 480, "channel": 3},
-            TimeStamp="2024-01-01T00:00:00Z",
-            ImageData=b"mock_image_data",
-        )
+                if camera.time_stamp:
+                    assert isinstance(camera.time_stamp, str)
 
-        assert camera.camera_name == "laptop"
-        assert camera.dtype == "uint8"
-        assert camera.shape["width"] == 640
-        assert camera.shape["height"] == 480
-        assert camera.shape["channel"] == 3
-        assert camera.time_stamp == "2024-01-01T00:00:00Z"
-        assert camera.image_data == b"mock_image_data"
+    @pytest.mark.asyncio
+    async def test_observation_state_keys(self, luckyrobots_instance, robot_config):
+        """Test that observation state keys match expected actuator names or indices"""
+        response = await luckyrobots_instance.handle_reset(Reset.Request(seed=42))
+        observation = response.observation
 
-    def test_camera_shape_model(self):
-        """Test camera shape model."""
-        shape = CameraShape(width=1920, height=1080, channel=3)
+        state_keys = list(observation.observation_state.keys())
+        expected_count = len(robot_config["observation_space"]["actuator_names"])
 
-        assert shape.width == 1920
-        assert shape.height == 1080
-        assert shape.channel == 3
+        # Should have the right number of state values
+        assert len(state_keys) == expected_count
 
-    @patch("cv2.imdecode")
-    @patch("numpy.frombuffer")
-    def test_camera_image_processing(self, mock_frombuffer, mock_imdecode):
-        """Test camera image processing from bytes to numpy array."""
-        # Mock image data
-        mock_image_bytes = b"fake_jpeg_data"
-        mock_numpy_array = np.array([1, 2, 3, 4], dtype=np.uint8)
-        mock_decoded_image = np.zeros((480, 640, 3), dtype=np.uint8)
+        # Keys should be either string indices or actuator names
+        for key in state_keys:
+            assert isinstance(key, str)
+            # Could be numeric indices like "0", "1", "2" or actual names
+            assert len(key) > 0
 
-        mock_frombuffer.return_value = mock_numpy_array
-        mock_imdecode.return_value = mock_decoded_image
+    @pytest.mark.asyncio
+    async def test_camera_data_when_enabled(self, luckyworld_session):
+        """Test camera data when cameras are enabled"""
+        # Create LuckyRobots instance with camera processing enabled
+        luckyrobots = LuckyRobots()
 
-        camera = CameraData(
-            CameraName="test_camera",
-            dtype="uint8",
-            shape={"width": 640, "height": 480, "channel": 3},
-            ImageData=mock_image_bytes,
-        )
+        try:
+            luckyrobots.start(
+                scene=TEST_SCENE,
+                robot=TEST_ROBOT,
+                task=TEST_TASK,
+                observation_type="pixels_agent_pos",  # This should enable cameras
+                headless=True,
+            )
 
-        # Process the image
-        camera.process_image()
+            success = luckyrobots.wait_for_world_client(
+                timeout=SIMULATOR_CONNECTION_TIMEOUT
+            )
+            assert success is True
 
-        # Verify the processing pipeline
-        mock_frombuffer.assert_called_once_with(mock_image_bytes, np.uint8)
-        mock_imdecode.assert_called_once_with(mock_numpy_array, cv2.IMREAD_COLOR)
+            response = await luckyrobots.handle_reset(Reset.Request(seed=42))
+            observation = response.observation
 
-        # Check that image_data is now the processed numpy array
-        assert np.array_equal(camera.image_data, mock_decoded_image)
+            # Check if cameras are present
+            if observation.observation_cameras is not None:
+                assert isinstance(observation.observation_cameras, list)
+                assert len(observation.observation_cameras) > 0
 
-    def test_camera_image_processing_no_data(self):
-        """Test camera image processing with no image data."""
-        camera = CameraData(
-            CameraName="test_camera",
-            dtype="uint8",
-            shape={"width": 640, "height": 480, "channel": 3},
-            ImageData=None,
-        )
+                for camera in observation.observation_cameras:
+                    assert isinstance(camera, CameraData)
+                    assert camera.camera_name is not None
+                    assert camera.dtype is not None
+                    assert camera.shape is not None
 
-        # Process should handle None gracefully
-        result = camera.process_image()
-        assert result is None
-        assert camera.image_data is None
+                    # Verify shape structure
+                    if isinstance(camera.shape, dict):
+                        assert "width" in camera.shape
+                        assert "height" in camera.shape
+                        assert "channel" in camera.shape
+                        assert camera.shape["width"] > 0
+                        assert camera.shape["height"] > 0
+                        assert camera.shape["channel"] > 0
 
-    @patch("cv2.imdecode")
-    @patch("numpy.frombuffer")
-    def test_observation_process_all_cameras(self, mock_frombuffer, mock_imdecode):
-        """Test processing all cameras in an observation."""
-        mock_numpy_array = np.array([1, 2, 3, 4], dtype=np.uint8)
-        mock_decoded_image = np.zeros((480, 640, 3), dtype=np.uint8)
+                    # If image data is present, verify it's valid
+                    if camera.image_data is not None:
+                        if isinstance(camera.image_data, bytes):
+                            assert len(camera.image_data) > 0
+                        elif isinstance(camera.image_data, np.ndarray):
+                            assert camera.image_data.size > 0
 
-        mock_frombuffer.return_value = mock_numpy_array
-        mock_imdecode.return_value = mock_decoded_image
+        finally:
+            luckyrobots.shutdown()
 
-        # Create observation with multiple cameras
-        cameras = [
-            CameraData(
-                CameraName="camera1",
-                dtype="uint8",
-                shape={"width": 640, "height": 480, "channel": 3},
-                ImageData=b"image1_data",
-            ),
-            CameraData(
-                CameraName="camera2",
-                dtype="uint8",
-                shape={"width": 640, "height": 480, "channel": 3},
-                ImageData=b"image2_data",
-            ),
-        ]
+    @pytest.mark.asyncio
+    async def test_camera_data_processing(self, luckyworld_session):
+        """Test camera data processing pipeline"""
+        luckyrobots = LuckyRobots()
 
-        observation = ObservationModel(
-            ObservationState={"joint1": 0.0}, ObservationCameras=cameras
-        )
+        try:
+            luckyrobots.start(
+                scene=TEST_SCENE,
+                robot=TEST_ROBOT,
+                task=TEST_TASK,
+                observation_type="pixels_agent_pos",
+                headless=True,
+            )
 
-        # Process all cameras
-        observation.process_all_cameras()
+            success = luckyrobots.wait_for_world_client(
+                timeout=SIMULATOR_CONNECTION_TIMEOUT
+            )
+            assert success is True
 
-        # Verify both cameras were processed
-        assert mock_frombuffer.call_count == 2
-        assert mock_imdecode.call_count == 2
+            response = await luckyrobots.handle_reset(Reset.Request(seed=42))
+            observation = response.observation
 
-        for camera in observation.observation_cameras:
-            assert np.array_equal(camera.image_data, mock_decoded_image)
+            if observation.observation_cameras:
+                # Test processing all cameras
+                observation.process_all_cameras()
 
-    def test_observation_process_no_cameras(self):
-        """Test processing observation with no cameras."""
-        observation = ObservationModel(
-            ObservationState={"joint1": 0.0}, ObservationCameras=None
-        )
+                for camera in observation.observation_cameras:
+                    # If camera had image data, it should now be processed
+                    if camera.image_data is not None:
+                        # After processing, should be numpy array or None
+                        assert camera.image_data is None or isinstance(
+                            camera.image_data, np.ndarray
+                        )
 
-        # Should handle None gracefully
-        observation.process_all_cameras()
-        assert observation.observation_cameras is None
+        finally:
+            luckyrobots.shutdown()
 
-    def test_camera_data_alias_fields(self):
-        """Test that camera data handles alias fields correctly."""
-        # Test with alias field names
-        camera_dict = {
-            "CameraName": "test_camera",
-            "dtype": "uint8",
-            "shape": {"width": 640, "height": 480, "channel": 3},
-            "TimeStamp": "2024-01-01T00:00:00Z",
-            "ImageData": b"test_data",
-        }
+    @pytest.mark.asyncio
+    async def test_observation_stability_over_time(self, luckyrobots_instance):
+        """Test that observations remain stable when no actions are taken"""
+        # Reset to a known state
+        await luckyrobots_instance.handle_reset(Reset.Request(seed=42))
 
-        camera = CameraData(**camera_dict)
+        # Take multiple observations with no actions
+        observations = []
+        for i in range(3):
+            # Use zero movements (no action)
+            actuator_values = [0.0] * 6  # Assuming 6 actuators for so100
+            response = await luckyrobots_instance.handle_step(
+                Step.Request(actuator_values=actuator_values)
+            )
+            observations.append(response.observation.observation_state)
+            await asyncio.sleep(0.1)
 
-        assert camera.camera_name == "test_camera"
-        assert camera.time_stamp == "2024-01-01T00:00:00Z"
-        assert camera.image_data == b"test_data"
+        # States should be very similar (allowing for small physics variations)
+        for i in range(1, len(observations)):
+            for key in observations[0].keys():
+                diff = abs(observations[0][key] - observations[i][key])
+                assert diff < 0.01, f"State {key} changed too much: {diff}"
 
-    def test_observation_model_alias_fields(self):
-        """Test that observation model handles alias fields correctly."""
-        # Test with alias field names
-        obs_dict = {
-            "ObservationState": {"joint1": 1.0},
-            "ObservationCameras": [
-                {
-                    "CameraName": "test_camera",
-                    "dtype": "uint8",
-                    "shape": {"width": 640, "height": 480, "channel": 3},
-                }
-            ],
-        }
+    @pytest.mark.asyncio
+    async def test_observation_bounds_checking(
+        self, luckyrobots_instance, robot_config
+    ):
+        """Test that all observation values are within reasonable bounds"""
+        response = await luckyrobots_instance.handle_reset(Reset.Request(seed=42))
+        observation = response.observation
 
-        observation = ObservationModel(**obs_dict)
+        actuator_limits = robot_config["observation_space"]["actuator_limits"]
+        state_values = list(observation.observation_state.values())
 
-        assert observation.observation_state == {"joint1": 1.0}
-        assert len(observation.observation_cameras) == 1
-        assert observation.observation_cameras[0].camera_name == "test_camera"
-
-    def test_actuator_state_values(self):
-        """Test different actuator state configurations."""
-        # Test so100 robot configuration
-        so100_state = {"0": 1.0, "1": -2.0, "2": 2.5, "3": -1.0, "4": 0.5, "5": 1.5}
-
-        observation = ObservationModel(ObservationState=so100_state)
-
-        # Verify all actuators are present
-        expected_actuators = ["0", "1", "2", "3", "4", "5"]
-
-        for actuator in expected_actuators:
-            assert actuator in observation.observation_state
-
-        # Test actuator limits (values should be within expected ranges)
-        assert -2.2 <= observation.observation_state["0"] <= 2.2
-        assert -3.14158 <= observation.observation_state["1"] <= 0.2
-        assert 0.0 <= observation.observation_state["2"] <= 3.14158
-        assert -2.0 <= observation.observation_state["3"] <= 1.8
-        assert -3.14158 <= observation.observation_state["4"] <= 3.14158
-        assert -0.2 <= observation.observation_state["5"] <= 2.0
+        # Check that all observation values are within the defined limits
+        for i, (value, limit) in enumerate(zip(state_values, actuator_limits)):
+            assert (
+                limit["lower"] <= value <= limit["upper"]
+            ), f"Observation actuator {i} value {value} outside limits [{limit['lower']}, {limit['upper']}]"

@@ -1,10 +1,13 @@
 import asyncio
+import os
 import logging
 from typing import Callable, Dict, Generic, List, Optional, Type, TypeVar
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("service")
 
 T = TypeVar("T")  # Request type

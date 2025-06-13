@@ -5,6 +5,7 @@ This module provides the WebSocketTransport class which handles message
 serialization and communication over WebSockets between distributed nodes.
 """
 
+import os
 import msgpack
 import asyncio
 import json
@@ -20,9 +21,11 @@ from pydantic import BaseModel, ValidationError
 from ..utils.event_loop import run_coroutine, get_event_loop
 
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("transporter")
 
 

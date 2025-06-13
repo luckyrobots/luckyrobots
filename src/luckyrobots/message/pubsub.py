@@ -6,13 +6,16 @@ publisher/subscriber patterns with WebSocket transport for distributed
 communication.
 """
 
+import os
 import logging
 import threading
 from typing import Any, Callable, Dict, List, Type
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("pubsub")
 
 

@@ -5,6 +5,7 @@ This module provides a WebSocket server that acts as a central hub for distribut
 nodes to discover each other and communicate.
 """
 
+import os
 import msgpack
 import asyncio
 import logging
@@ -14,9 +15,11 @@ from fastapi import FastAPI, WebSocket
 
 from ..message.transporter import MessageType, TransportMessage
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("manager")
 
 # FastAPI app

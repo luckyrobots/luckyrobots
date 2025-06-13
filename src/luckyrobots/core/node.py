@@ -6,6 +6,7 @@ LuckyRobots framework. A node is a component that can publish messages,
 subscribe to messages, and call services.
 """
 
+import os
 import asyncio
 import logging
 import threading
@@ -18,9 +19,11 @@ from ..message.srv.service import ServiceServer, ServiceError
 from ..message.transporter import Transporter
 from ..utils.event_loop import run_coroutine
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("node")
 
 

@@ -1,7 +1,13 @@
 import asyncio
 import threading
 import logging
+import os
 
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("event_loop")
 
 # Global variables to store the event loop and thread

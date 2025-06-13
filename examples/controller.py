@@ -209,7 +209,7 @@ def main():
             task=args.task,
             observation_type=args.observation_type,
         )
-        luckyrobots.wait_for_world_client(timeout=60.0)
+        luckyrobots.wait_for_world_client()
 
         controller.start_loop(rate_hz=args.rate)
 
