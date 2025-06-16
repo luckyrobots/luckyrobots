@@ -182,12 +182,6 @@ cd luckyrobots
 pip install -e .
 ```
 
-### Library Development Mode
-```bash
-python -m luckyrobots --lr-library-dev
-```
-Creates a symlink for local development without reinstalling.
-
 ### Contributing
 1. Fork the repository
 2. Create a feature branch
