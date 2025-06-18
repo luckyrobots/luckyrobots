@@ -6,6 +6,12 @@
    Infinite synthetic data generation for embodied AI
 </p>
 
+<p align="center">
+  <a href="https://luckyrobots.github.io/ReleaseV0.1/" target="_blank">
+   <img src="https://img.shields.io/badge/Explore_V0.1-Get_Started-grey?style=for-the-badge&labelColor=grey&color=blue" alt="Get Started" />
+  </a>
+</p>
+
 <div align="center">
 
 [![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
@@ -13,7 +19,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/pypi/pyversions/luckyrobots)](https://pypi.org/project/luckyrobots/)
 [![Status](https://img.shields.io/badge/Status-Alpha-orange)](https://pypi.org/project/luckyrobots/)
-[![Discord](https://dcbadge.vercel.app/api/server/5CH3wx3tAs?style=flat)](https://discord.gg/5CH3wx3tAs)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/5CH3wx3tAs)
 
 </div>
 
@@ -191,12 +197,6 @@ git clone https://github.com/luckyrobots/luckyrobots.git
 cd luckyrobots
 pip install -e .
 ```
-
-### Library Development Mode
-```bash
-python -m luckyrobots --lr-library-dev
-```
-Creates a symlink for local development without reinstalling.
 
 ### Contributing
 1. Fork the repository
