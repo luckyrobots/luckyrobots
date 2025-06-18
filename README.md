@@ -6,6 +6,12 @@
    Infinite synthetic data generation for embodied AI
 </p>
 
+<p align="center">
+  <a href="https://luckyrobots.github.io/ReleaseV0.1/" target="_blank">
+    <img src="https://img.shields.io/badge/🌐_Project_Page-Visit_Now-blue?style=for-the-badge&logo=github" alt="Project Page" />
+  </a>
+</p>
+
 <div align="center">
 
 [![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
