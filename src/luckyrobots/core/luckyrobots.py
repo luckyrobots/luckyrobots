@@ -273,6 +273,9 @@ class LuckyRobots(Node):
             await self.world_client.send_text(json.dumps(request_data))
             response_data = await asyncio.wait_for(response_future, timeout=30.0)
 
+            # Wait for reset animation to finish in Lucky World
+            time.sleep(1)
+
             observation = ObservationModel(**response_data["Observation"])
             if self.process_cameras:
                 observation.process_all_cameras()
