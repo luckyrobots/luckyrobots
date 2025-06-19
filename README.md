@@ -39,11 +39,11 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
 1. **Download Lucky World Executable from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest) and add its path to your system variables**
    ```bash
    # Set environment variables (choose one method):
-   
+
    # Method 1: Set LUCKYWORLD_PATH directly to the executable
    export LUCKYWORLD_PATH=/path/to/LuckyWorld.exe  # Windows
    export LUCKYWORLD_PATH=/path/to/LuckyWorld      # Linux/Mac
-   
+
    # Method 2: Set LUCKYWORLD_HOME to the directory containing the executable
    export LUCKYWORLD_HOME=/path/to/luckyworld/directory
    ```

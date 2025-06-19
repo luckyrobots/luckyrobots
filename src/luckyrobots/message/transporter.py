@@ -158,7 +158,6 @@ class Transporter:
                 except (json.JSONDecodeError, ValidationError) as e:
                     logger.error(f"Error parsing message: {e}, message: {message_text}")
             except websockets.ConnectionClosed:
-                logger.info("WebSocket connection closed")
                 break
             except Exception as e:
                 logger.error(f"Error handling message: {e}")

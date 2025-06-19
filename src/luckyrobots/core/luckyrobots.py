@@ -1,5 +1,4 @@
 import cv2
-import sys
 import json
 import msgpack
 import asyncio
@@ -36,7 +35,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("luckyrobots")
 
-# FastAPI app and manager instances
 app = FastAPI()
 manager = Manager()
 
@@ -44,26 +42,9 @@ manager = Manager()
 class LuckyRobots(Node):
     """Main LuckyRobots node for managing robot communication and control"""
 
-    host = "localhost"
-    port = 3000
-
-    robot_client = None
-    world_client = None
-
-    _pending_resets = {}
-    _pending_steps = {}
-
-    _running = False
-    _nodes: Dict[str, "Node"] = {}
-    _shutdown_event = threading.Event()
-
-    def __init__(self, host: str = None, port: int = None):
-        initialize_event_loop()
-
-        self.host = host or self.host
-        self.port = port or self.port
-
-        # Initialize clients and state
+    def __init__(self, host: str = "localhost", port: int = 3000) -> None:
+        self.host = host
+        self.port = port
         self.robot_client = None
         self.world_client = None
         self._pending_resets = {}
@@ -72,8 +53,9 @@ class LuckyRobots(Node):
         self._nodes: Dict[str, Node] = {}
         self._shutdown_event = threading.Event()
 
-        if not self._is_websocket_server_running():
-            self._start_websocket_server()
+        initialize_event_loop()
+
+        self._start_websocket_server()
 
         super().__init__("lucky_robots_manager", "", self.host, self.port)
         app.lucky_robots = self
@@ -84,31 +66,46 @@ class LuckyRobots(Node):
             ws_url = f"ws://{self.host}:{self.port}/nodes"
             ws = create_connection(ws_url, timeout=1)
             ws.close()
-            logger.info(f"WebSocket server running on {self.host}:{self.port}")
             return True
         except Exception as e:
-            logger.info(f"WebSocket server not running on {self.host}:{self.port}")
             return False
 
     def _start_websocket_server(self) -> None:
         """Start the websocket server in a separate thread using uvicorn"""
 
+        if self._is_websocket_server_running():
+            logger.warning(
+                f"WebSocket server already running on {self.host}:{self.port}"
+            )
+            return
+
         def run_server():
             logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-            uvicorn.run(app, host=self.host, port=self.port, log_level="warning")
+            config = uvicorn.Config(
+                app, host=self.host, port=self.port, log_level="warning"
+            )
+            self._server = uvicorn.Server(config)
+            self._server.run()
 
-        server_thread = threading.Thread(target=run_server, daemon=True)
-        server_thread.start()
+        self._server_thread = threading.Thread(target=run_server, daemon=True)
+        self._server_thread.start()
 
         logger.info(f"Starting WebSocket server on {self.host}:{self.port}")
 
-        # Give the server time to start
-        time.sleep(0.5)
+        # Wait for the server to start
+        timeout = 10.0
+        start_time = time.perf_counter()
 
-    @staticmethod
-    def set_host(ip_address: str) -> None:
-        """Set the host address for the LuckyRobots node"""
-        LuckyRobots.host = ip_address
+        while time.perf_counter() - start_time < timeout:
+            if self._is_websocket_server_running():
+                logger.info(f"WebSocket server ready on {self.host}:{self.port}")
+                return
+            time.sleep(0.1)
+
+        logger.error(f"WebSocket server failed to start within {timeout} seconds")
+        raise RuntimeError(
+            f"WebSocket server failed to start on {self.host}:{self.port}"
+        )
 
     @staticmethod
     def get_robot_config(robot: str = None) -> dict:
@@ -127,6 +124,15 @@ class LuckyRobots(Node):
         )
         self.step_service = await self.create_service(Step, "/step", self.handle_step)
 
+    def _setup_signal_handlers(self) -> None:
+        """Setup signal handlers for the LuckyRobots node to handle Ctrl+C"""
+
+        def sigint_handler(signum, frame):
+            logger.info("Ctrl+C pressed. Shutting down...")
+            self.shutdown()
+
+        signal.signal(signal.SIGINT, sigint_handler)
+
     def start(
         self,
         scene: str,
@@ -144,40 +150,37 @@ class LuckyRobots(Node):
         validate_params(scene, robot, task, observation_type)
         self.process_cameras = "pixels" in observation_type
 
-        # success = launch_luckyworld(
-        #     scene=scene,
-        #     robot=robot,
-        #     task=task,
-        #     executable_path=executable_path,
-        #     headless=headless,
-        # )
-        # if not success:
-        #     logger.error("Failed to launch LuckyWorld")
-        #     self.shutdown()
-        #     raise
+        success = launch_luckyworld(
+            scene=scene,
+            robot=robot,
+            task=task,
+            executable_path=executable_path,
+            headless=headless,
+        )
+        if not success:
+            logger.error("Failed to launch LuckyWorld")
+            self.shutdown()
+            raise
 
         self._setup_signal_handlers()
 
         # Start all registered nodes
+        failed_nodes = []
         for node in self._nodes.values():
             try:
                 node.start()
+                logger.info(f"Started node: {node.full_name}")
             except Exception as e:
                 logger.error(f"Error starting node {node.full_name}: {e}")
+                failed_nodes.append(node.full_name)
 
-        # Start the luckyrobots node
+        if failed_nodes:
+            logger.error(f"Failed to start nodes: {', '.join(failed_nodes)}")
+            # Continue anyway - some nodes might be optional
+
         super().start()
 
         self._running = True
-
-    def _setup_signal_handlers(self) -> None:
-        """Setup signal handlers for the LuckyRobots node to handle Ctrl+C"""
-
-        def sigint_handler(signum, frame):
-            print("\nCtrl+C pressed. Shutting down...")
-            self.shutdown()
-
-        signal.signal(signal.SIGINT, sigint_handler)
 
     def _display_welcome_message(self) -> None:
         """Display the welcome message for the LuckyRobots node in the terminal"""
@@ -224,7 +227,7 @@ class LuckyRobots(Node):
         """Wait for the world client to connect to the websocket server"""
         start_time = time.perf_counter()
 
-        logger.info(f"Waiting for world client to connect for {timeout} seconds")
+        logger.info(f"Waiting for world client to connect (timeout: {timeout}s)")
         while not self.world_client and time.perf_counter() - start_time < timeout:
             time.sleep(0.5)
 
@@ -232,9 +235,11 @@ class LuckyRobots(Node):
             logger.info("World client connected successfully")
             return True
         else:
-            logger.error("No world client connected after 60 seconds")
+            logger.error(f"No world client connected after {timeout} seconds")
             self.shutdown()
-            raise
+            raise RuntimeError(
+                f"World client connection timeout after {timeout} seconds"
+            )
 
     async def handle_reset(self, request: Reset.Request) -> Reset.Response:
         """Handle the reset request by forwarding to the world client"""
@@ -343,24 +348,32 @@ class LuckyRobots(Node):
     def _stop_websocket_server(self) -> None:
         """Stop the WebSocket server if it's running"""
         if hasattr(self, "_server") and self._server is not None:
-            logger.info("Stopping WebSocket server...")
-            self._server.should_exit = True
+            try:
+                # Stop the uvicorn server
+                self._server.should_exit = True
 
-            if (
-                hasattr(self, "_server_thread")
-                and self._server_thread
-                and self._server_thread.is_alive()
-            ):
-                self._server_thread.join(timeout=2.0)
-                if self._server_thread.is_alive():
-                    logger.warning(
-                        "WebSocket server thread did not terminate gracefully"
-                    )
-                else:
-                    logger.info("WebSocket server stopped")
+                # Wait for the server thread to terminate
+                if (
+                    hasattr(self, "_server_thread")
+                    and self._server_thread
+                    and self._server_thread.is_alive()
+                ):
+                    self._server_thread.join(timeout=5.0)
 
-            self._server = None
-            self._server_thread = None
+                    if self._server_thread.is_alive():
+                        logger.warning(
+                            "WebSocket server thread did not terminate within timeout"
+                        )
+                    else:
+                        logger.info("WebSocket server thread terminated successfully")
+
+                self._server = None
+                self._server_thread = None
+
+            except Exception as e:
+                logger.error(f"Error stopping WebSocket server: {e}")
+        else:
+            logger.info("No WebSocket server instance found")
 
     def _cleanup_camera_windows(self) -> None:
         """Clean up all OpenCV windows and reset tracking"""
@@ -380,38 +393,98 @@ class LuckyRobots(Node):
     def shutdown(self) -> None:
         """Shutdown the LuckyRobots node and clean up resources"""
         if not self._running:
+            logger.info("LuckyRobots already shut down")
             return
 
-        logger.info("Starting LuckyRobots shutdown")
+        logger.info("Starting LuckyRobots shutdown sequence")
         self._running = False
 
-        # 1. Shutdown nodes first (they depend on transport)
-        for node_name, node in self._nodes.items():
-            try:
-                node.shutdown()
-            except Exception as e:
-                logger.error(f"Error shutting down node {node_name}: {e}")
-
-        # 2. Stop LuckyWorld executable (before transport shutdown)
-        try:
-            logger.info("Stopping LuckyWorld executable...")
-            stop_luckyworld()
-        except Exception as e:
-            logger.error(f"Error stopping LuckyWorld executable: {e}")
-
-        # 3. Shutdown self (transport layer)
-        try:
-            super().shutdown()
-        except Exception as e:
-            logger.error(f"Error shutting down LuckyRobots transport: {e}")
-
-        # 4. Clean up UI resources
-        self._cleanup_camera_windows()
-
-        # 5. Set shutdown event
+        self._cancel_pending_operations()
+        self._shutdown_nodes()
+        self._stop_luckyworld()
+        self._shutdown_transport()
+        self._stop_websocket_server()
+        self._cleanup_resources()
         self._shutdown_event.set()
 
         logger.info("LuckyRobots shutdown complete")
+
+    def _cancel_pending_operations(self) -> None:
+        """Cancel all pending reset and step operations"""
+        logger.info("Cancelling pending operations")
+
+        # Cancel pending resets
+        for _, future in self._pending_resets.items():
+            if not future.done():
+                future.cancel()
+        self._pending_resets.clear()
+
+        # Cancel pending steps
+        for _, future in self._pending_steps.items():
+            if not future.done():
+                future.cancel()
+        self._pending_steps.clear()
+
+    def _shutdown_nodes(self) -> None:
+        """Shutdown all registered nodes with timeout"""
+        if not self._nodes:
+            return
+
+        logger.info(f"Shutting down {len(self._nodes)} registered nodes")
+
+        failed_nodes = []
+        for node_name, node in self._nodes.items():
+            try:
+                logger.debug(f"Shutting down node: {node_name}")
+                node.shutdown()
+                logger.debug(f"Node {node_name} shut down successfully")
+            except Exception as e:
+                logger.error(f"Error shutting down node {node_name}: {e}")
+                failed_nodes.append(node_name)
+
+        if failed_nodes:
+            logger.warning(f"Failed to shutdown nodes: {', '.join(failed_nodes)}")
+        else:
+            logger.info("All nodes shut down successfully")
+
+        self._nodes.clear()
+
+    def _stop_luckyworld(self) -> None:
+        """Stop the LuckyWorld executable with error handling"""
+        try:
+            stop_luckyworld()
+        except Exception as e:
+            logger.error(f"Error stopping LuckyWorld executable: {e}")
+            # Don't raise - continue with shutdown even if LuckyWorld fails to stop
+
+    def _shutdown_transport(self) -> None:
+        """Shutdown the transport layer with timeout"""
+        try:
+            logger.info("Shutting down transport layer...")
+            super().shutdown()
+            logger.info("Transport layer shut down")
+        except Exception as e:
+            logger.error(f"Error shutting down transport layer: {e}")
+
+    def _cleanup_resources(self) -> None:
+        """Clean up all remaining resources"""
+
+        # Cleanup camera windows
+        self._cleanup_camera_windows()
+
+        # Close WebSocket connections
+        if hasattr(self, "world_client") and self.world_client:
+            try:
+                self.world_client.close()
+                self.world_client = None
+            except Exception as e:
+                logger.debug(f"Error closing world client: {e}")
+
+        # Clear any remaining state
+        self.robot_client = None
+        self.world_client = None
+
+        logger.info("Resource cleanup complete")
 
 
 @app.websocket("/nodes")
@@ -463,7 +536,6 @@ async def nodes_endpoint(websocket: WebSocket) -> None:
 
                 if message.msg_type in handlers:
                     if message.msg_type == MessageType.NODE_SHUTDOWN:
-                        logger.info(f"Node {node_name} shutting down")
                         break
                     await handlers[message.msg_type]()
                 else:
@@ -503,7 +575,7 @@ async def world_endpoint(websocket: WebSocket) -> None:
                     future = pending_resets.get(request_id)
                     shared_loop.call_soon_threadsafe(
                         lambda: future.set_result(message_data)
-                        if not future.done()
+                        if future is not None and not future.done()
                         else None
                     )
                     shared_loop.call_soon_threadsafe(
@@ -513,7 +585,7 @@ async def world_endpoint(websocket: WebSocket) -> None:
                     future = pending_steps.get(request_id)
                     shared_loop.call_soon_threadsafe(
                         lambda: future.set_result(message_data)
-                        if not future.done()
+                        if future is not None and not future.done()
                         else None
                     )
                     shared_loop.call_soon_threadsafe(
