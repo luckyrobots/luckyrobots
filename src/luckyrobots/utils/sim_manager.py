@@ -1,87 +1,24 @@
-import atexit
 import os
 import platform
 import subprocess
-import sys
 import tempfile
-import signal
 import threading
 import time
 import logging
+
 from typing import Optional
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+if not os.getenv("PYTEST_CURRENT_TEST") and not os.getenv("LUCKYROBOTS_NO_LOGS"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 logger = logging.getLogger("luckyworld")
 
 LOCK_FILE = os.path.join(tempfile.gettempdir(), "luckyworld_lock")
 _process = None
 _monitor_thread = None
 _shutdown_event = threading.Event()
-
-
-def cleanup():
-    """Cleanup function to be called when the script exits"""
-    global _process, _monitor_thread
-
-    logger.info("Cleaning up LuckyWorld...")
-
-    # Stop monitoring first
-    if _monitor_thread is not None and _monitor_thread.is_alive():
-        _shutdown_event.set()
-        _monitor_thread.join(timeout=3)
-
-    # Terminate process
-    if _process is not None:
-        try:
-            if _process.poll() is None:  # Process is still running
-                logger.info("Terminating LuckyWorld process...")
-                _process.terminate()
-                _process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            logger.warning("Process didn't terminate gracefully, force killing...")
-            _process.kill()
-            try:
-                _process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                logger.error("Failed to kill process")
-        except Exception as e:
-            logger.error(f"Error during process cleanup: {e}")
-
-    # Always remove lock file
-    remove_lock_file()
-    logger.info("Cleanup complete")
-
-
-def monitor_process():
-    """Monitor the LuckyWorld process and handle its termination"""
-    global _process
-    try:
-        while not _shutdown_event.is_set():
-            if _process is None or _process.poll() is not None:
-                logger.warning("LuckyWorld process has terminated")
-                # Don't kill the main process, just break out of monitoring
-                break
-            time.sleep(1)
-    except Exception as e:
-        logger.error(f"Error in process monitor: {e}")
-    finally:
-        # Ensure cleanup happens when monitoring stops
-        if not _shutdown_event.is_set():
-            logger.info("Process monitor detected termination, cleaning up...")
-            remove_lock_file()
-
-
-def is_luckyworld_running() -> bool:
-    """Check if LuckyWorld is running by checking the lock file"""
-    return os.path.exists(LOCK_FILE)
-
-
-def create_lock_file(pid: int) -> None:
-    """Create a lock file with the process ID"""
-    with open(LOCK_FILE, "w") as f:
-        f.write(str(pid))
 
 
 def remove_lock_file() -> None:
@@ -96,11 +33,33 @@ def remove_lock_file() -> None:
         logger.error(f"Error removing lock file: {e}")
 
 
-def signal_handler(signum, frame):
-    """Handle termination signals"""
-    logger.info(f"Received signal {signum}, shutting down...")
-    cleanup()
-    sys.exit(0)
+def monitor_process():
+    """Monitor the LuckyWorld process and handle its termination"""
+    global _process
+    try:
+        while not _shutdown_event.is_set():
+            if _process is None or _process.poll() is not None:
+                logger.info("LuckyWorld process has terminated")
+                # Don't kill the main process, just break out of monitoring
+                break
+            time.sleep(1)
+    except Exception as e:
+        logger.error(f"Error in process monitor: {e}")
+    finally:
+        # Ensure cleanup happens when monitoring stops
+        if not _shutdown_event.is_set():
+            remove_lock_file()
+
+
+def is_luckyworld_running() -> bool:
+    """Check if LuckyWorld is running by checking the lock file"""
+    return os.path.exists(LOCK_FILE)
+
+
+def create_lock_file(pid: int) -> None:
+    """Create a lock file with the process ID"""
+    with open(LOCK_FILE, "w") as f:
+        f.write(str(pid))
 
 
 def find_luckyworld_executable() -> Optional[str]:
@@ -207,7 +166,7 @@ def launch_luckyworld(
             logger.info("  WSL2: /mnt/c/Program Files/LuckyWorld/LuckyWorldV2.exe")
             return False
 
-    if not os.path.exists(executable_path) or not executable_path.endswith(".exe"):
+    if not os.path.exists(executable_path):
         logger.error(f"Executable not found at: {executable_path}")
         return False
 
@@ -270,7 +229,151 @@ def launch_luckyworld(
 
     except Exception as e:
         logger.error(f"Failed to launch LuckyWorld: {e}")
-        cleanup()
+        stop_luckyworld()
+        return False
+
+
+def kill_processes():
+    """Kill all LuckyWorld processes"""
+    system = platform.system()
+    is_wsl = "microsoft" in platform.uname().release.lower()
+
+    if is_wsl:
+        return _kill_wsl_processes()
+    elif system == "Windows":
+        return _kill_windows_processes()
+    elif system == "Darwin":
+        return _kill_macos_processes()
+    else:
+        return _kill_linux_processes()
+
+
+def _kill_wsl_processes():
+    try:
+        result = subprocess.run(
+            [
+                "/mnt/c/Windows/System32/taskkill.exe",
+                "/F",
+                "/IM",
+                "LuckyWorldV2.exe",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            return True
+        elif result.returncode == 128:  # Process not found
+            logger.info("No LuckyWorld processes found running")
+            return True
+        else:
+            logger.warning(
+                f"taskkill failed with code {result.returncode}: {result.stderr}"
+            )
+            return False
+
+    except subprocess.TimeoutExpired:
+        logger.error("taskkill command timed out")
+        return False
+    except Exception as e:
+        logger.error(f"Failed to kill processes: {e}")
+        return False
+
+
+def _kill_windows_processes():
+    """Windows-specific process killing"""
+    try:
+        # Kill LuckyWorldV2.exe
+        result = subprocess.run(
+            ["taskkill", "/F", "/IM", "LuckyWorldV2.exe"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            logger.info("Successfully killed LuckyWorldV2.exe processes")
+            return True
+        elif result.returncode == 128:  # Process not found
+            logger.info("No LuckyWorldV2.exe processes found")
+            return True
+        else:
+            logger.warning(f"taskkill failed: {result.stderr}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        logger.error("taskkill command timed out")
+        return False
+    except FileNotFoundError:
+        logger.error("taskkill command not found")
+        return False
+    except Exception as e:
+        logger.error(f"Failed to kill Windows processes: {e}")
+        return False
+
+
+def _kill_macos_processes():
+    """macOS-specific process killing"""
+    try:
+        # Kill LuckyWorld processes
+        result = subprocess.run(
+            ["pkill", "-f", "LuckyWorld"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            logger.info("Successfully killed LuckyWorld processes")
+            return True
+        elif result.returncode == 1:  # No processes found
+            logger.info("No LuckyWorld processes found")
+            return True
+        else:
+            logger.warning(f"pkill failed: {result.stderr}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        logger.error("pkill command timed out")
+        return False
+    except FileNotFoundError:
+        logger.error("pkill command not found")
+        return False
+    except Exception as e:
+        logger.error(f"Failed to kill macOS processes: {e}")
+        return False
+
+
+def _kill_linux_processes():
+    """Linux-specific process killing"""
+    try:
+        # Kill LuckyWorld processes
+        result = subprocess.run(
+            ["pkill", "-f", "LuckyWorld"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            logger.info("Successfully killed LuckyWorld processes")
+            return True
+        elif result.returncode == 1:  # No processes found
+            logger.info("No LuckyWorld processes found")
+            return True
+        else:
+            logger.warning(f"pkill failed: {result.stderr}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        logger.error("pkill command timed out")
+        return False
+    except FileNotFoundError:
+        logger.error("pkill command not found")
+        return False
+    except Exception as e:
+        logger.error(f"Failed to kill Linux processes: {e}")
         return False
 
 
@@ -285,17 +388,19 @@ def stop_luckyworld() -> bool:
     try:
         if _process:
             logger.info("Stopping LuckyWorld...")
-            _process.terminate()
-            _process.wait(timeout=10)
-            logger.info("LuckyWorld stopped successfully")
-        cleanup()
+
+            try:
+                _process.terminate()
+                _process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                logger.info("Graceful termination timeout, using kill_processes...")
+            except Exception:
+                logger.info("Graceful termination failed, using kill_processes...")
+
+            kill_processes()
+
+        remove_lock_file()
         return True
     except Exception as e:
         logger.error(f"Error stopping LuckyWorld: {e}")
         return False
-
-
-# Register cleanup and signal handlers
-atexit.register(cleanup)
-signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
-signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
