@@ -124,8 +124,8 @@ class LuckyRobots(Node):
         )
         self.step_service = await self.create_service(Step, "/step", self.handle_step)
 
-    def _setup_signal_handlers(self) -> None:
-        """Setup signal handlers for the LuckyRobots node to handle Ctrl+C"""
+    def _register_cleanup_handlers(self) -> None:
+        """Register cleanup handlers for the LuckyRobots node to handle Ctrl+C"""
 
         def sigint_handler(signum, frame):
             logger.info("Ctrl+C pressed. Shutting down...")
@@ -162,7 +162,7 @@ class LuckyRobots(Node):
             self.shutdown()
             raise
 
-        self._setup_signal_handlers()
+        self._register_cleanup_handlers()
 
         # Start all registered nodes
         failed_nodes = []
@@ -184,8 +184,12 @@ class LuckyRobots(Node):
 
     def _display_welcome_message(self) -> None:
         """Display the welcome message for the LuckyRobots node in the terminal"""
-        welcome_art = [
-            "*" * 60,
+
+        # Create the complete message in one go
+        stars = "*" * 60
+
+        welcome_lines = [
+            stars,
             "                                                                                ",
             "                                                                                ",
             "▄▄▌  ▄• ▄▌ ▄▄· ▄ •▄  ▄· ▄▌▄▄▄        ▄▄▄▄·       ▄▄▄▄▄.▄▄ · ",
@@ -197,31 +201,34 @@ class LuckyRobots(Node):
             "                                                                                ",
         ]
 
-        for line in welcome_art:
-            print(line)
-
+        # Add macOS instructions if needed
         if platform.system() == "Darwin":
-            mac_instructions = [
-                "*" * 60,
-                "For macOS users:",
-                "Please be patient. The application may take up to a minute to open on its first launch.",
-                "If the application doesn't appear, please follow these steps:",
-                "1. Open System Settings",
-                "2. Navigate to Privacy & Security",
-                "3. Scroll down and click 'Allow' next to the 'luckyrobots' app",
-                "*" * 60,
-            ]
-            for line in mac_instructions:
-                print(line)
+            welcome_lines.extend(
+                [
+                    stars,
+                    "For macOS users:",
+                    "Please be patient. The application may take up to a minute to open on its first launch.",
+                    "If the application doesn't appear, please follow these steps:",
+                    "1. Open System Settings",
+                    "2. Navigate to Privacy & Security",
+                    "3. Scroll down and click 'Allow' next to the 'luckyrobots' app",
+                    stars,
+                ]
+            )
 
-        final_messages = [
-            "Lucky Robots application started successfully.",
-            "To move the robot: Choose a level and tick the HTTP checkbox.",
-            "To receive camera feed: Choose a level and tick the Capture checkbox.",
-            "*" * 60,
-        ]
-        for line in final_messages:
-            print(line)
+        # Add final messages
+        welcome_lines.extend(
+            [
+                "Lucky Robots application started successfully.",
+                "To move the robot: Choose a level and tick the HTTP checkbox.",
+                "To receive camera feed: Choose a level and tick the Capture checkbox.",
+                stars,
+                "",  # Empty line at the end
+            ]
+        )
+
+        # Single print statement - cannot be interrupted!
+        print("\n".join(welcome_lines), flush=True)
 
     def wait_for_world_client(self, timeout: float = 120.0) -> bool:
         """Wait for the world client to connect to the websocket server"""
