@@ -6,11 +6,13 @@
    Infinite synthetic data generation for embodied AI
 </p>
 
+<!--
 <p align="center">
   <a href="https://luckyrobots.github.io/ReleaseV0.1/" target="_blank">
    <img src="https://img.shields.io/badge/Explore_V0.1-Get_Started-grey?style=for-the-badge&labelColor=grey&color=blue" alt="Get Started" />
   </a>
 </p>
+-->
 
 <div align="center">
 
