@@ -419,6 +419,8 @@ class LuckyRobots(Node):
 
         logger.info("LuckyRobots shutdown complete")
 
+        exit(0)
+
     def _cancel_pending_operations(self) -> None:
         """Cancel all pending reset and step operations"""
         logger.info("Cancelling pending operations")
