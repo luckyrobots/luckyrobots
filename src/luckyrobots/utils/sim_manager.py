@@ -255,7 +255,7 @@ def _kill_wsl_processes():
                 "/mnt/c/Windows/System32/taskkill.exe",
                 "/F",
                 "/IM",
-                "LuckyWorldV2.exe",
+                "LuckyWorldV2-Win64-Shipping.exe",  # NOTE: Make sure this is the name of the executable
             ],
             capture_output=True,
             text=True,
