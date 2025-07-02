@@ -137,6 +137,7 @@ class LuckyRobots(Node):
         self,
         scene: str,
         robot: str,
+        debug: bool = False,
         task: str = None,
         executable_path: str = None,
         observation_type: str = "pixels_agent_pos",
@@ -153,6 +154,7 @@ class LuckyRobots(Node):
         success = launch_luckyworld(
             scene=scene,
             robot=robot,
+            debug=debug,
             task=task,
             executable_path=executable_path,
             headless=headless,
@@ -160,7 +162,9 @@ class LuckyRobots(Node):
         if not success:
             logger.error("Failed to launch LuckyWorld")
             self.shutdown()
-            raise
+            raise RuntimeError(
+                "Failed to launch LuckyWorld. Look through the log for more information."
+            )
 
         self._register_cleanup_handlers()
 

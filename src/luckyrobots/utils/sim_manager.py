@@ -137,6 +137,7 @@ def launch_luckyworld(
     scene: str = "ArmLevel",
     robot: str = "so100",
     task: Optional[str] = None,
+    debug: bool = False,
     executable_path: Optional[str] = None,
     headless: bool = False,
     windowed: bool = True,
@@ -147,7 +148,10 @@ def launch_luckyworld(
 
     # Check if already running
     if is_luckyworld_running():
-        logger.error("LuckyWorld is already running. Stop the existing instance first.")
+        logger.error(
+            "LuckyWorld is already running. \
+            Stop the existing instance or remove the luckyworld lock file located at /tmp/luckyworld_lock."
+        )
         return False
 
     # Find executable if not provided
@@ -161,7 +165,7 @@ def launch_luckyworld(
             logger.info("  LUCKYWORLD_PATH=/full/path/to/LuckyWorldV2.exe")
             logger.info("  LUCKYWORLD_HOME=/path/to/luckyworld/directory")
             logger.info("Or check these common locations:")
-            logger.info("  Development: Build/Windows/LuckyWorldV2.exe")
+            logger.info("  Development: Builds/Windows/LuckyWorldV2.exe")
             logger.info("  Windows: C:\\Program Files\\LuckyWorld\\LuckyWorldV2.exe")
             logger.info("  WSL2: /mnt/c/Program Files/LuckyWorld/LuckyWorldV2.exe")
             return False
@@ -184,6 +188,9 @@ def launch_luckyworld(
 
         if task:
             command.append(f"-Task={task}")
+
+        if debug:
+            command.append("-Debug")
 
         if headless:
             command.append("-Headless")
@@ -255,7 +262,7 @@ def _kill_wsl_processes():
                 "/mnt/c/Windows/System32/taskkill.exe",
                 "/F",
                 "/IM",
-                "LuckyWorldV2-Win64-Shipping.exe",  # NOTE: Make sure this is the name of the executable
+                "LuckyWorldV2.exe",  # NOTE: Make sure this is the name of the LuckyWorld executable
             ],
             capture_output=True,
             text=True,
@@ -265,8 +272,8 @@ def _kill_wsl_processes():
         if result.returncode == 0:
             return True
         elif result.returncode == 128:  # Process not found
-            logger.info("No LuckyWorld processes found running")
-            return True
+            logger.error("No LuckyWorld processes found running")
+            return False
         else:
             logger.warning(
                 f"taskkill failed with code {result.returncode}: {result.stderr}"
