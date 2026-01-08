@@ -18,22 +18,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "watchdog",
-    "fastapi",
-    "uvicorn[standard]",
-    "ultralytics",
-    "requests",
-    "tqdm",
-    "beautifulsoup4",
-    "psutil",
-    "opencv-python",
-    "packaging",
-    "websockets",
-    "pydantic",
+    "grpcio>=1.76.0",
+    "protobuf>=4.25.0",
     "numpy",
-    "asyncio",
-    "websocket-client",
-    "msgpack",
     "pyyaml",
 ]
 
