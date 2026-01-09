@@ -4,8 +4,15 @@ Minimal example: drive a gRPC-enabled RobotSandbox agent from Python.
 Prerequisites:
   - LuckyEditor running with the gRPC server enabled (see GrpcPanel).
   - A scene loaded that contains a gRPC-bridged agent (e.g. PiperAgent).
+
+Notes:
+  - On some Windows setups, other software may already bind 127.0.0.1:50051.
+    If you see "unknown service hazel.rpc.v1.*", try:
+      - changing the LuckyEditor gRPC port (e.g. to 50052), or
+      - connecting via your machine's LAN IP (e.g. 192.168.x.x).
 """
 
+import argparse
 import time
 from typing import Optional
 
@@ -47,8 +54,13 @@ def run_episode(
 
 
 def main(argv: Optional[list] = None) -> None:
-    # Adjust the agent name to match the bridge name in your scene.
-    run_episode(agent_name="PiperAgent")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--address", default="127.0.0.1:50051")
+    parser.add_argument("--agent-name", default="PiperAgent")
+    parser.add_argument("--seconds", type=float, default=5.0)
+    args = parser.parse_args(argv)
+
+    run_episode(agent_name=args.agent_name, addr=args.address, seconds=args.seconds)
 
 
 if __name__ == "__main__":

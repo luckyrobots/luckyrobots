@@ -562,6 +562,11 @@ class AgentServiceStub(object):
                 request_serializer=hazel__rpc__pb2.StreamAgentRequest.SerializeToString,
                 response_deserializer=hazel__rpc__pb2.AgentFrame.FromString,
                 _registered_method=True)
+        self.SetAgentActions = channel.unary_unary(
+                '/hazel.rpc.v1.AgentService/SetAgentActions',
+                request_serializer=hazel__rpc__pb2.SetAgentActionsRequest.SerializeToString,
+                response_deserializer=hazel__rpc__pb2.SetAgentActionsResponse.FromString,
+                _registered_method=True)
 
 
 class AgentServiceServicer(object):
@@ -577,8 +582,15 @@ class AgentServiceServicer(object):
         """Server-streaming observations (and optional action echo) for a single agent.
 
         The client specifies which agent to stream via StreamAgentRequest and may
-        provide a target FPS hint. Actions are currently sent via MujocoService
-        (SendControl); AgentFrame.actions is primarily used for telemetry.
+        provide a target FPS hint.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetAgentActions(self, request, context):
+        """Set the current action vector for a specific agent. The server will pad or
+        truncate the provided actions to match the agent's declared ActionSize.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -596,6 +608,11 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     servicer.StreamAgent,
                     request_deserializer=hazel__rpc__pb2.StreamAgentRequest.FromString,
                     response_serializer=hazel__rpc__pb2.AgentFrame.SerializeToString,
+            ),
+            'SetAgentActions': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetAgentActions,
+                    request_deserializer=hazel__rpc__pb2.SetAgentActionsRequest.FromString,
+                    response_serializer=hazel__rpc__pb2.SetAgentActionsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -652,6 +669,33 @@ class AgentService(object):
             '/hazel.rpc.v1.AgentService/StreamAgent',
             hazel__rpc__pb2.StreamAgentRequest.SerializeToString,
             hazel__rpc__pb2.AgentFrame.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetAgentActions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.v1.AgentService/SetAgentActions',
+            hazel__rpc__pb2.SetAgentActionsRequest.SerializeToString,
+            hazel__rpc__pb2.SetAgentActionsResponse.FromString,
             options,
             channel_credentials,
             insecure,
