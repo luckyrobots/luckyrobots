@@ -10,23 +10,20 @@ LuckyRobots
 .. autoclass:: luckyrobots.LuckyRobots
    :members:
 
-Node
-~~~~
+LuckyEngineClient
+~~~~~~~~~~~~~~~~~
 
-.. autoclass:: luckyrobots.Node
+.. autoclass:: luckyrobots.LuckyEngineClient
+   :members:
+
+GrpcConnectionError
+~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: luckyrobots.GrpcConnectionError
    :members:
 
 Models
 ------
 
 .. autoclass:: luckyrobots.ObservationModel
-   :members:
-
-Message Types
--------------
-
-.. autoclass:: luckyrobots.Reset
-   :members:
-
-.. autoclass:: luckyrobots.Step
    :members:

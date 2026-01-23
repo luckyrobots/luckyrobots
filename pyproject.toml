@@ -19,8 +19,6 @@ classifiers = [
 ]
 dependencies = [
     "watchdog",
-    "fastapi",
-    "uvicorn[standard]",
     "ultralytics",
     "requests",
     "tqdm",
@@ -28,13 +26,11 @@ dependencies = [
     "psutil",
     "opencv-python",
     "packaging",
-    "websockets",
     "pydantic",
     "numpy",
-    "asyncio",
-    "websocket-client",
-    "msgpack",
     "pyyaml",
+    "grpcio",
+    "protobuf",
 ]
 
 [project.urls]
@@ -61,4 +57,5 @@ dev = [
     "twine",
     "black",
     "pre-commit",
+    "grpcio-tools",
 ]

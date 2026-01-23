@@ -33,3 +33,21 @@ ENV/
 
 # LLM Context
 repomix-output.xml
+
+# Sphinx build artifacts
+docs/_build/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Linting
+.ruff_cache/

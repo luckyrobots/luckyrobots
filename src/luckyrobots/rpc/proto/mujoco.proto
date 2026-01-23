@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+// MuJoCo service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+// MuJoCo joint state.
+message JointState {
+    repeated float positions = 1;   // qpos
+    repeated float velocities = 2;  // qvel
+    uint32 nq = 3;                  // Number of position coordinates
+    uint32 nv = 4;                  // Number of velocity coordinates
+}
+
+message GetJointStateRequest {
+    // Entity name or tag hint for which robot to target.
+    // Implementation may ignore this and use a "registered default robot" depending on current scene setup.
+    string robot_name = 1;
+}
+
+message GetJointStateResponse {
+    bool success = 1;
+    string message = 2;
+    JointState state = 3;
+}
+
+message SendControlRequest {
+    // Entity name or tag hint for which robot to target.
+    // Current Learn integration treats this as "set external actions for the next step".
+    string robot_name = 1;
+    repeated float controls = 2;    // Control input vector
+}
+
+message SendControlResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetMujocoInfoRequest {
+    // Entity name or tag hint.
+    string robot_name = 1;
+}
+
+message GetMujocoInfoResponse {
+    bool success = 1;
+    string message = 2;
+    uint32 nq = 3;
+    uint32 nv = 4;
+    uint32 nu = 5;  // Number of actuators
+    repeated string joint_names = 6;
+    repeated string actuator_names = 7;
+}
+
+// MuJoCo state + control IO.
+service MujocoService {
+    rpc GetJointState(GetJointStateRequest) returns (GetJointStateResponse);
+    rpc SendControl(SendControlRequest) returns (SendControlResponse);
+    rpc GetMujocoInfo(GetMujocoInfoRequest) returns (GetMujocoInfoResponse);
+    
+    // Streaming variant for continuous state observation
+    rpc StreamJointState(GetJointStateRequest) returns (stream GetJointStateResponse);
+}
+

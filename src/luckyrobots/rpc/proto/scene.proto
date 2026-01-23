@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+// Scene service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+import "common.proto";
+
+// Lightweight entity snapshot for editor tooling / inspection.
+// Depending on request flags, `transform` and/or `components` may be left default/empty.
+message EntityInfo {
+    EntityId id = 1;
+    string name = 2;
+    Transform transform = 3;
+    repeated string components = 4;  // List of component type names (best-effort)
+}
+
+// Fetch basic active-scene metadata.
+message GetSceneInfoRequest {}
+
+message GetSceneInfoResponse {
+    string scene_name = 1;
+    string scene_path = 2;
+    uint32 entity_count = 3;
+}
+
+// List all entities, optionally including extra data to avoid unnecessary bandwidth.
+message ListEntitiesRequest {
+    bool include_transforms = 1;
+    bool include_components = 2;
+}
+
+message ListEntitiesResponse {
+    repeated EntityInfo entities = 1;
+}
+
+// Fetch a single entity by ID or by name.
+message GetEntityRequest {
+    oneof identifier {
+        EntityId id = 1;
+        string name = 2;
+    }
+}
+
+message GetEntityResponse {
+    bool found = 1;
+    EntityInfo entity = 2;
+}
+
+// Set an entity's transform.
+// Note: server may clamp/ignore values depending on scene state.
+message SetEntityTransformRequest {
+    EntityId id = 1;
+    Transform transform = 2;
+}
+
+message SetEntityTransformResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Scene inspection + basic editing.
+service SceneService {
+    rpc GetSceneInfo(GetSceneInfoRequest) returns (GetSceneInfoResponse);
+    rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesResponse);
+    rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
+    rpc SetEntityTransform(SetEntityTransformRequest) returns (SetEntityTransformResponse);
+}
+

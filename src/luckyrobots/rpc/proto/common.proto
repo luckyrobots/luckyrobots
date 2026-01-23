@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+// Common/shared types for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+//
+// Compatibility note:
+// - Avoid renumbering existing field tags (the `= N` numbers). Add new fields with new tags instead.
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+// Stable entity identifier (maps to engine UUID / entity ID depending on context).
+message EntityId {
+    uint64 id = 1;
+}
+
+// Basic math types for scene transforms.
+message Vec3 {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+message Quat {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+    float w = 4;
+}
+
+// World-space transform. Interpretation matches the engine's transform component.
+message Transform {
+    Vec3 position = 1;
+    Quat rotation = 2;
+    Vec3 scale = 3;
+}
+

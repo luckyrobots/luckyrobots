@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+// Viewport service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+import "media.proto";
+
+// Start a viewport stream. Server may clamp FPS and may choose an actual resolution.
+message StartViewportStreamRequest {
+    string viewport_name = 1;    // Which viewport to stream
+    uint32 target_fps = 2;       // Desired frames per second
+    uint32 width = 3;            // Desired width (0 = native)
+    uint32 height = 4;           // Desired height (0 = native)
+    string format = 5;           // "raw", "jpeg" (default: raw)
+}
+
+message ViewportStreamConfig {
+    bool streaming = 1;
+    string viewport_name = 2;
+    uint32 fps = 3;
+    uint32 width = 4;
+    uint32 height = 5;
+}
+
+message StopViewportStreamRequest {}
+
+message StopViewportStreamResponse {
+    bool success = 1;
+}
+
+message GetViewportInfoRequest {}
+
+message GetViewportInfoResponse {
+    repeated string available_viewports = 1;
+    ViewportStreamConfig current_config = 2;
+}
+
+// Streams pixels from a named viewport (useful for external visualization / training input).
+service ViewportService {
+    rpc GetViewportInfo(GetViewportInfoRequest) returns (GetViewportInfoResponse);
+    rpc StreamViewport(StartViewportStreamRequest) returns (stream ImageFrame);
+}
+

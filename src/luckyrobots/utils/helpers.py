@@ -10,7 +10,7 @@ def validate_params(
     task: str = None,
     observation_type: str = None,
 ) -> bool:
-    """Validate the parameters passed into Lucky World"""
+    """Validate the parameters passed into LuckyEngine"""
     robot_config = get_robot_config(robot)
 
     if scene is None:

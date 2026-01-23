@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+// LuckyEngine / Hazel ScriptCore gRPC API (v1)
+//
+// This .proto is the *single source of truth* for the editor/runtime gRPC surface.
+// Code generators produce language-specific stubs:
+// - Client stubs: classes like `SceneServiceStub` / `AgentServiceStub` used by external tools
+// - Server bindings: base/service descriptors used by ScriptCore to host implementations
+//
+// In this repo:
+// - ScriptCore server host + impls live under `Hazel-ScriptCore/Source/Hazel/Net/Grpc/`
+// - C# generated files are checked in under `Hazel-ScriptCore/Source/Hazel/Net/Grpc/Generated/`
+// - A reference external Python client that generates Python stubs on-the-fly is `scripts/grpc_env.py`
+//
+// Compatibility note:
+// - Avoid renumbering existing field tags (the `= N` numbers). Add new fields with new tags instead.
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+// This file is an umbrella entrypoint for the full API. The canonical message/service
+// definitions live in smaller domain-specific protos for readability.
+
+import "common.proto";
+import "scene.proto";
+import "mujoco.proto";
+import "telemetry.proto";
+import "media.proto";
+import "agent.proto";
+import "viewport.proto";
+import "camera.proto";
+

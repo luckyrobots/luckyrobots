@@ -1,0 +1,25 @@
+* text=auto eol=lf
+
+*.py text eol=lf
+*.proto text eol=lf
+*.md text eol=lf
+*.rst text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.sh text eol=lf
+Makefile text eol=lf
+
+# Do not attempt to normalize common binary artifacts
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.svg binary
+*.ico binary

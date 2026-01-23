@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+// Media / image payload types shared across services.
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+// Generic image frame. For `format="raw"`, `data` is tightly-packed pixels (usually RGBA).
+// For compressed formats, `data` is the encoded blob (e.g. JPEG bytes).
+message ImageFrame {
+    bytes data = 1;              // Raw pixel data (RGBA or compressed)
+    uint32 width = 2;
+    uint32 height = 3;
+    uint32 channels = 4;         // 3 for RGB, 4 for RGBA
+    string format = 5;           // "raw", "jpeg", "png"
+    uint64 timestamp_ms = 6;     // Timestamp in milliseconds
+    uint32 frame_number = 7;
+}
+
+// Named image payload for observation snapshots.
+// `name` can be a camera name or viewport name, depending on source.
+message NamedImageFrame {
+    string name = 1;
+    ImageFrame frame = 2;
+}
+
