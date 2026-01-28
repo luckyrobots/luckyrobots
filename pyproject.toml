@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "luckyrobots"
-version = "0.1.68"
+version = "0.1.70"
 description = "Robotics-AI Training in Hyperrealistic Game Environments"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -45,13 +45,11 @@ Issues = "https://github.com/luckyrobots/luckyrobots/issues"
 [tool.hatch.build.targets.wheel]
 packages = ["src/luckyrobots"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"src/luckyrobots/config" = "luckyrobots/config"
-
 [tool.hatch.build.targets.sdist]
 include = [
     "src/luckyrobots/**/*.py",
     "src/luckyrobots/config/*.yaml",
+    "src/luckyrobots/grpc/proto/*.proto",
 ]
 
 [dependency-groups]
