@@ -24,4 +24,3 @@ message NamedImageFrame {
     string name = 1;
     ImageFrame frame = 2;
 }
-

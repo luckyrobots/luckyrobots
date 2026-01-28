@@ -39,4 +39,3 @@ service CameraService {
     rpc ListCameras(ListCamerasRequest) returns (ListCamerasResponse);
     rpc StreamCamera(StreamCameraRequest) returns (stream ImageFrame);
 }
-

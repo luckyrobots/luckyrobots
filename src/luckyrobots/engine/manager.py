@@ -1,66 +1,30 @@
 """
-LuckyEngine simulation manager.
+LuckyEngine engine lifecycle management.
 
-This module handles launching and stopping the LuckyEngine executable.
+This module handles launching, stopping, and managing the LuckyEngine executable.
 """
 
+import logging
 import os
 import platform
 import subprocess
 import tempfile
 import threading
 import time
-import logging
-
 from typing import Optional
 
 logger = logging.getLogger("luckyrobots.luckyengine")
 
+# Module-level state
 LOCK_FILE = os.path.join(tempfile.gettempdir(), "luckyengine_lock")
-_process = None
-_monitor_thread = None
+_process: Optional[subprocess.Popen] = None
+_monitor_thread: Optional[threading.Thread] = None
 _shutdown_event = threading.Event()
 
 
-def remove_lock_file() -> None:
-    """Remove the lock file"""
-    try:
-        if os.path.exists(LOCK_FILE):
-            os.remove(LOCK_FILE)
-            logger.debug("Lock file removed successfully")
-        else:
-            logger.debug("Lock file doesn't exist, nothing to remove")
-    except Exception as e:
-        logger.error(f"Error removing lock file: {e}")
-
-
-def monitor_process():
-    """Monitor the LuckyEngine process and handle its termination"""
-    global _process
-    try:
-        while not _shutdown_event.is_set():
-            if _process is None or _process.poll() is not None:
-                logger.info("LuckyEngine process has terminated")
-                # Don't kill the main process, just break out of monitoring
-                break
-            time.sleep(1)
-    except Exception as e:
-        logger.error(f"Error in process monitor: {e}")
-    finally:
-        # Ensure cleanup happens when monitoring stops
-        if not _shutdown_event.is_set():
-            remove_lock_file()
-
-
-def is_luckyengine_running() -> bool:
-    """Check if LuckyEngine is running by checking the lock file"""
-    return os.path.exists(LOCK_FILE)
-
-
-def create_lock_file(pid: int) -> None:
-    """Create a lock file with the process ID"""
-    with open(LOCK_FILE, "w") as f:
-        f.write(str(pid))
+# ============================================================================
+# Public API
+# ============================================================================
 
 
 def find_luckyengine_executable() -> Optional[str]:
@@ -71,6 +35,9 @@ def find_luckyengine_executable() -> Optional[str]:
     1. LUCKYENGINE_PATH environment variable
     2. LUCKYENGINE_HOME environment variable
     3. System installation paths
+
+    Returns:
+        Path to executable if found, None otherwise.
     """
     is_wsl = "microsoft" in platform.uname().release.lower()
 
@@ -80,8 +47,7 @@ def find_luckyengine_executable() -> Optional[str]:
         logger.info(f"Using LUCKYENGINE_PATH environment variable: {env_path}")
         if os.path.exists(env_path):
             return env_path
-        else:
-            logger.warning(f"LUCKYENGINE_PATH points to non-existent file: {env_path}")
+        logger.warning(f"LUCKYENGINE_PATH points to non-existent file: {env_path}")
 
     # 2. Check LUCKYENGINE_HOME environment variable
     env_home = os.environ.get("LUCKYENGINE_HOME")
@@ -90,10 +56,7 @@ def find_luckyengine_executable() -> Optional[str]:
         executable = _get_executable_for_platform(env_home, "LuckyEngine", is_wsl)
         if executable and os.path.exists(executable):
             return executable
-        else:
-            logger.warning(
-                f"LUCKYENGINE_HOME does not contain executable: {executable}"
-            )
+        logger.warning(f"LUCKYENGINE_HOME does not contain executable: {executable}")
 
     # 3. System installation paths
     system_paths = _get_system_paths(is_wsl)
@@ -105,64 +68,14 @@ def find_luckyengine_executable() -> Optional[str]:
     return None
 
 
-def _get_executable_for_platform(
-    home_dir: str, base_name: str, is_wsl: bool
-) -> Optional[str]:
-    """Get the executable path for the current platform."""
-    if platform.system() == "Linux" and not is_wsl:
-        return os.path.join(home_dir, f"{base_name}.sh")
-    elif platform.system() == "Darwin":
-        return os.path.join(
-            home_dir, f"{base_name}.app", "Contents", "MacOS", base_name
-        )
-    else:  # Windows or WSL2
-        return os.path.join(home_dir, f"{base_name}.exe")
+def is_luckyengine_running() -> bool:
+    """
+    Check if LuckyEngine is currently running.
 
-
-def _get_system_paths(is_wsl: bool) -> list[str]:
-    """Get system installation paths for the current platform."""
-    paths = []
-
-    if platform.system() == "Linux" and not is_wsl:
-        # LuckyEngine paths
-        paths.extend(
-            [
-                "/opt/LuckyEngine/LuckyEngine.sh",
-                "/usr/local/bin/LuckyEngine.sh",
-                os.path.expanduser("~/.local/share/LuckyEngine/LuckyEngine.sh"),
-                os.path.expanduser("~/LuckyEngine/LuckyEngine.sh"),
-            ]
-        )
-    elif platform.system() == "Darwin":
-        # LuckyEngine paths
-        paths.extend(
-            [
-                "/Applications/LuckyEngine/LuckyEngine.app/Contents/MacOS/LuckyEngine",
-                os.path.expanduser(
-                    "~/Applications/LuckyEngine/LuckyEngine.app/Contents/MacOS/LuckyEngine"
-                ),
-            ]
-        )
-    else:  # Windows or WSL2
-        # LuckyEngine paths
-        paths.extend(
-            [
-                "C:\\Program Files\\LuckyEngine\\LuckyEngine.exe",
-                "C:\\Program Files (x86)\\LuckyEngine\\LuckyEngine.exe",
-                os.path.expanduser("~\\AppData\\Local\\LuckyEngine\\LuckyEngine.exe"),
-            ]
-        )
-
-        if is_wsl:
-            # LuckyEngine WSL paths
-            paths.extend(
-                [
-                    "/mnt/c/Program Files/LuckyEngine/LuckyEngine.exe",
-                    "/mnt/c/Program Files (x86)/LuckyEngine/LuckyEngine.exe",
-                ]
-            )
-
-    return paths
+    Returns:
+        True if lock file exists, False otherwise.
+    """
+    return os.path.exists(LOCK_FILE)
 
 
 def launch_luckyengine(
@@ -280,133 +193,13 @@ def launch_luckyengine(
         return False
 
 
-def kill_processes():
-    """Kill all LuckyEngine processes"""
-    system = platform.system()
-    is_wsl = "microsoft" in platform.uname().release.lower()
-
-    if is_wsl:
-        return _kill_wsl_processes()
-    elif system == "Windows":
-        return _kill_windows_processes()
-    elif system == "Darwin":
-        return _kill_macos_processes()
-    else:
-        return _kill_linux_processes()
-
-
-def _kill_wsl_processes():
-    """WSL-specific process killing"""
-    try:
-        result = subprocess.run(
-            [
-                "/mnt/c/Windows/System32/taskkill.exe",
-                "/F",
-                "/IM",
-                "LuckyEngine.exe",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            logger.info("Killed LuckyEngine.exe processes")
-            return True
-        if result.returncode == 128:  # Process not found
-            logger.debug("No LuckyEngine processes found running")
-            return True
-    except Exception:
-        return True
-
-    return True
-
-
-def _kill_windows_processes():
-    """Windows-specific process killing"""
-    try:
-        result = subprocess.run(
-            ["taskkill", "/F", "/IM", "LuckyEngine.exe"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            logger.info("Successfully killed LuckyEngine.exe processes")
-            return True
-        elif result.returncode == 128:  # Process not found
-            logger.info("No LuckyEngine processes found")
-            return True
-    except Exception:
-        pass
-    return True
-
-
-def _kill_macos_processes():
-    """macOS-specific process killing"""
-    try:
-        # Kill LuckyEngine process
-        result = subprocess.run(
-            ["pkill", "-f", "LuckyEngine"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-        if result.returncode == 0:
-            logger.info("Successfully killed LuckyEngine processes")
-            return True
-        elif result.returncode == 1:  # No processes found
-            logger.info("No LuckyEngine processes found")
-            return True
-        else:
-            logger.warning(f"pkill failed: {result.stderr}")
-            return False
-
-    except subprocess.TimeoutExpired:
-        logger.error("pkill command timed out")
-        return False
-    except FileNotFoundError:
-        logger.error("pkill command not found")
-        return False
-    except Exception as e:
-        logger.error(f"Failed to kill macOS processes: {e}")
-        return False
-
-
-def _kill_linux_processes():
-    """Linux-specific process killing"""
-    try:
-        # Kill LuckyEngine process
-        result = subprocess.run(
-            ["pkill", "-f", "LuckyEngine"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-        if result.returncode == 0:
-            logger.info("Successfully killed LuckyEngine processes")
-            return True
-        elif result.returncode == 1:  # No processes found
-            logger.info("No LuckyEngine processes found")
-            return True
-        else:
-            logger.warning(f"pkill failed: {result.stderr}")
-            return False
-
-    except subprocess.TimeoutExpired:
-        logger.error("pkill command timed out")
-        return False
-    except FileNotFoundError:
-        logger.error("pkill command not found")
-        return False
-    except Exception as e:
-        logger.error(f"Failed to kill Linux processes: {e}")
-        return False
-
-
 def stop_luckyengine() -> bool:
-    """Stop the running LuckyEngine instance"""
+    """
+    Stop the running LuckyEngine instance.
+
+    Returns:
+        True if stopped successfully, False otherwise.
+    """
     global _process
 
     if not is_luckyengine_running():
@@ -432,3 +225,203 @@ def stop_luckyengine() -> bool:
     except Exception as e:
         logger.error(f"Error stopping LuckyEngine: {e}")
         return False
+
+
+# ============================================================================
+# Private Helpers
+# ============================================================================
+
+
+def _get_executable_for_platform(
+    home_dir: str, base_name: str, is_wsl: bool
+) -> Optional[str]:
+    """Get the executable path for the current platform."""
+    if platform.system() == "Linux" and not is_wsl:
+        return os.path.join(home_dir, f"{base_name}.sh")
+    elif platform.system() == "Darwin":
+        return os.path.join(
+            home_dir, f"{base_name}.app", "Contents", "MacOS", base_name
+        )
+    else:  # Windows or WSL2
+        return os.path.join(home_dir, f"{base_name}.exe")
+
+
+def _get_system_paths(is_wsl: bool) -> list[str]:
+    """Get system installation paths for the current platform."""
+    paths = []
+
+    if platform.system() == "Linux" and not is_wsl:
+        paths.extend(
+            [
+                "/opt/LuckyEngine/LuckyEngine.sh",
+                "/usr/local/bin/LuckyEngine.sh",
+                os.path.expanduser("~/.local/share/LuckyEngine/LuckyEngine.sh"),
+                os.path.expanduser("~/LuckyEngine/LuckyEngine.sh"),
+            ]
+        )
+    elif platform.system() == "Darwin":
+        paths.extend(
+            [
+                "/Applications/LuckyEngine/LuckyEngine.app/Contents/MacOS/LuckyEngine",
+                os.path.expanduser(
+                    "~/Applications/LuckyEngine/LuckyEngine.app/Contents/MacOS/LuckyEngine"
+                ),
+            ]
+        )
+    else:  # Windows or WSL2
+        paths.extend(
+            [
+                "C:\\Program Files\\LuckyEngine\\LuckyEngine.exe",
+                "C:\\Program Files (x86)\\LuckyEngine\\LuckyEngine.exe",
+                os.path.expanduser("~\\AppData\\Local\\LuckyEngine\\LuckyEngine.exe"),
+            ]
+        )
+
+        if is_wsl:
+            paths.extend(
+                [
+                    "/mnt/c/Program Files/LuckyEngine/LuckyEngine.exe",
+                    "/mnt/c/Program Files (x86)/LuckyEngine/LuckyEngine.exe",
+                ]
+            )
+
+    return paths
+
+
+def monitor_process() -> None:
+    """Monitor the LuckyEngine process and handle its termination."""
+    global _process
+    try:
+        while not _shutdown_event.is_set():
+            if _process is None or _process.poll() is not None:
+                logger.info("LuckyEngine process has terminated")
+                break
+            time.sleep(1)
+    except Exception as e:
+        logger.error(f"Error in process monitor: {e}")
+    finally:
+        # Ensure cleanup happens when monitoring stops
+        if not _shutdown_event.is_set():
+            remove_lock_file()
+
+
+def create_lock_file(pid: int) -> None:
+    """Create a lock file with the process ID."""
+    with open(LOCK_FILE, "w") as f:
+        f.write(str(pid))
+
+
+def remove_lock_file() -> None:
+    """Remove the lock file."""
+    try:
+        if os.path.exists(LOCK_FILE):
+            os.remove(LOCK_FILE)
+            logger.debug("Lock file removed successfully")
+        else:
+            logger.debug("Lock file doesn't exist, nothing to remove")
+    except Exception as e:
+        logger.error(f"Error removing lock file: {e}")
+
+
+def kill_processes() -> None:
+    """Kill all LuckyEngine processes."""
+    system = platform.system()
+    is_wsl = "microsoft" in platform.uname().release.lower()
+
+    if is_wsl:
+        _kill_wsl_processes()
+    elif system == "Windows":
+        _kill_windows_processes()
+    elif system == "Darwin":
+        _kill_macos_processes()
+    else:
+        _kill_linux_processes()
+
+
+def _kill_wsl_processes() -> None:
+    """Kill LuckyEngine processes on WSL."""
+    try:
+        result = subprocess.run(
+            [
+                "/mnt/c/Windows/System32/taskkill.exe",
+                "/F",
+                "/IM",
+                "LuckyEngine.exe",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            logger.info("Killed LuckyEngine.exe processes")
+        elif result.returncode == 128:  # Process not found
+            logger.debug("No LuckyEngine processes found running")
+    except Exception as e:
+        logger.debug(f"Error killing WSL processes: {e}")
+
+
+def _kill_windows_processes() -> None:
+    """Kill LuckyEngine processes on Windows."""
+    try:
+        result = subprocess.run(
+            ["taskkill", "/F", "/IM", "LuckyEngine.exe"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            logger.info("Successfully killed LuckyEngine.exe processes")
+        elif result.returncode == 128:  # Process not found
+            logger.info("No LuckyEngine processes found")
+    except Exception as e:
+        logger.debug(f"Error killing Windows processes: {e}")
+
+
+def _kill_macos_processes() -> None:
+    """Kill LuckyEngine processes on macOS."""
+    try:
+        result = subprocess.run(
+            ["pkill", "-f", "LuckyEngine"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            logger.info("Successfully killed LuckyEngine processes")
+        elif result.returncode == 1:  # No processes found
+            logger.info("No LuckyEngine processes found")
+        else:
+            logger.warning(f"pkill failed: {result.stderr}")
+
+    except subprocess.TimeoutExpired:
+        logger.error("pkill command timed out")
+    except FileNotFoundError:
+        logger.error("pkill command not found")
+    except Exception as e:
+        logger.error(f"Failed to kill macOS processes: {e}")
+
+
+def _kill_linux_processes() -> None:
+    """Kill LuckyEngine processes on Linux."""
+    try:
+        result = subprocess.run(
+            ["pkill", "-f", "LuckyEngine"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            logger.info("Successfully killed LuckyEngine processes")
+        elif result.returncode == 1:  # No processes found
+            logger.info("No LuckyEngine processes found")
+        else:
+            logger.warning(f"pkill failed: {result.stderr}")
+
+    except subprocess.TimeoutExpired:
+        logger.error("pkill command timed out")
+    except FileNotFoundError:
+        logger.error("pkill command not found")
+    except Exception as e:
+        logger.error(f"Failed to kill Linux processes: {e}")

@@ -5,7 +5,8 @@ This example demonstrates how to:
 1. Launch LuckyEngine
 2. Connect to LuckyEngine via gRPC
 3. Send control commands (MujocoService.SendControl)
-4. Read back robot state (MujocoService.GetJointState)
+4. Read back robot state and observations
+5. Reset the agent periodically during the control loop
 """
 
 import argparse
@@ -20,7 +21,7 @@ from luckyrobots import (
     LuckyRobots,
     ObservationDefaults,
 )
-from luckyrobots.utils.sim_manager import launch_luckyengine, stop_luckyengine
+from luckyrobots.engine import launch_luckyengine, stop_luckyengine
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -38,7 +39,7 @@ class Controller:
             port=port,
             robot_name=robot,
             observation_defaults=ObservationDefaults(
-                include_joint_state=False,
+                include_joint_state=True,
                 include_agent_frame=True,
                 include_telemetry=False,
             ),
@@ -94,18 +95,43 @@ class Controller:
         return np.zeros((0,), dtype=np.float32)
 
     def run_loop(self, rate_hz: float, duration_s: float) -> None:
-        """Run a simple control loop at the requested rate for a fixed duration."""
+        """Run a simple control loop at the requested rate for a fixed duration.
+
+        The agent will be reset every 10 seconds during the loop.
+        """
         period = 1.0 / rate_hz
         end_time = time.perf_counter() + duration_s
+        last_reset_time = time.perf_counter()
+        reset_interval_s = 10.0
 
         logger.info(
             "Starting control loop at %.1f Hz for %.1f seconds", rate_hz, duration_s
         )
+
         while time.perf_counter() < end_time:
             start = time.perf_counter()
+
+            # Reset the agent every 10 seconds
+            current_time = time.perf_counter()
+            if current_time - last_reset_time >= reset_interval_s:
+                logger.info("Resetting agent")
+                try:
+                    resp = self.client.reset_agent()
+                    if hasattr(resp, "success") and resp.success:
+                        logger.info(
+                            "Agent reset successful: %s", getattr(resp, "message", "")
+                        )
+                    else:
+                        logger.warning(
+                            "Agent reset returned success=False: %s",
+                            getattr(resp, "message", ""),
+                        )
+                except Exception as e:
+                    logger.error("Failed to reset agent: %s", e, exc_info=True)
+                last_reset_time = current_time
+
             action = self.sample_action()
             obs_vec = self.step(action)
-            logger.info("sent %d controls, got obs[%d]", action.size, obs_vec.size)
 
             elapsed = time.perf_counter() - start
             time.sleep(max(0.0, period - elapsed))
@@ -114,13 +140,13 @@ class Controller:
 def main() -> None:
     parser = argparse.ArgumentParser(description="LuckyEngine gRPC control example")
     parser.add_argument("--executable-path", type=str, default=None)
-    parser.add_argument("--host", type=str, default="127.0.0.1")
+    parser.add_argument("--host", type=str, default="172.24.160.1")
     parser.add_argument("--port", type=int, default=50051)
-    parser.add_argument("--scene", type=str, default="ArmLevel")
-    parser.add_argument("--task", type=str, default="pickandplace")
-    parser.add_argument("--robot", type=str, default="two_pandas")
+    parser.add_argument("--scene", type=str, default="velocity")
+    parser.add_argument("--task", type=str, default="locomotion")
+    parser.add_argument("--robot", type=str, default="unitreego1")
     parser.add_argument("--rate", type=float, default=10.0)
-    parser.add_argument("--duration", type=float, default=10.0)
+    parser.add_argument("--duration", type=float, default=60.0)
     parser.add_argument(
         "--skip-launch",
         action="store_true",
@@ -145,12 +171,8 @@ def main() -> None:
             logger.info("Skipping launch (--skip-launch flag set)")
 
         controller = Controller(host=args.host, port=args.port, robot=args.robot)
-        logger.info("Connecting to server...")
         controller.connect(timeout_s=120.0)
-        logger.info("Connection successful, starting control loop...")
-        import pdb; pdb.set_trace()
         controller.run_loop(rate_hz=args.rate, duration_s=args.duration)
-        logger.info("Control loop completed")
     finally:
         if launched_here:
             stop_luckyengine()

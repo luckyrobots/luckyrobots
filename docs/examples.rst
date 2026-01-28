@@ -52,6 +52,28 @@ Accessing Observations
     print("positions:", list(obs.joint_state.positions))
     print("velocities:", list(obs.joint_state.velocities))
 
+Resetting Agents
+----------------
+
+Reset agents during training or control loops:
+
+.. code-block:: python
+
+    from luckyrobots import LuckyEngineClient
+
+    client = LuckyEngineClient(host="127.0.0.1", port=50051)
+    client.connect()
+
+    # Reset the default agent
+    resp = client.reset_agent()
+    if resp.success:
+        print(f"Agent reset successful: {resp.message}")
+
+    # Reset a specific agent
+    resp = client.reset_agent(agent_name="agent_0")
+    if resp.success:
+        print(f"Agent 'agent_0' reset successful: {resp.message}")
+
 Command Line Usage
 ------------------
 
@@ -59,14 +81,14 @@ Run the included controller example with different options:
 
 .. code-block:: bash
 
-    # Basic usage
-    python controller.py
+    # Basic usage (connects to running server, resets agent every 10 seconds)
+    python examples/controller.py --skip-launch
 
     # Specify robot and scene
-    python controller.py --robot two_pandas --scene ArmLevel --task pickandplace
+    python examples/controller.py --robot unitreego1 --scene velocity --task locomotion
 
-    # Custom rate
-    python controller.py --rate 30
+    # Custom rate and duration
+    python examples/controller.py --rate 30 --duration 60 --skip-launch
 
     # Custom host/port
-    python controller.py --host 192.168.1.100 --port 50051
+    python examples/controller.py --host 192.168.1.100 --port 50051 --skip-launch

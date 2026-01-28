@@ -30,7 +30,7 @@ LuckyEngine exposes the following gRPC services (defined in ``hazel_rpc.proto``)
 
 - **SceneService**: Scene inspection and entity manipulation
 - **MujocoService**: Joint state queries and control commands (SendControl, GetJointState)
-- **AgentService**: RL-style observation/action streaming and unified snapshots (GetObservation)
+- **AgentService**: RL-style observation/action streaming, unified snapshots (GetObservation), and agent resets (ResetAgent)
 - **TelemetryService**: Telemetry data streaming
 - **CameraService**: Camera frame streaming
 - **ViewportService**: Viewport pixel streaming

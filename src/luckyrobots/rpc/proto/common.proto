@@ -34,4 +34,3 @@ message Transform {
     Quat rotation = 2;
     Vec3 scale = 3;
 }
-

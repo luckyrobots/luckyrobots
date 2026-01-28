@@ -8,4 +8,3 @@ and accessing its services (Scene, MuJoCo, Telemetry, Agent, Viewport, Camera).
 from .client import LuckyEngineClient, GrpcConnectionError, ObservationDefaults
 
 __all__ = ["LuckyEngineClient", "GrpcConnectionError", "ObservationDefaults"]
-

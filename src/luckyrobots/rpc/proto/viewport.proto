@@ -43,4 +43,3 @@ service ViewportService {
     rpc GetViewportInfo(GetViewportInfoRequest) returns (GetViewportInfoResponse);
     rpc StreamViewport(StartViewportStreamRequest) returns (stream ImageFrame);
 }
-

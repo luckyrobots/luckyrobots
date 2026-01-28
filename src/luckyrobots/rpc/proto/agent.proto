@@ -37,6 +37,17 @@ message StreamAgentRequest {
     uint32 target_fps = 2;
 }
 
+message ResetAgentRequest {
+    // Agent logical name. Convention in this repo is `agent_0`, `agent_1`, ...
+    // Empty typically means "default agent" (agent_0).
+    string agent_name = 1;
+}
+
+message ResetAgentResponse {
+    bool success = 1;
+    string message = 2;
+}
+
 // Agent observation stream frame.
 // This stream is server->client; external actions are currently sent via MujocoService.SendControl.
 message AgentFrame {
@@ -135,5 +146,7 @@ service AgentService {
     // provide a target FPS hint. Actions are currently sent via MujocoService
     // (SendControl); AgentFrame.actions is primarily used for telemetry.
     rpc StreamAgent(StreamAgentRequest) returns (stream AgentFrame);
+    // Reset a specific agent (full reset: clear buffers, reset state, resample commands, apply MuJoCo state).
+    // Useful for multi-env RL where individual agents need to be reset without resetting the entire scene.
+    rpc ResetAgent(ResetAgentRequest) returns (ResetAgentResponse);
 }
-

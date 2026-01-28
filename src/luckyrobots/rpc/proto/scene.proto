@@ -68,4 +68,3 @@ service SceneService {
     rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
     rpc SetEntityTransform(SetEntityTransformRequest) returns (SetEntityTransformResponse);
 }
-

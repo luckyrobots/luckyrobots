@@ -16,4 +16,3 @@ Regenerate with:
 Then adjust imports in the generated `*_pb2.py` and `*_pb2_grpc.py` to be
 package-relative (`from . import ...`).
 """
-

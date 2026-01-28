@@ -58,8 +58,7 @@ service MujocoService {
     rpc GetJointState(GetJointStateRequest) returns (GetJointStateResponse);
     rpc SendControl(SendControlRequest) returns (SendControlResponse);
     rpc GetMujocoInfo(GetMujocoInfoRequest) returns (GetMujocoInfoResponse);
-    
+
     // Streaming variant for continuous state observation
     rpc StreamJointState(GetJointStateRequest) returns (stream GetJointStateResponse);
 }
-

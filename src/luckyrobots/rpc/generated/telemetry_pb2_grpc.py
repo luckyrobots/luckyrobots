@@ -5,29 +5,31 @@ import warnings
 
 from . import telemetry_pb2 as telemetry__pb2
 
-GRPC_GENERATED_VERSION = '1.76.0'
+GRPC_GENERATED_VERSION = "1.76.0"
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
+
+    _version_not_supported = first_version_is_lower(
+        GRPC_VERSION, GRPC_GENERATED_VERSION
+    )
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     raise RuntimeError(
-        f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in telemetry_pb2_grpc.py depends on'
-        + f' grpcio>={GRPC_GENERATED_VERSION}.'
-        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
-        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
+        f"The grpc package installed is at version {GRPC_VERSION},"
+        + " but the generated code in telemetry_pb2_grpc.py depends on"
+        + f" grpcio>={GRPC_GENERATED_VERSION}."
+        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
+        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
     )
 
 
 class TelemetryServiceStub(object):
-    """Stream-only service intended for external tools (plotting, training logs, debugging).
-    """
+    """Stream-only service intended for external tools (plotting, training logs, debugging)."""
 
     def __init__(self, channel):
         """Constructor.
@@ -36,73 +38,78 @@ class TelemetryServiceStub(object):
             channel: A grpc.Channel.
         """
         self.GetTelemetrySchema = channel.unary_unary(
-                '/hazel.rpc.v1.TelemetryService/GetTelemetrySchema',
-                request_serializer=telemetry__pb2.GetTelemetrySchemaRequest.SerializeToString,
-                response_deserializer=telemetry__pb2.GetTelemetrySchemaResponse.FromString,
-                _registered_method=True)
+            "/hazel.rpc.v1.TelemetryService/GetTelemetrySchema",
+            request_serializer=telemetry__pb2.GetTelemetrySchemaRequest.SerializeToString,
+            response_deserializer=telemetry__pb2.GetTelemetrySchemaResponse.FromString,
+            _registered_method=True,
+        )
         self.StreamTelemetry = channel.unary_stream(
-                '/hazel.rpc.v1.TelemetryService/StreamTelemetry',
-                request_serializer=telemetry__pb2.StreamTelemetryRequest.SerializeToString,
-                response_deserializer=telemetry__pb2.TelemetryFrame.FromString,
-                _registered_method=True)
+            "/hazel.rpc.v1.TelemetryService/StreamTelemetry",
+            request_serializer=telemetry__pb2.StreamTelemetryRequest.SerializeToString,
+            response_deserializer=telemetry__pb2.TelemetryFrame.FromString,
+            _registered_method=True,
+        )
 
 
 class TelemetryServiceServicer(object):
-    """Stream-only service intended for external tools (plotting, training logs, debugging).
-    """
+    """Stream-only service intended for external tools (plotting, training logs, debugging)."""
 
     def GetTelemetrySchema(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def StreamTelemetry(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_TelemetryServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetTelemetrySchema': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetTelemetrySchema,
-                    request_deserializer=telemetry__pb2.GetTelemetrySchemaRequest.FromString,
-                    response_serializer=telemetry__pb2.GetTelemetrySchemaResponse.SerializeToString,
-            ),
-            'StreamTelemetry': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamTelemetry,
-                    request_deserializer=telemetry__pb2.StreamTelemetryRequest.FromString,
-                    response_serializer=telemetry__pb2.TelemetryFrame.SerializeToString,
-            ),
+        "GetTelemetrySchema": grpc.unary_unary_rpc_method_handler(
+            servicer.GetTelemetrySchema,
+            request_deserializer=telemetry__pb2.GetTelemetrySchemaRequest.FromString,
+            response_serializer=telemetry__pb2.GetTelemetrySchemaResponse.SerializeToString,
+        ),
+        "StreamTelemetry": grpc.unary_stream_rpc_method_handler(
+            servicer.StreamTelemetry,
+            request_deserializer=telemetry__pb2.StreamTelemetryRequest.FromString,
+            response_serializer=telemetry__pb2.TelemetryFrame.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'hazel.rpc.v1.TelemetryService', rpc_method_handlers)
+        "hazel.rpc.v1.TelemetryService", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('hazel.rpc.v1.TelemetryService', rpc_method_handlers)
+    server.add_registered_method_handlers(
+        "hazel.rpc.v1.TelemetryService", rpc_method_handlers
+    )
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class TelemetryService(object):
-    """Stream-only service intended for external tools (plotting, training logs, debugging).
-    """
+    """Stream-only service intended for external tools (plotting, training logs, debugging)."""
 
     @staticmethod
-    def GetTelemetrySchema(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+    def GetTelemetrySchema(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/hazel.rpc.v1.TelemetryService/GetTelemetrySchema',
+            "/hazel.rpc.v1.TelemetryService/GetTelemetrySchema",
             telemetry__pb2.GetTelemetrySchemaRequest.SerializeToString,
             telemetry__pb2.GetTelemetrySchemaResponse.FromString,
             options,
@@ -113,23 +120,26 @@ class TelemetryService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True)
+            _registered_method=True,
+        )
 
     @staticmethod
-    def StreamTelemetry(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+    def StreamTelemetry(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/hazel.rpc.v1.TelemetryService/StreamTelemetry',
+            "/hazel.rpc.v1.TelemetryService/StreamTelemetry",
             telemetry__pb2.StreamTelemetryRequest.SerializeToString,
             telemetry__pb2.TelemetryFrame.FromString,
             options,
@@ -140,4 +150,5 @@ class TelemetryService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True)
+            _registered_method=True,
+        )

@@ -4,7 +4,7 @@ import time
 from collections.abc import Sequence
 from typing import Optional
 
-from ..utils.sim_manager import launch_luckyengine, stop_luckyengine
+from ..engine import launch_luckyengine, stop_luckyengine
 from ..core.models import ObservationModel
 from ..rpc import LuckyEngineClient, GrpcConnectionError
 from ..utils.helpers import (

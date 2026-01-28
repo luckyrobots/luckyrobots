@@ -200,7 +200,9 @@ class LuckyEngineClient:
             logger.debug(f"Health check failed: {e}")
             return False
 
-    def wait_for_server(self, timeout: float = 30.0, poll_interval: float = 0.5) -> bool:
+    def wait_for_server(
+        self, timeout: float = 30.0, poll_interval: float = 0.5
+    ) -> bool:
         """
         Wait for the gRPC server to become available.
 
@@ -214,6 +216,7 @@ class LuckyEngineClient:
         import time
 
         start = time.perf_counter()
+
         while time.perf_counter() - start < timeout:
             if not self.is_connected():
                 try:
@@ -221,7 +224,7 @@ class LuckyEngineClient:
                 except Exception:
                     pass
 
-            if self.health_check(timeout=1.0):
+            if self.health_check(timeout=10.0):
                 return True
 
             time.sleep(poll_interval)
@@ -403,7 +406,9 @@ class LuckyEngineClient:
             else include_agent_frame
         )
         include_telemetry = (
-            defaults.include_telemetry if include_telemetry is None else include_telemetry
+            defaults.include_telemetry
+            if include_telemetry is None
+            else include_telemetry
         )
         camera_names = defaults.camera_names if camera_names is None else camera_names
         viewport_names = (
@@ -457,7 +462,29 @@ class LuckyEngineClient:
         Returns an iterator of AgentFrame messages.
         """
         return self.agent.StreamAgent(
-            self.pb.agent.StreamAgentRequest(agent_name=agent_name, target_fps=target_fps),
+            self.pb.agent.StreamAgentRequest(
+                agent_name=agent_name, target_fps=target_fps
+            ),
+        )
+
+    def reset_agent(self, agent_name: str = "", timeout: Optional[float] = None):
+        """
+        Reset a specific agent (full reset: clear buffers, reset state, resample commands, apply MuJoCo state).
+
+        Useful for multi-env RL where individual agents need to be reset without resetting the entire scene.
+
+        Args:
+            agent_name: Agent logical name. Convention is `agent_0`, `agent_1`, ...
+                Empty string means "default agent" (agent_0).
+            timeout: Timeout in seconds (uses default if None).
+
+        Returns:
+            ResetAgentResponse with success and message fields.
+        """
+        timeout = timeout or self.timeout
+        return self.agent.ResetAgent(
+            self.pb.agent.ResetAgentRequest(agent_name=agent_name),
+            timeout=timeout,
         )
 
     def stream_telemetry(self, target_fps: int = 30):

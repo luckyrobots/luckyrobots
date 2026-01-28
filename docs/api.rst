@@ -27,3 +27,13 @@ Models
 
 .. autoclass:: luckyrobots.ObservationModel
    :members:
+
+Engine Management
+-----------------
+
+Engine Lifecycle
+~~~~~~~~~~~~~~~~
+
+.. automodule:: luckyrobots.engine
+   :members:
+   :undoc-members:
