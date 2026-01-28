@@ -6,14 +6,6 @@
    Infinite synthetic data generation for embodied AI
 </p>
 
-<!--
-<p align="center">
-  <a href="https://luckyrobots.github.io/ReleaseV0.1/" target="_blank">
-   <img src="https://img.shields.io/badge/Explore_V0.1-Get_Started-grey?style=for-the-badge&labelColor=grey&color=blue" alt="Get Started" />
-  </a>
-</p>
--->
-
 <div align="center">
 
 [![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
@@ -32,179 +24,200 @@ https://github.com/user-attachments/assets/0ab2953d-b188-4af7-a225-71decdd2378c
 Hyperrealistic robotics simulation framework with Python API for embodied AI training and testing.
 
 <p align="center">
-  <img width="49%" alt="Bedroom environment in Lucky World" src="https://github.com/user-attachments/assets/279a7864-9a8b-453e-8567-3a174f5db8ab" />
-  <img width="49%" alt="Open floor plan in Lucky World" src="https://github.com/user-attachments/assets/68c72b97-98ab-42b0-a065-8a4247b014c7" />
+  <img width="49%" alt="Bedroom environment in LuckyEngine" src="https://github.com/user-attachments/assets/279a7864-9a8b-453e-8567-3a174f5db8ab" />
+  <img width="49%" alt="Open floor plan in LuckyEngine" src="https://github.com/user-attachments/assets/68c72b97-98ab-42b0-a065-8a4247b014c7" />
 </p>
 
 ## Quick Start
 
-1. **Download Lucky World Executable from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest) and add its path to your system variables**
+1. **Download LuckyEngine** from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest) and set the path:
    ```bash
-   # Set environment variables (choose one method):
+   # Set environment variable (choose one method):
 
-   # Method 1: Set LUCKYWORLD_PATH directly to the executable
-   export LUCKYWORLD_PATH=/path/to/LuckyWorld.exe  # Windows
-   export LUCKYWORLD_PATH=/path/to/LuckyWorld      # Linux/Mac
+   # Method 1: Set LUCKYENGINE_PATH directly to the executable
+   export LUCKYENGINE_PATH=/path/to/LuckyEngine      # Linux/Mac
+   export LUCKYENGINE_PATH=/path/to/LuckyEngine.exe  # Windows
 
-   # Method 2: Set LUCKYWORLD_HOME to the directory containing the executable
-   export LUCKYWORLD_HOME=/path/to/luckyworld/directory
+   # Method 2: Set LUCKYENGINE_HOME to the directory containing the executable
+   export LUCKYENGINE_HOME=/path/to/luckyengine/directory
    ```
 
-2. **Create conda environment (recommended)**
-   ```bash
-   conda create -n luckyrobots python
-   conda activate luckyrobots
-   ```
-
-3. **Install**
+2. **Install**
    ```bash
    pip install luckyrobots
    ```
 
-4. **Run Example**
+3. **Run Example**
    ```bash
    git clone https://github.com/luckyrobots/luckyrobots.git
    cd luckyrobots/examples
-   python controller.py
+   python controller.py --skip-launch  # If LuckyEngine is already running
    ```
 
 ## Basic Usage
 
 ```python
-from luckyrobots import LuckyRobots, Node
-import numpy as np
+from luckyrobots import LuckyEngineClient
 
-# Create controller node
-class RobotController(Node):
-    async def control_loop(self):
-        # Reset environment
-        reset_response = await self.reset_client.call(Reset.Request())
+# Connect to LuckyEngine
+client = LuckyEngineClient(
+    host="127.0.0.1",
+    port=50051,
+    robot_name="unitreego1",
+)
+client.wait_for_server()
 
-        # Send actions
-        actuator_values = np.array([0.1, 0.2, -0.1, 0.0, 0.5, 1.0])
-        step_response = await self.step_client.call(Step.Request(actuator_values=actuator_values))
+# Optional: Fetch schema for named observation access
+client.fetch_schema()
 
-        # Access observations
-        observation = step_response.observation
-        joint_states = observation.observation_state
-        camera_data = observation.observation_cameras
+# Get RL observation
+obs = client.get_observation()
+print(f"Observation: {obs.observation[:5]}...")  # Flat vector for RL
+print(f"Timestamp: {obs.timestamp_ms}")
 
-# Start simulation
-luckyrobots = LuckyRobots()
-controller = RobotController()
-luckyrobots.register_node(controller)
-luckyrobots.start(scene="kitchen", robot="so100", task="pickandplace")
+# Named access (if schema fetched)
+# obs["proj_grav_x"]  # Access by name
+# obs.to_dict()       # Convert to dict
+
+# Send controls
+client.send_control(controls=[0.1, 0.2, -0.1, ...])
+
+# Get joint state (separate from RL observation)
+joints = client.get_joint_state()
+print(f"Positions: {joints.positions}")
+print(f"Velocities: {joints.velocities}")
+```
+
+## API Overview
+
+### Core Classes
+
+**`LuckyEngineClient`** - Low-level gRPC client
+- `wait_for_server(timeout)` - Wait for LuckyEngine connection
+- `get_observation()` - Get RL observation vector
+- `get_joint_state()` - Get joint positions/velocities
+- `send_control(controls)` - Send actuator commands
+- `get_agent_schema()` - Get observation/action names and sizes
+- `reset_agent()` - Reset agent state
+
+**`LuckyRobots`** - High-level wrapper (launches LuckyEngine)
+- `start(scene, robot, task)` - Launch and connect
+- `get_observation()` - Get observation
+- `step(controls)` - Send controls and get next observation
+
+### Models
+
+```python
+from luckyrobots import ObservationResponse, StateSnapshot
+
+# ObservationResponse - returned by get_observation()
+obs.observation      # List[float] - flat RL observation vector
+obs.actions          # List[float] - last applied actions
+obs.timestamp_ms     # int - wall-clock timestamp
+obs.frame_number     # int - monotonic counter
+obs["name"]          # Named access (if schema fetched)
+obs.to_dict()        # Convert to name->value dict
 ```
 
 ## Available Robots & Environments
 
 ### Robots
+- **unitreego1**: Quadruped robot
 - **so100**: 6-DOF manipulator with gripper
 - **stretch_v1**: Mobile manipulator
-- **dji300**: Quadcopter drone
 
 ### Scenes
+- **velocity**: Velocity control training
 - **kitchen**: Residential kitchen environment
-- **loft**: Open floor plan apartment
-- **drone_flight**: Outdoor flight area
 
 ### Tasks
+- **locomotion**: Walking/movement
 - **pickandplace**: Object manipulation
-- **navigation**: Path planning and movement
-
-## API Reference
-
-### Core Classes
-
-**LuckyRobots**: Main simulation manager
-- `start(scene, robot, task, observation_type)`: Initialize simulation
-- `register_node(node)`: Add controller node
-- `spin()`: Run main loop
-
-**Node**: Base class for robot controllers
-- `create_client(service_type, service_name)`: Create service client
-- `create_service(service_type, service_name, handler)`: Create service server
-
-### Services
-
-**Reset**: Reset robot to initial state
-```python
-request = Reset.Request(seed=42, options={})
-response = await reset_client.call(request)
-```
-
-**Step**: Send action and get observation
-```python
-request = Step.Request(actuator_values=[0.1, 0.2, -0.1])
-response = await step_client.call(request)
-```
-
-### Observations
-
-Access sensor data from step responses:
-```python
-# Joint positions and velocities
-joint_states = response.observation.observation_state
-
-# Camera images (RGB + depth)
-for camera in response.observation.observation_cameras:
-    image = camera.image_data  # numpy array
-    name = camera.camera_name  # "head_cam", "hand_cam", etc.
-```
-
-## Command Line Interface
-
-```bash
-# Basic usage
-python controller.py --robot so100 --scene kitchen --task pickandplace
-
-# With camera display
-python controller.py --show-camera --rate 30
-
-# Custom host/port
-python controller.py --host 192.168.1.100 --port 3001
-```
-
-## Configuration
-
-Robot configurations are defined in `src/luckyrobots/config/robots.yaml`:
-
-```yaml
-so100:
-  action_space:
-    actuator_names: [shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper]
-    actuator_limits:
-      - name: shoulder_pan
-        lower: -2.2
-        upper: 2.2
-  available_scenes: [kitchen]
-  available_tasks: [pickandplace]
-```
-
-## Architecture
-
-Lucky Robots uses a distributed node architecture:
-
-- **Manager Node**: Central message routing
-- **LuckyRobots Node**: Simulation interface
-- **Controller Nodes**: User-defined robot controllers
-- **WebSocket Transport**: Inter-node communication
-- **Lucky World**: Physics simulation backend
 
 ## Development
 
-### Setup Development Environment
+### Setup with uv (recommended)
+
+```bash
+# Clone and enter repo
+git clone https://github.com/luckyrobots/luckyrobots.git
+cd luckyrobots
+
+# Install uv if you haven't
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create venv and install deps
+uv sync
+
+# Run tests
+uv run pytest
+
+# Run example
+uv run python examples/controller.py --skip-launch
+```
+
+### Setup with pip
+
 ```bash
 git clone https://github.com/luckyrobots/luckyrobots.git
 cd luckyrobots
-pip install -e .
+pip install -e ".[dev]"
+```
+
+### Regenerating gRPC Stubs
+
+The Python gRPC stubs are in `src/luckyrobots/grpc/generated/` and are
+generated from protos in `src/luckyrobots/grpc/proto/`.
+
+```bash
+python -m grpc_tools.protoc \
+  -I "src/luckyrobots/grpc/proto" \
+  --python_out="src/luckyrobots/grpc/generated" \
+  --grpc_python_out="src/luckyrobots/grpc/generated" \
+  src/luckyrobots/grpc/proto/*.proto
+```
+
+### Project Structure
+
+```
+src/luckyrobots/
+├── client.py            # LuckyEngineClient (main API)
+├── luckyrobots.py       # LuckyRobots high-level wrapper
+├── models/              # Pydantic models
+│   ├── observation.py   # ObservationResponse, StateSnapshot
+│   └── camera.py        # CameraData, CameraShape
+├── engine/              # Engine management
+├── grpc/                # gRPC internals
+│   ├── generated/       # Protobuf stubs
+│   └── proto/           # .proto files
+└── config/              # Robot configurations
 ```
 
 ### Contributing
+
 1. Fork the repository
 2. Create a feature branch
 3. Make changes and add tests
-4. Submit a pull request
+4. Run `uv run ruff check .` and `uv run ruff format .`
+5. Submit a pull request
+
+## Architecture
+
+Lucky Robots uses gRPC for communication:
+
+- **LuckyEngine**: Physics + rendering backend (Unreal Engine + MuJoCo)
+- **Python client**: Connects via gRPC (default `127.0.0.1:50051`)
+
+### gRPC Services
+
+| Service | Status | Description |
+|---------|--------|-------------|
+| MujocoService | ✅ Working | Joint state, controls |
+| AgentService | ✅ Working | Observations, reset |
+| SceneService | 🚧 Placeholder | Scene inspection |
+| TelemetryService | 🚧 Placeholder | Telemetry streaming |
+| CameraService | 🚧 Placeholder | Camera frames |
+| ViewportService | 🚧 Placeholder | Viewport pixels |
 
 ## License
 

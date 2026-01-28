@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+// Telemetry service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+// Schema describing telemetry vectors (names are informational; sizes are authoritative).
+message TelemetrySchema {
+    repeated string observation_names = 1;
+    repeated string action_names = 2;
+    uint32 nq = 3;
+    uint32 nu = 4;
+}
+
+message GetTelemetrySchemaRequest {}
+
+message GetTelemetrySchemaResponse {
+    TelemetrySchema schema = 1;
+}
+
+// Request a server-stream of telemetry frames.
+// Server may clamp `target_fps` based on configured limits.
+message StreamTelemetryRequest {
+    uint32 target_fps = 1;        // Desired sampling rate (frames per second)
+}
+
+// Telemetry frame: lightweight stream of simulator state (qpos) and last applied control.
+message TelemetryFrame {
+    uint64 timestamp_ms = 1;      // Wall-clock timestamp in milliseconds
+    uint32 frame_number = 2;      // Monotonic frame counter
+    uint32 task_index = 3;        // Reserved for future multi-task setups
+
+    repeated float observation_qpos = 4; // MuJoCo qpos[0..nq)
+    repeated float action_ctrl = 5;      // MuJoCo ctrl[0..nu)
+}
+
+// Stream-only service intended for external tools (plotting, training logs, debugging).
+service TelemetryService {
+    rpc GetTelemetrySchema(GetTelemetrySchemaRequest) returns (GetTelemetrySchemaResponse);
+    rpc StreamTelemetry(StreamTelemetryRequest) returns (stream TelemetryFrame);
+}

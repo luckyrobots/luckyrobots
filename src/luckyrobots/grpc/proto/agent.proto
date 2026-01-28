@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+// Agent + observation service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+import "common.proto";
+import "media.proto";
+import "mujoco.proto";
+import "telemetry.proto";
+
+// Schema for an RL-style agent. `*_names` are informative; sizes are authoritative.
+message AgentSchema {
+    string agent_name = 1;
+    repeated string observation_names = 2;
+    repeated string action_names = 3;
+    uint32 observation_size = 4;
+    uint32 action_size = 5;
+}
+
+message GetAgentSchemaRequest {
+    // Agent logical name. Convention in this repo is `agent_0`, `agent_1`, ...
+    // Empty typically means "default agent".
+    string agent_name = 1;
+}
+
+message GetAgentSchemaResponse {
+    AgentSchema schema = 1;
+}
+
+message StreamAgentRequest {
+    // Agent logical name. If empty, server may fall back to a default agent.
+    string agent_name = 1;
+    // Client hint: desired update rate. Server may clamp.
+    uint32 target_fps = 2;
+}
+
+message ResetAgentRequest {
+    // Agent logical name. Convention in this repo is `agent_0`, `agent_1`, ...
+    // Empty typically means "default agent" (agent_0).
+    string agent_name = 1;
+}
+
+message ResetAgentResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Agent observation stream frame.
+// This stream is server->client; external actions are currently sent via MujocoService.SendControl.
+message AgentFrame {
+    // Wall-clock timestamp in milliseconds (set by server on outgoing frames)
+    uint64 timestamp_ms = 1;
+    // Monotonic frame counter (set by server on outgoing frames)
+    uint32 frame_number = 2;
+
+    // Flat observation vector for this frame, as defined by the Agent's ObservationSpec.
+    repeated float observations = 3;
+
+    // Flat action vector for this frame.
+    // For frames sent from the client to the server, this carries the actions that
+    // should be applied for the next simulation step.
+    // For frames sent from the server to the client, this typically mirrors the last
+    // applied actions for debugging/telemetry.
+    repeated float actions = 4;
+
+    // Optional agent identifier, used when multiplexing multiple agents over a single
+    // stream. If empty, the server may fall back to a default agent.
+    string agent_name = 5;
+
+    // Optional target FPS hint requested by the client. The server may clamp or ignore
+    // this value depending on simulation timing constraints.
+    uint32 target_fps = 6;
+}
+
+// =============================================================================
+// Observation RPC (single-shot snapshot)
+// =============================================================================
+
+// Single-shot camera snapshot request (mirrors StreamCameraRequest without fps).
+message GetCameraFrameRequest {
+    oneof identifier {
+        EntityId id = 1;
+        string name = 2;
+    }
+
+    uint32 width = 3;            // Desired width (0 = native)
+    uint32 height = 4;           // Desired height (0 = native)
+    string format = 5;           // "raw", "jpeg" (default: raw)
+}
+
+// Single-shot viewport snapshot request (mirrors StartViewportStreamRequest without fps).
+message GetViewportFrameRequest {
+    string viewport_name = 1;
+    uint32 width = 2;            // Desired width (0 = native)
+    uint32 height = 3;           // Desired height (0 = native)
+    string format = 4;           // "raw", "jpeg" (default: raw)
+}
+
+// Request a unified observation snapshot. The server decides the exact meaning of
+// "observation" based on the active scene/agent configuration and the fields selected here.
+message GetObservationRequest {
+    // Target robot (used for MujocoService-style state and external actions).
+    string robot_name = 1;
+
+    // Target agent (used for RL-style flattened observation vectors). Empty means default agent.
+    string agent_name = 2;
+
+    // Include components in the response (server may ignore unsupported fields).
+    bool include_joint_state = 3;
+    bool include_agent_frame = 4;
+    bool include_telemetry = 5;
+
+    // Optional image snapshots.
+    repeated GetCameraFrameRequest cameras = 6;
+    repeated GetViewportFrameRequest viewports = 7;
+}
+
+message GetObservationResponse {
+    bool success = 1;
+    string message = 2;
+
+    // Timestamp/frame_number are best-effort; server may use whichever timing source is available.
+    uint64 timestamp_ms = 3;
+    uint32 frame_number = 4;
+
+    // Optional components.
+    JointState joint_state = 5;
+    AgentFrame agent_frame = 6;
+    TelemetryFrame telemetry = 7;
+
+    repeated NamedImageFrame camera_frames = 8;
+    repeated NamedImageFrame viewport_frames = 9;
+}
+
+// Per-agent RL-style observation streaming (training / inference clients consume this).
+service AgentService {
+    rpc GetAgentSchema(GetAgentSchemaRequest) returns (GetAgentSchemaResponse);
+    // Single-shot observation snapshot (unified observation surface).
+    rpc GetObservation(GetObservationRequest) returns (GetObservationResponse);
+    // Server-streaming observations (and optional action echo) for a single agent.
+    //
+    // The client specifies which agent to stream via StreamAgentRequest and may
+    // provide a target FPS hint. Actions are currently sent via MujocoService
+    // (SendControl); AgentFrame.actions is primarily used for telemetry.
+    rpc StreamAgent(StreamAgentRequest) returns (stream AgentFrame);
+    // Reset a specific agent (full reset: clear buffers, reset state, resample commands, apply MuJoCo state).
+    // Useful for multi-env RL where individual agents need to be reset without resetting the entire scene.
+    rpc ResetAgent(ResetAgentRequest) returns (ResetAgentResponse);
+}

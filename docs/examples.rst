@@ -1,55 +1,27 @@
 Examples
 ========
 
-Basic Robot Controller
------------------------
+Minimal gRPC Control
+--------------------
 
-Here's a simple example showing how to create a robot controller:
+LuckyRobots is gRPC-only. The most direct way to control a robot is to use
+`LuckyEngineClient` to call the unified observation RPC + control RPCs.
 
 .. code-block:: python
 
-    from luckyrobots import LuckyRobots, Node, Reset, Step
     import numpy as np
-    import asyncio
+    from luckyrobots import LuckyEngineClient
 
-    class MyController(Node):
-        def __init__(self):
-            super().__init__("my_controller")
+    client = LuckyEngineClient(host="127.0.0.1", port=50051)
+    client.connect()
 
-        async def _setup_async(self):
-            # Create service clients for reset and step
-            self.reset_client = self.create_client(Reset, "/reset")
-            self.step_client = self.create_client(Step, "/step")
+    # Send controls (actuator targets depend on the robot you spawned)
+    client.send_control(controls=[0.1, 0.2, -0.1], robot_name="two_pandas")
 
-        async def run_robot(self):
-            # Reset the environment
-            await self.reset_client.call(Reset.Request())
-            print("Environment reset!")
-
-            # Run 10 steps with random actions
-            for i in range(10):
-                # Sample random action (6 values for so100 robot)
-                action = np.random.uniform(-1, 1, size=6)
-
-                # Send action to robot
-                response = await self.step_client.call(
-                    Step.Request(actuator_values=action.tolist())
-                )
-
-                print(f"Step {i+1}: Action sent, got observation")
-                await asyncio.sleep(0.1)  # Small delay
-
-    # Setup and run
-    controller = MyController()
-    luckyrobots = LuckyRobots()
-    luckyrobots.register_node(controller)
-
-    # Start simulation
-    luckyrobots.start(
-        scene="kitchen",
-        robot="so100",
-        task="pickandplace"
-    )
+    # Read back a unified observation snapshot (AgentService.GetObservation)
+    obs = client.get_observation(robot_name="two_pandas")
+    qpos = np.array(list(obs.joint_state.positions))
+    print("qpos:", qpos)
 
 Using Robot Configuration
 -------------------------
@@ -58,61 +30,49 @@ Access robot-specific settings for proper action limits:
 
 .. code-block:: python
 
-    from luckyrobots import LuckyRobots, Node, Reset, Step
     import numpy as np
+    from luckyrobots import LuckyRobots
 
-    class ConfiguredController(Node):
-        def __init__(self, robot_name="so100"):
-            super().__init__("configured_controller")
-            self.robot_config = LuckyRobots.get_robot_config(robot_name)
-
-        async def _setup_async(self):
-            self.reset_client = self.create_client(Reset, "/reset")
-            self.step_client = self.create_client(Step, "/step")
-
-        def sample_valid_action(self):
-            """Sample action within robot's actual limits"""
-            limits = self.robot_config["action_space"]["actuator_limits"]
-            lower = [limit["lower"] for limit in limits]
-            upper = [limit["upper"] for limit in limits]
-            return np.random.uniform(lower, upper)
-
-        async def control_loop(self):
-            await self.reset_client.call(Reset.Request())
-
-            for step in range(20):
-                action = self.sample_valid_action()
-                await self.step_client.call(
-                    Step.Request(actuator_values=action.tolist())
-                )
-                print(f"Step {step}: Valid action within limits")
+    cfg = LuckyRobots.get_robot_config("two_pandas")
+    limits = cfg["action_space"]["actuator_limits"]
+    lower = np.array([a["lower"] for a in limits], dtype=np.float32)
+    upper = np.array([a["upper"] for a in limits], dtype=np.float32)
+    action = np.random.uniform(lower, upper)
 
 Accessing Observations
 ----------------------
 
-Get sensor data from the robot:
+.. code-block:: python
+
+    from luckyrobots import LuckyEngineClient
+
+    client = LuckyEngineClient()
+    client.connect()
+    obs = client.get_observation(robot_name="two_pandas")
+    print("positions:", list(obs.joint_state.positions))
+    print("velocities:", list(obs.joint_state.velocities))
+
+Resetting Agents
+----------------
+
+Reset agents during training or control loops:
 
 .. code-block:: python
 
-    class ObservationController(Node):
-        async def _setup_async(self):
-            self.reset_client = self.create_client(Reset, "/reset")
-            self.step_client = self.create_client(Step, "/step")
+    from luckyrobots import LuckyEngineClient
 
-        async def observe_robot(self):
-            # Reset and get initial observation
-            reset_response = await self.reset_client.call(Reset.Request())
-            observation = reset_response.observation
+    client = LuckyEngineClient(host="127.0.0.1", port=50051)
+    client.connect()
 
-            # Print joint states
-            joint_states = observation.observation_state
-            print(f"Joint positions: {joint_states}")
+    # Reset the default agent
+    resp = client.reset_agent()
+    if resp.success:
+        print(f"Agent reset successful: {resp.message}")
 
-            # Check for cameras
-            if observation.observation_cameras:
-                print(f"Found {len(observation.observation_cameras)} cameras")
-                for camera in observation.observation_cameras:
-                    print(f"Camera: {camera.camera_name}")
+    # Reset a specific agent
+    resp = client.reset_agent(agent_name="agent_0")
+    if resp.success:
+        print(f"Agent 'agent_0' reset successful: {resp.message}")
 
 Command Line Usage
 ------------------
@@ -121,153 +81,14 @@ Run the included controller example with different options:
 
 .. code-block:: bash
 
-    # Basic usage
-    python controller.py
+    # Basic usage (connects to running server, resets agent every 10 seconds)
+    python examples/controller.py --skip-launch
 
     # Specify robot and scene
-    python controller.py --robot so100 --scene kitchen --task pickandplace
+    python examples/controller.py --robot unitreego1 --scene velocity --task locomotion
 
-    # Show camera feed
-    python controller.py --show-camera
-
-    # Custom rate
-    python controller.py --rate 30
-
-    # Custom host
-    python controller.py --host 192.168.1.100 --port 3001
-
-Simple Complete Example
------------------------
-
-Put it all together:
-
-.. code-block:: python
-
-    from luckyrobots import LuckyRobots, Node, Reset, Step, run_coroutine
-    import numpy as np
-    import asyncio
-
-    class SimpleRobot(Node):
-        async def _setup_async(self):
-            self.reset_client = self.create_client(Reset, "/reset")
-            self.step_client = self.create_client(Step, "/step")
-
-        async def move_robot(self):
-            # Reset
-            await self.reset_client.call(Reset.Request())
-
-            # Move for 5 steps
-            for i in range(5):
-                action = [0.1, 0.0, 0.0, 0.0, 0.0, 1.0]  # Simple action
-                await self.step_client.call(Step.Request(actuator_values=action))
-                await asyncio.sleep(0.5)
-
-            print("Robot movement complete!")
-
-    def main():
-        robot = SimpleRobot()
-        luckyrobots = LuckyRobots()
-        luckyrobots.register_node(robot)
-        luckyrobots.start(scene="kitchen", robot="so100", task="pickandplace")
-
-        # Run the robot
-        run_coroutine(robot.move_robot())
-
-    if __name__ == "__main__":
-        main()
----------------------------
-
-Example showing how to access camera data from observations:
-
-.. code-block:: python
-
-    import cv2
-    from luckyrobots import LuckyRobots, Node, Reset, Step
-
-    class CameraController(Node):
-        async def _setup_async(self):
-            self.reset_client = self.create_client(Reset, "/reset")
-            self.step_client = self.create_client(Step, "/step")
-
-        async def process_cameras(self, observation):
-            """Process camera data from observation"""
-            if observation.observation_cameras:
-                for camera in observation.observation_cameras:
-                    print(f"Camera: {camera.camera_name}")
-                    print(f"Image shape: {camera.shape}")
-
-                    # Display image (if image_data is processed)
-                    if hasattr(camera, 'image_data') and camera.image_data is not None:
-                        cv2.imshow(camera.camera_name, camera.image_data)
-                        cv2.waitKey(1)
-
-        async def run_with_cameras(self):
-            reset_response = await self.reset_client.call(Reset.Request())
-            await self.process_cameras(reset_response.observation)
-
-            for i in range(50):
-                action = [0.1, 0.0, 0.0, 0.0, 0.0, 1.0]  # Simple action
-                step_response = await self.step_client.call(
-                    Step.Request(actuator_values=action)
-                )
-                await self.process_cameras(step_response.observation)
-
-Command Line Interface
-----------------------
-
-The included controller example supports command line arguments:
-
-.. code-block:: bash
-
-    # Basic usage
-    python controller.py --robot so100 --scene kitchen --task pickandplace
-
-    # With camera display
-    python controller.py --show-camera --rate 30
+    # Custom rate and duration
+    python examples/controller.py --rate 30 --duration 60 --skip-launch
 
     # Custom host/port
-    python controller.py --host 192.168.1.100 --port 3001
-
-Service and Publisher Examples
-------------------------------
-
-Creating custom services and publishers:
-
-.. code-block:: python
-
-    from luckyrobots import Node
-
-    class ServiceNode(Node):
-        async def _setup_async(self):
-            # Create a custom service
-            await self.create_service(
-                MyServiceType,
-                "my_service",
-                self.handle_my_service
-            )
-
-            # Create a publisher
-            self.my_publisher = self.create_publisher(
-                MyMessageType,
-                "my_topic"
-            )
-
-            # Create a subscriber
-            self.my_subscriber = self.create_subscription(
-                MyMessageType,
-                "other_topic",
-                self.handle_message
-            )
-
-        async def handle_my_service(self, request):
-            # Process service request
-            return MyServiceType.Response(success=True)
-
-        def handle_message(self, message):
-            # Process received message
-            print(f"Received: {message}")
-
-        def publish_data(self, data):
-            # Publish a message
-            message = MyMessageType(data=data)
-            self.my_publisher.publish(message)
+    python examples/controller.py --host 192.168.1.100 --port 50051 --skip-launch

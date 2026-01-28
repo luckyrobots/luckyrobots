@@ -1,4 +1,4 @@
-so100:
+two_pandas:
   observation_types:
     - pixels_agent_pos
   available_scenes:
@@ -7,85 +7,245 @@ so100:
     - pickandplace
   action_space:
     actuator_names:
-      - shoulder_pan
-      - shoulder_lift
-      - elbow_flex
-      - wrist_flex
-      - wrist_roll
-      - gripper
+      - L_joint1
+      - L_joint2
+      - L_joint3
+      - L_joint4
+      - L_joint5
+      - L_joint6
+      - L_joint7
+      - L_gripper
+      - R_joint1
+      - R_joint2
+      - R_joint3
+      - R_joint4
+      - R_joint5
+      - R_joint6
+      - R_joint7
+      - R_gripper
     actuator_limits:
-      - name: shoulder_pan
-        lower: -2.2
-        upper: 2.2
-      - name: shoulder_lift
-        lower: -3.14158
-        upper: 0.2
-      - name: elbow_flex
+      - name: L_joint1
+        lower: -2.8973
+        upper: 2.8973
+      - name: L_joint2
+        lower: -1.7628
+        upper: 1.7628
+      - name: L_joint3
+        lower: -2.8973
+        upper: 2.8973
+      - name: L_joint4
+        lower: -3.07179
+        upper: -0.06979
+      - name: L_joint5
+        lower: -2.8973
+        upper: 2.8973
+      - name: L_joint6
+        lower: -0.31421
+        upper: 3.45579
+      - name: L_joint7
+        lower: -3.6826
+        upper: 2.112
+      - name: L_gripper
         lower: 0.0
-        upper: 3.14158
-      - name: wrist_flex
-        lower: -2.0
-        upper: 1.8
-      - name: wrist_roll
-        lower: -3.14158
-        upper: 3.14158
-      - name: gripper
-        lower: -0.2
-        upper: 2.0
+        upper: 255.0
+      - name: R_joint1
+        lower: -2.8973
+        upper: 2.8973
+      - name: R_joint2
+        lower: -1.7628
+        upper: 1.7628
+      - name: R_joint3
+        lower: -2.8973
+        upper: 2.8973
+      - name: R_joint4
+        lower: -3.07179
+        upper: -0.06979
+      - name: R_joint5
+        lower: -2.8973
+        upper: 2.8973
+      - name: R_joint6
+        lower: -0.31421
+        upper: 3.45579
+      - name: R_joint7
+        lower: -3.6826
+        upper: 2.112
+      - name: R_gripper
+        lower: 0.0
+        upper: 255.0
   observation_space:
     actuator_names:
-      - shoulder_pan
-      - shoulder_lift
-      - elbow_flex
-      - wrist_flex
-      - wrist_roll
-      - gripper
+      - L_joint1
+      - L_joint2
+      - L_joint3
+      - L_joint4
+      - L_joint5
+      - L_joint6
+      - L_joint7
+      - L_gripper
+      - R_joint1
+      - R_joint2
+      - R_joint3
+      - R_joint4
+      - R_joint5
+      - R_joint6
+      - R_joint7
+      - R_gripper
     actuator_limits:
-      - name: shoulder_pan
-        lower: -2.2
-        upper: 2.2
-      - name: shoulder_lift
-        lower: -3.14158
-        upper: 0.2
-      - name: elbow_flex
+      - name: L_joint1
+        lower: -2.8973
+        upper: 2.8973
+      - name: L_joint2
+        lower: -1.7628
+        upper: 1.7628
+      - name: L_joint3
+        lower: -2.8973
+        upper: 2.8973
+      - name: L_joint4
+        lower: -3.07179
+        upper: -0.06979
+      - name: L_joint5
+        lower: -2.8973
+        upper: 2.8973
+      - name: L_joint6
+        lower: -0.31421
+        upper: 3.45579
+      - name: L_joint7
+        lower: -3.6826
+        upper: 2.112
+      - name: L_gripper
         lower: 0.0
-        upper: 3.14158
-      - name: wrist_flex
-        lower: -2.0
-        upper: 1.8
-      - name: wrist_roll
-        lower: -3.14158
-        upper: 3.14158
-      - name: gripper
-        lower: -0.2
-        upper: 2.0
-  camera_config:
-    laptop:
-      camera_index: 0
-      fps: 60
-      camera_resolution: [640, 480]
-    phone:
-      camera_index: 1
-      fps: 60
-      camera_resolution: [640, 480]
+        upper: 255.0
+      - name: R_joint1
+        lower: -2.8973
+        upper: 2.8973
+      - name: R_joint2
+        lower: -1.7628
+        upper: 1.7628
+      - name: R_joint3
+        lower: -2.8973
+        upper: 2.8973
+      - name: R_joint4
+        lower: -3.07179
+        upper: -0.06979
+      - name: R_joint5
+        lower: -2.8973
+        upper: 2.8973
+      - name: R_joint6
+        lower: -0.31421
+        upper: 3.45579
+      - name: R_joint7
+        lower: -3.6826
+        upper: 2.112
+      - name: R_gripper
+        lower: 0.0
+        upper: 255.0
 
-stretch_v1:
+unitreego1:
   observation_types:
-    - pixels_agent_pos
+    - agent_pos
   available_scenes:
-    - loft
+    - velocity
   available_tasks:
-    - pickandplace
-    - navigation
+    - locomotion
   action_space:
+    actuator_names:
+      - FR_hip
+      - FR_thigh
+      - FR_calf
+      - FL_hip
+      - FL_thigh
+      - FL_calf
+      - RR_hip
+      - RR_thigh
+      - RR_calf
+      - RL_hip
+      - RL_thigh
+      - RL_calf
+    actuator_limits:
+      - name: FR_hip
+        lower: -0.863
+        upper: 0.863
+      - name: FR_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: FR_calf
+        lower: -2.818
+        upper: -0.888
+      - name: FL_hip
+        lower: -0.863
+        upper: 0.863
+      - name: FL_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: FL_calf
+        lower: -2.818
+        upper: -0.888
+      - name: RR_hip
+        lower: -0.863
+        upper: 0.863
+      - name: RR_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: RR_calf
+        lower: -2.818
+        upper: -0.888
+      - name: RL_hip
+        lower: -0.863
+        upper: 0.863
+      - name: RL_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: RL_calf
+        lower: -2.818
+        upper: -0.888
   observation_space:
-
-dji300:
-  observation_types:
-    - pixels_agent_pos
-  available_scenes:
-    - drone_flight
-  available_tasks:
-    - navigation
-  action_space:
-  observation_space:
+    actuator_names:
+      - FR_hip
+      - FR_thigh
+      - FR_calf
+      - FL_hip
+      - FL_thigh
+      - FL_calf
+      - RR_hip
+      - RR_thigh
+      - RR_calf
+      - RL_hip
+      - RL_thigh
+      - RL_calf
+    actuator_limits:
+      - name: FR_hip
+        lower: -0.863
+        upper: 0.863
+      - name: FR_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: FR_calf
+        lower: -2.818
+        upper: -0.888
+      - name: FL_hip
+        lower: -0.863
+        upper: 0.863
+      - name: FL_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: FL_calf
+        lower: -2.818
+        upper: -0.888
+      - name: RR_hip
+        lower: -0.863
+        upper: 0.863
+      - name: RR_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: RR_calf
+        lower: -2.818
+        upper: -0.888
+      - name: RL_hip
+        lower: -0.863
+        upper: 0.863
+      - name: RL_thigh
+        lower: -0.686
+        upper: 4.501
+      - name: RL_calf
+        lower: -2.818
+        upper: -0.888

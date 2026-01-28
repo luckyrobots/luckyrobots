@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+// Camera service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+
+package hazel.rpc.v1;
+
+option cc_enable_arenas = true;
+
+import "common.proto";
+import "media.proto";
+
+// Camera list entry. `id` matches an entity ID in the scene.
+message CameraInfo {
+    EntityId id = 1;
+    string name = 2;
+}
+
+message ListCamerasRequest {}
+
+message ListCamerasResponse {
+    repeated CameraInfo cameras = 1;
+}
+
+// Start a camera stream by `id` or `name`.
+message StreamCameraRequest {
+    oneof identifier {
+        EntityId id = 1;
+        string name = 2;
+    }
+
+    uint32 target_fps = 3;       // Desired frames per second
+    uint32 width = 4;            // Desired width (0 = native)
+    uint32 height = 5;           // Desired height (0 = native)
+    string format = 6;           // "raw", "jpeg" (default: raw)
+}
+
+// Streams pixels from a camera entity (useful for external perception / debugging).
+service CameraService {
+    rpc ListCameras(ListCamerasRequest) returns (ListCamerasResponse);
+    rpc StreamCamera(StreamCameraRequest) returns (stream ImageFrame);
+}

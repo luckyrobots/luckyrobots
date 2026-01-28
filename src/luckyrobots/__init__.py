@@ -1,19 +1,30 @@
-from .core.node import Node
-from .core.luckyrobots import LuckyRobots
-from .core.models import ObservationModel
-from .message.srv.types import Reset, Step
-from .utils.check_updates import check_updates
-from .utils.event_loop import run_coroutine
-from .utils.helpers import FPS
+"""
+LuckyRobots - Robotics simulation framework with gRPC communication.
+
+This package provides a Python API for controlling robots in the LuckyEngine
+simulation environment via gRPC.
+"""
+
+from .luckyrobots import LuckyRobots
+from .client import LuckyEngineClient, GrpcConnectionError, BenchmarkResult
+from .models import ObservationResponse, StateSnapshot, CameraData, CameraShape
+from .utils import FPS
+from .engine import check_updates
 
 
 __all__ = [
+    # High-level API
     "LuckyRobots",
-    "Node",
-    "ObservationModel",
-    "Reset",
-    "Step",
+    # Low-level client
+    "LuckyEngineClient",
+    "GrpcConnectionError",
+    "BenchmarkResult",
+    # Models
+    "ObservationResponse",
+    "StateSnapshot",
+    "CameraData",
+    "CameraShape",
+    # Utilities
     "FPS",
     "check_updates",
-    "run_coroutine",
 ]
