@@ -16,10 +16,10 @@ import time
 import numpy as np
 
 from luckyrobots import (
+    FPS,
     GrpcConnectionError,
     LuckyEngineClient,
     LuckyRobots,
-    ObservationDefaults,
 )
 from luckyrobots.engine import launch_luckyengine, stop_luckyengine
 
@@ -38,11 +38,6 @@ class Controller:
             host=host,
             port=port,
             robot_name=robot,
-            observation_defaults=ObservationDefaults(
-                include_joint_state=True,
-                include_agent_frame=True,
-                include_telemetry=False,
-            ),
         )
 
         robot_cfg = LuckyRobots.get_robot_config(robot)
@@ -83,16 +78,8 @@ class Controller:
         if hasattr(resp, "success") and not resp.success:
             raise RuntimeError(f"SendControl failed: {getattr(resp, 'message', '')}")
 
-        obs = self.client.get_observation(agent_name="")
-        if hasattr(obs, "success") and not obs.success:
-            raise RuntimeError(f"GetObservation failed: {getattr(obs, 'message', '')}")
-
-        # Prefer agent-frame observation vector
-        if getattr(obs, "agent_frame", None) is not None:
-            return np.array(list(obs.agent_frame.observations), dtype=np.float32)
-
-        # Fallback (shouldn't happen if include_agent_frame=True)
-        return np.zeros((0,), dtype=np.float32)
+        obs = self.client.get_observation()
+        return np.array(obs.observation, dtype=np.float32)
 
     def run_loop(self, rate_hz: float, duration_s: float) -> None:
         """Run a simple control loop at the requested rate for a fixed duration.
@@ -102,7 +89,11 @@ class Controller:
         period = 1.0 / rate_hz
         end_time = time.perf_counter() + duration_s
         last_reset_time = time.perf_counter()
+        last_fps_log_time = time.perf_counter()
         reset_interval_s = 10.0
+        fps_log_interval_s = 2.0
+
+        fps_counter = FPS(frame_window=30)
 
         logger.info(
             "Starting control loop at %.1f Hz for %.1f seconds", rate_hz, duration_s
@@ -133,6 +124,12 @@ class Controller:
             action = self.sample_action()
             obs_vec = self.step(action)
 
+            # Measure and log FPS
+            current_fps = fps_counter.measure()
+            if current_time - last_fps_log_time >= fps_log_interval_s:
+                logger.info("Control loop FPS: %.1f", current_fps)
+                last_fps_log_time = current_time
+
             elapsed = time.perf_counter() - start
             time.sleep(max(0.0, period - elapsed))
 
@@ -145,7 +142,7 @@ def main() -> None:
     parser.add_argument("--scene", type=str, default="velocity")
     parser.add_argument("--task", type=str, default="locomotion")
     parser.add_argument("--robot", type=str, default="unitreego1")
-    parser.add_argument("--rate", type=float, default=10.0)
+    parser.add_argument("--rate", type=float, default=30.0)
     parser.add_argument("--duration", type=float, default=60.0)
     parser.add_argument(
         "--skip-launch",

@@ -6,14 +6,6 @@
    Infinite synthetic data generation for embodied AI
 </p>
 
-<!--
-<p align="center">
-  <a href="https://luckyrobots.github.io/ReleaseV0.1/" target="_blank">
-   <img src="https://img.shields.io/badge/Explore_V0.1-Get_Started-grey?style=for-the-badge&labelColor=grey&color=blue" alt="Get Started" />
-  </a>
-</p>
--->
-
 <div align="center">
 
 [![PyPI version](https://img.shields.io/pypi/v/luckyrobots.svg)](https://pypi.org/project/luckyrobots/)
@@ -38,179 +30,194 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
 
 ## Quick Start
 
-1. **Download LuckyEngine Executable from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest) and add its path to your system variables**
+1. **Download LuckyEngine** from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest) and set the path:
    ```bash
-   # Set environment variables (choose one method):
+   # Set environment variable (choose one method):
 
    # Method 1: Set LUCKYENGINE_PATH directly to the executable
-   export LUCKYENGINE_PATH=/path/to/LuckyEngine.exe  # Windows
    export LUCKYENGINE_PATH=/path/to/LuckyEngine      # Linux/Mac
+   export LUCKYENGINE_PATH=/path/to/LuckyEngine.exe  # Windows
 
    # Method 2: Set LUCKYENGINE_HOME to the directory containing the executable
    export LUCKYENGINE_HOME=/path/to/luckyengine/directory
    ```
 
-2. **Create conda environment (recommended)**
-   ```bash
-   conda create -n luckyrobots python
-   conda activate luckyrobots
-   ```
-
-3. **Install**
+2. **Install**
    ```bash
    pip install luckyrobots
    ```
 
-4. **Run Example**
+3. **Run Example**
    ```bash
    git clone https://github.com/luckyrobots/luckyrobots.git
    cd luckyrobots/examples
-   python controller.py
+   python controller.py --skip-launch  # If LuckyEngine is already running
    ```
 
 ## Basic Usage
 
 ```python
 from luckyrobots import LuckyEngineClient
-import numpy as np
 
-client = LuckyEngineClient(host="127.0.0.1", port=50051)
-client.connect()
-
-# Send controls (actuator targets depend on the robot you spawned)
-client.send_control(controls=[0.1, 0.2, -0.1], robot_name="two_pandas")
-
-# Read back a unified observation snapshot (AgentService.GetObservation)
-obs = client.get_observation(
-    robot_name="two_pandas",
-    include_joint_state=True,
-    include_agent_frame=True,
+# Connect to LuckyEngine
+client = LuckyEngineClient(
+    host="127.0.0.1",
+    port=50051,
+    robot_name="unitreego1",
 )
-print("obs.timestamp_ms:", obs.timestamp_ms)
-print("obs.frame_number:", obs.frame_number)
-print("obs_vector_len:", len(obs.agent_frame.observations))
+client.wait_for_server()
+
+# Optional: Fetch schema for named observation access
+client.fetch_schema()
+
+# Get RL observation
+obs = client.get_observation()
+print(f"Observation: {obs.observation[:5]}...")  # Flat vector for RL
+print(f"Timestamp: {obs.timestamp_ms}")
+
+# Named access (if schema fetched)
+# obs["proj_grav_x"]  # Access by name
+# obs.to_dict()       # Convert to dict
+
+# Send controls
+client.send_control(controls=[0.1, 0.2, -0.1, ...])
+
+# Get joint state (separate from RL observation)
+joints = client.get_joint_state()
+print(f"Positions: {joints.positions}")
+print(f"Velocities: {joints.velocities}")
+```
+
+## API Overview
+
+### Core Classes
+
+**`LuckyEngineClient`** - Low-level gRPC client
+- `wait_for_server(timeout)` - Wait for LuckyEngine connection
+- `get_observation()` - Get RL observation vector
+- `get_joint_state()` - Get joint positions/velocities
+- `send_control(controls)` - Send actuator commands
+- `get_agent_schema()` - Get observation/action names and sizes
+- `reset_agent()` - Reset agent state
+
+**`LuckyRobots`** - High-level wrapper (launches LuckyEngine)
+- `start(scene, robot, task)` - Launch and connect
+- `get_observation()` - Get observation
+- `step(controls)` - Send controls and get next observation
+
+### Models
+
+```python
+from luckyrobots import ObservationResponse, StateSnapshot
+
+# ObservationResponse - returned by get_observation()
+obs.observation      # List[float] - flat RL observation vector
+obs.actions          # List[float] - last applied actions
+obs.timestamp_ms     # int - wall-clock timestamp
+obs.frame_number     # int - monotonic counter
+obs["name"]          # Named access (if schema fetched)
+obs.to_dict()        # Convert to name->value dict
 ```
 
 ## Available Robots & Environments
 
 ### Robots
+- **unitreego1**: Quadruped robot
 - **so100**: 6-DOF manipulator with gripper
 - **stretch_v1**: Mobile manipulator
-- **dji300**: Quadcopter drone
 
 ### Scenes
+- **velocity**: Velocity control training
 - **kitchen**: Residential kitchen environment
-- **loft**: Open floor plan apartment
-- **drone_flight**: Outdoor flight area
 
 ### Tasks
+- **locomotion**: Walking/movement
 - **pickandplace**: Object manipulation
-- **navigation**: Path planning and movement
-
-## API Reference
-
-### Core Classes
-
-**LuckyEngineClient**: Direct gRPC client for LuckyEngine
-- `wait_for_server(timeout)`: wait until LuckyEngine is reachable
-- `send_control(controls, robot_name)`: send actuator controls
-- `get_observation(...)`: fetch a unified observation snapshot (server must implement it)
-
-### Observations
-
-Access sensor data from gRPC responses:
-```python
-obs = client.get_observation(robot_name="two_pandas")
-positions = obs.joint_state.positions
-velocities = obs.joint_state.velocities
-```
-
-## Command Line Interface
-
-```bash
-# Basic usage
-python controller.py --robot two_pandas --scene ArmLevel --task pickandplace
-
-# Custom rate/host/port
-python controller.py --rate 30 --host 192.168.1.100 --port 50051
-```
-
-## Configuration
-
-Robot configurations are defined in `src/luckyrobots/config/robots.yaml`:
-
-```yaml
-so100:
-  action_space:
-    actuator_names: [shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper]
-    actuator_limits:
-      - name: shoulder_pan
-        lower: -2.2
-        upper: 2.2
-  available_scenes: [kitchen]
-  available_tasks: [pickandplace]
-```
-
-## Architecture
-
-Lucky Robots is gRPC-only:
-
-- **LuckyEngine**: physics + rendering backend
-- **Python client**: connects to LuckyEngine via gRPC (default `127.0.0.1:50051`)
-
-### gRPC Configuration
-
-The Python client connects to LuckyEngine's gRPC server:
-
-```python
-client = LuckyEngineClient(host="127.0.0.1", port=50051)
-```
-
-The gRPC interface provides access to:
-- **SceneService**: Scene inspection and entity manipulation
-- **MujocoService**: Joint state queries and control commands
-- **AgentService**: RL-style observation/action streaming
-- **TelemetryService**: Telemetry data streaming
-- **CameraService**: Camera frame streaming
-- **ViewportService**: Viewport pixel streaming
 
 ## Development
 
-### Setup Development Environment
+### Setup with uv (recommended)
+
+```bash
+# Clone and enter repo
+git clone https://github.com/luckyrobots/luckyrobots.git
+cd luckyrobots
+
+# Install uv if you haven't
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create venv and install deps
+uv sync
+
+# Run tests
+uv run pytest
+
+# Run example
+uv run python examples/controller.py --skip-launch
+```
+
+### Setup with pip
+
 ```bash
 git clone https://github.com/luckyrobots/luckyrobots.git
 cd luckyrobots
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
 
-### Regenerating Python gRPC stubs
+### Regenerating gRPC Stubs
 
-The Python gRPC stubs are checked in under `src/luckyrobots/rpc/generated/` and are
-generated from the vendored protos under `src/luckyrobots/rpc/proto/`.
+The Python gRPC stubs are in `src/luckyrobots/grpc/generated/` and are
+generated from protos in `src/luckyrobots/grpc/proto/`.
 
 ```bash
 python -m grpc_tools.protoc \
-  -I "src/luckyrobots/rpc/proto" \
-  --python_out="src/luckyrobots/rpc/generated" \
-  --grpc_python_out="src/luckyrobots/rpc/generated" \
-  "src/luckyrobots/rpc/proto/common.proto" \
-  "src/luckyrobots/rpc/proto/media.proto" \
-  "src/luckyrobots/rpc/proto/scene.proto" \
-  "src/luckyrobots/rpc/proto/mujoco.proto" \
-  "src/luckyrobots/rpc/proto/telemetry.proto" \
-  "src/luckyrobots/rpc/proto/agent.proto" \
-  "src/luckyrobots/rpc/proto/viewport.proto" \
-  "src/luckyrobots/rpc/proto/camera.proto"
+  -I "src/luckyrobots/grpc/proto" \
+  --python_out="src/luckyrobots/grpc/generated" \
+  --grpc_python_out="src/luckyrobots/grpc/generated" \
+  src/luckyrobots/grpc/proto/*.proto
 ```
 
-Note: `grpc_tools.protoc` generates absolute imports in `*_pb2.py` / `*_pb2_grpc.py`.
-For this package layout, adjust them to package-relative imports (`from . import ...`).
+### Project Structure
+
+```
+src/luckyrobots/
+├── client.py            # LuckyEngineClient (main API)
+├── luckyrobots.py       # LuckyRobots high-level wrapper
+├── models/              # Pydantic models
+│   ├── observation.py   # ObservationResponse, StateSnapshot
+│   └── camera.py        # CameraData, CameraShape
+├── engine/              # Engine management
+├── grpc/                # gRPC internals
+│   ├── generated/       # Protobuf stubs
+│   └── proto/           # .proto files
+└── config/              # Robot configurations
+```
 
 ### Contributing
+
 1. Fork the repository
 2. Create a feature branch
 3. Make changes and add tests
-4. Submit a pull request
+4. Run `uv run ruff check .` and `uv run ruff format .`
+5. Submit a pull request
+
+## Architecture
+
+Lucky Robots uses gRPC for communication:
+
+- **LuckyEngine**: Physics + rendering backend (Unreal Engine + MuJoCo)
+- **Python client**: Connects via gRPC (default `127.0.0.1:50051`)
+
+### gRPC Services
+
+| Service | Status | Description |
+|---------|--------|-------------|
+| MujocoService | ✅ Working | Joint state, controls |
+| AgentService | ✅ Working | Observations, reset |
+| SceneService | 🚧 Placeholder | Scene inspection |
+| TelemetryService | 🚧 Placeholder | Telemetry streaming |
+| CameraService | 🚧 Placeholder | Camera frames |
+| ViewportService | 🚧 Placeholder | Viewport pixels |
 
 ## License
 

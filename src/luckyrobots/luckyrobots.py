@@ -4,13 +4,10 @@ import time
 from collections.abc import Sequence
 from typing import Optional
 
-from ..engine import launch_luckyengine, stop_luckyengine
-from ..core.models import ObservationModel
-from ..rpc import LuckyEngineClient, GrpcConnectionError
-from ..utils.helpers import (
-    validate_params,
-    get_robot_config,
-)
+from .engine import launch_luckyengine, stop_luckyengine
+from .models import ObservationResponse
+from .client import LuckyEngineClient, GrpcConnectionError
+from .utils import validate_params, get_robot_config
 
 logger = logging.getLogger("luckyrobots")
 
@@ -121,83 +118,35 @@ class LuckyRobots:
             raise GrpcConnectionError("Not connected. Call start() or connect() first.")
         return self._engine_client
 
-    def get_observation(
-        self,
-        agent_name: str = "",
-        include_joint_state: bool = True,
-        include_agent_frame: bool = True,
-        include_telemetry: bool = False,
-        camera_names: Optional[list[str]] = None,
-        viewport_names: Optional[list[str]] = None,
-        width: int = 0,
-        height: int = 0,
-        format: str = "raw",
-    ) -> ObservationModel:
+    def get_observation(self, agent_name: str = "") -> ObservationResponse:
         """
-        Fetch a unified observation snapshot via `AgentService.GetObservation`.
+        Get observation vector.
 
-        This requires LuckyEngine to implement the new RPC. The observation content is
-        controlled by the request fields (agent/joints/telemetry/images).
+        This returns only the flat observation vector defined by the agent's
+        observation spec. For sensor data, use the dedicated methods:
+        - get_joint_state() for joint positions/velocities
+        - engine_client.stream_telemetry() for telemetry
+        - engine_client.stream_camera() for camera frames
+
+        Args:
+            agent_name: Agent name (empty = default agent).
+
+        Returns:
+            ObservationResponse with observation vector, actions, timestamp.
         """
-        if self._engine_client is None:
-            raise GrpcConnectionError("gRPC client not initialized")
+        client = self._require_client()
+        return client.get_observation(agent_name=agent_name)
 
+    def get_joint_state(self):
+        """
+        Get joint positions/velocities.
+
+        Returns the raw MuJoCo joint state for the robot.
+        """
         client = self._require_client()
         if not self._robot_name:
             raise ValueError("Robot name is not set.")
-
-        resp = client.get_observation(
-            robot_name=self._robot_name,
-            agent_name=agent_name,
-            include_joint_state=include_joint_state,
-            include_agent_frame=include_agent_frame,
-            include_telemetry=include_telemetry,
-            camera_names=camera_names,
-            viewport_names=viewport_names,
-            width=width,
-            height=height,
-            format=format,
-        )
-        if hasattr(resp, "success") and not resp.success:
-            raise RuntimeError(f"GetObservation failed: {getattr(resp, 'message', '')}")
-
-        # Build ObservationModel from returned components.
-        observation = ObservationModel()
-
-        # Agent frame (preferred "observation vector" path)
-        if getattr(resp, "agent_frame", None) is not None:
-            observation = ObservationModel.from_grpc_agent_frame(
-                resp.agent_frame,
-                joint_names=self._joint_names,
-            )
-
-        # Joint state (optional; can also populate observation_state)
-        if getattr(resp, "joint_state", None) is not None and include_joint_state:
-            joint_obs = ObservationModel.from_grpc_joint_state(
-                resp.joint_state,
-                joint_names=self._joint_names,
-            )
-            # Merge: prefer agent-derived vector/timestamps, but keep joint state mapping.
-            observation.observation_state = joint_obs.observation_state
-            if observation.observation_vector is None:
-                observation.observation_vector = joint_obs.observation_vector
-
-        # Timestamp/frame metadata (best-effort)
-        observation.timestamp_ms = getattr(resp, "timestamp_ms", None)
-        observation.frame_number = getattr(resp, "frame_number", None)
-
-        # Camera frames (optional)
-        camera_frames = getattr(resp, "camera_frames", None) or []
-        if camera_frames:
-            from ..core.models import CameraData
-
-            observation.observation_cameras = [
-                CameraData.from_grpc_frame(item.frame, camera_name=item.name)
-                for item in camera_frames
-                if getattr(item, "frame", None) is not None
-            ]
-
-        return observation
+        return client.get_joint_state(robot_name=self._robot_name)
 
     def send_control(self, controls: Sequence[float]) -> None:
         """Send control commands to the robot via gRPC."""
@@ -214,7 +163,7 @@ class LuckyRobots:
 
     def step(
         self, controls: Sequence[float], sleep_s: float = 0.01
-    ) -> ObservationModel:
+    ) -> ObservationResponse:
         """Send controls, wait briefly for physics, then return a fresh observation."""
         self.send_control(controls)
         if sleep_s > 0:

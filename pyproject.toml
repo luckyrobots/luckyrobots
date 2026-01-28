@@ -8,39 +8,43 @@ version = "0.1.68"
 description = "Robotics-AI Training in Hyperrealistic Game Environments"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
 authors = [
     {name = "Devrim Yasar", email = "braces.verbose03@icloud.com"},
     {name = "Ethan Clark", email = "ethan@luckyrobots.com"},
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "watchdog",
-    "ultralytics",
-    "requests",
-    "tqdm",
-    "beautifulsoup4",
-    "psutil",
-    "opencv-python",
-    "packaging",
-    "pydantic",
-    "numpy",
-    "pyyaml",
-    "grpcio",
-    "protobuf",
+    "grpcio>=1.60.0",
+    "protobuf>=4.25.0",
+    "pydantic>=2.0.0",
+    "numpy>=1.24.0",
+    "pyyaml>=6.0",
+    "opencv-python>=4.8.0",
+    "requests>=2.31.0",
+    "tqdm>=4.66.0",
+    "psutil>=5.9.0",
+    "packaging>=23.0",
+    "beautifulsoup4>=4.12.0",
+    "watchdog>=3.0.0",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/luckyrobots/luckyrobots"
-"Bug Tracker" = "https://github.com/luckyrobots/luckyrobots/issues"
+Homepage = "https://github.com/luckyrobots/luckyrobots"
+Documentation = "https://luckyrobots.readthedocs.io"
+Repository = "https://github.com/luckyrobots/luckyrobots"
+Issues = "https://github.com/luckyrobots/luckyrobots/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/luckyrobots"]
 
-# Include config files as package data
 [tool.hatch.build.targets.wheel.force-include]
 "src/luckyrobots/config" = "luckyrobots/config"
 
@@ -48,14 +52,32 @@ packages = ["src/luckyrobots"]
 include = [
     "src/luckyrobots/**/*.py",
     "src/luckyrobots/config/*.yaml",
-    "src/luckyrobots/config/__init__.py",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "build",
-    "twine",
-    "black",
-    "pre-commit",
-    "grpcio-tools",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "black>=24.0.0",
+    "ruff>=0.2.0",
+    "grpcio-tools>=1.60.0",
+    "build>=1.0.0",
+    "twine>=5.0.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]

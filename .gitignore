@@ -1,7 +1,8 @@
-# Python cache files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 
 # Distribution / packaging
 build/
@@ -10,32 +11,22 @@ dist/
 .eggs/
 
 # Virtual environments
-.env
-.venv
-env/
+.venv/
 venv/
-ENV/
+.env
 
-# IDE files
+# uv
+uv.lock
+
+# IDE
 .vscode/
 .idea/
-
-# macOS
-.DS_Store
-
-# Log files
-*.log
-
-# Temporary files
-*.tmp
 *.swp
 *~
 
-# LLM Context
-repomix-output.xml
-
-# Sphinx build artifacts
-docs/_build/
+# OS
+.DS_Store
+Thumbs.db
 
 # Testing
 .pytest_cache/
@@ -46,8 +37,12 @@ htmlcov/
 
 # Type checking
 .mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Linting
 .ruff_cache/
+
+# Docs
+docs/_build/
+
+# Misc
+*.log
+*.tmp
+repomix-output.xml
