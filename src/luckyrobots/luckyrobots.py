@@ -170,6 +170,25 @@ class LuckyRobots:
             time.sleep(sleep_s)
         return self.get_observation()
 
+    def reset(self, agent_name: str = "") -> ObservationResponse:
+        """
+        Reset the agent and return a fresh observation.
+
+        Args:
+            agent_name: Agent logical name. Empty string means default agent.
+
+        Returns:
+            ObservationResponse after reset.
+
+        Raises:
+            RuntimeError: If reset fails.
+        """
+        client = self._require_client()
+        resp = client.reset_agent(agent_name=agent_name)
+        if hasattr(resp, "success") and not resp.success:
+            raise RuntimeError(f"Reset failed: {getattr(resp, 'message', '')}")
+        return self.get_observation(agent_name=agent_name)
+
     def close(self, stop_engine: bool = True) -> None:
         """Close gRPC client and optionally stop the engine executable."""
         if self._engine_client is not None:
