@@ -2,7 +2,7 @@ syntax = "proto3";
 
 // MuJoCo service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
 
-package hazel.rpc.v1;
+package hazel.rpc;
 
 option cc_enable_arenas = true;
 

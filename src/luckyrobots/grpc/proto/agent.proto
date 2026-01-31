@@ -2,7 +2,7 @@ syntax = "proto3";
 
 // Agent + observation service definitions for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
 
-package hazel.rpc.v1;
+package hazel.rpc;
 
 option cc_enable_arenas = true;
 
@@ -37,10 +37,42 @@ message StreamAgentRequest {
     uint32 target_fps = 2;
 }
 
+// Domain randomization configuration for physics parameters.
+// All range fields are [min, max] pairs. Empty ranges mean "use defaults".
+message DomainRandomizationConfig {
+    // Initial state randomization
+    repeated float pose_position_noise = 1;   // [x, y, z] position noise std
+    float pose_orientation_noise = 2;         // Orientation noise std (radians)
+    float joint_position_noise = 3;           // Joint position noise std
+    float joint_velocity_noise = 4;           // Joint velocity noise std
+
+    // Physics parameters (all [min, max] ranges)
+    repeated float friction_range = 5;        // Surface friction coefficient
+    repeated float restitution_range = 6;     // Bounce/restitution coefficient
+    repeated float mass_scale_range = 7;      // Body mass multiplier
+    repeated float com_offset_range = 8;      // Center of mass offset
+
+    // Motor/actuator randomization
+    repeated float motor_strength_range = 9;  // Motor strength multiplier
+    repeated float motor_offset_range = 10;   // Motor position offset
+
+    // External disturbances
+    repeated float push_interval_range = 11;  // Time between pushes [min, max]
+    repeated float push_velocity_range = 12;  // Push velocity magnitude [min, max]
+
+    // Terrain configuration
+    string terrain_type = 13;                 // Terrain type identifier
+    float terrain_difficulty = 14;            // Terrain difficulty level
+}
+
 message ResetAgentRequest {
     // Agent logical name. Convention in this repo is `agent_0`, `agent_1`, ...
     // Empty typically means "default agent" (agent_0).
     string agent_name = 1;
+
+    // Optional domain randomization config for this reset.
+    // If not provided, use defaults or keep previous values.
+    DomainRandomizationConfig dr_config = 2;
 }
 
 message ResetAgentResponse {

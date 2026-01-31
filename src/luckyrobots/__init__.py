@@ -7,7 +7,13 @@ simulation environment via gRPC.
 
 from .luckyrobots import LuckyRobots
 from .client import LuckyEngineClient, GrpcConnectionError, BenchmarkResult
-from .models import ObservationResponse, StateSnapshot, CameraData, CameraShape
+from .models import (
+    ObservationResponse,
+    StateSnapshot,
+    CameraData,
+    CameraShape,
+    DomainRandomizationConfig,
+)
 from .utils import FPS
 from .engine import check_updates
 
@@ -24,6 +30,7 @@ __all__ = [
     "StateSnapshot",
     "CameraData",
     "CameraShape",
+    "DomainRandomizationConfig",
     # Utilities
     "FPS",
     "check_updates",

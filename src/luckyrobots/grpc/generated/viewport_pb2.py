@@ -9,9 +9,13 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
-
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC, 6, 31, 1, "", "viewport.proto"
+    _runtime_version.Domain.PUBLIC,
+    6,
+    31,
+    1,
+    '',
+    'viewport.proto'
 )
 # @@protoc_insertion_point(imports)
 
@@ -21,28 +25,26 @@ _sym_db = _symbol_database.Default()
 from . import media_pb2 as media__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x0eviewport.proto\x12\x0chazel.rpc.v1\x1a\x0bmedia.proto"v\n\x1aStartViewportStreamRequest\x12\x15\n\rviewport_name\x18\x01 \x01(\t\x12\x12\n\ntarget_fps\x18\x02 \x01(\r\x12\r\n\x05width\x18\x03 \x01(\r\x12\x0e\n\x06height\x18\x04 \x01(\r\x12\x0e\n\x06\x66ormat\x18\x05 \x01(\t"l\n\x14ViewportStreamConfig\x12\x11\n\tstreaming\x18\x01 \x01(\x08\x12\x15\n\rviewport_name\x18\x02 \x01(\t\x12\x0b\n\x03\x66ps\x18\x03 \x01(\r\x12\r\n\x05width\x18\x04 \x01(\r\x12\x0e\n\x06height\x18\x05 \x01(\r"\x1b\n\x19StopViewportStreamRequest"-\n\x1aStopViewportStreamResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08"\x18\n\x16GetViewportInfoRequest"r\n\x17GetViewportInfoResponse\x12\x1b\n\x13\x61vailable_viewports\x18\x01 \x03(\t\x12:\n\x0e\x63urrent_config\x18\x02 \x01(\x0b\x32".hazel.rpc.v1.ViewportStreamConfig2\xc9\x01\n\x0fViewportService\x12^\n\x0fGetViewportInfo\x12$.hazel.rpc.v1.GetViewportInfoRequest\x1a%.hazel.rpc.v1.GetViewportInfoResponse\x12V\n\x0eStreamViewport\x12(.hazel.rpc.v1.StartViewportStreamRequest\x1a\x18.hazel.rpc.v1.ImageFrame0\x01\x42\x03\xf8\x01\x01\x62\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0eviewport.proto\x12\thazel.rpc\x1a\x0bmedia.proto\"v\n\x1aStartViewportStreamRequest\x12\x15\n\rviewport_name\x18\x01 \x01(\t\x12\x12\n\ntarget_fps\x18\x02 \x01(\r\x12\r\n\x05width\x18\x03 \x01(\r\x12\x0e\n\x06height\x18\x04 \x01(\r\x12\x0e\n\x06\x66ormat\x18\x05 \x01(\t\"l\n\x14ViewportStreamConfig\x12\x11\n\tstreaming\x18\x01 \x01(\x08\x12\x15\n\rviewport_name\x18\x02 \x01(\t\x12\x0b\n\x03\x66ps\x18\x03 \x01(\r\x12\r\n\x05width\x18\x04 \x01(\r\x12\x0e\n\x06height\x18\x05 \x01(\r\"\x1b\n\x19StopViewportStreamRequest\"-\n\x1aStopViewportStreamResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x18\n\x16GetViewportInfoRequest\"o\n\x17GetViewportInfoResponse\x12\x1b\n\x13\x61vailable_viewports\x18\x01 \x03(\t\x12\x37\n\x0e\x63urrent_config\x18\x02 \x01(\x0b\x32\x1f.hazel.rpc.ViewportStreamConfig2\xbd\x01\n\x0fViewportService\x12X\n\x0fGetViewportInfo\x12!.hazel.rpc.GetViewportInfoRequest\x1a\".hazel.rpc.GetViewportInfoResponse\x12P\n\x0eStreamViewport\x12%.hazel.rpc.StartViewportStreamRequest\x1a\x15.hazel.rpc.ImageFrame0\x01\x42\x03\xf8\x01\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "viewport_pb2", _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'viewport_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-    _globals["DESCRIPTOR"]._loaded_options = None
-    _globals["DESCRIPTOR"]._serialized_options = b"\370\001\001"
-    _globals["_STARTVIEWPORTSTREAMREQUEST"]._serialized_start = 45
-    _globals["_STARTVIEWPORTSTREAMREQUEST"]._serialized_end = 163
-    _globals["_VIEWPORTSTREAMCONFIG"]._serialized_start = 165
-    _globals["_VIEWPORTSTREAMCONFIG"]._serialized_end = 273
-    _globals["_STOPVIEWPORTSTREAMREQUEST"]._serialized_start = 275
-    _globals["_STOPVIEWPORTSTREAMREQUEST"]._serialized_end = 302
-    _globals["_STOPVIEWPORTSTREAMRESPONSE"]._serialized_start = 304
-    _globals["_STOPVIEWPORTSTREAMRESPONSE"]._serialized_end = 349
-    _globals["_GETVIEWPORTINFOREQUEST"]._serialized_start = 351
-    _globals["_GETVIEWPORTINFOREQUEST"]._serialized_end = 375
-    _globals["_GETVIEWPORTINFORESPONSE"]._serialized_start = 377
-    _globals["_GETVIEWPORTINFORESPONSE"]._serialized_end = 491
-    _globals["_VIEWPORTSERVICE"]._serialized_start = 494
-    _globals["_VIEWPORTSERVICE"]._serialized_end = 695
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'\370\001\001'
+  _globals['_STARTVIEWPORTSTREAMREQUEST']._serialized_start=42
+  _globals['_STARTVIEWPORTSTREAMREQUEST']._serialized_end=160
+  _globals['_VIEWPORTSTREAMCONFIG']._serialized_start=162
+  _globals['_VIEWPORTSTREAMCONFIG']._serialized_end=270
+  _globals['_STOPVIEWPORTSTREAMREQUEST']._serialized_start=272
+  _globals['_STOPVIEWPORTSTREAMREQUEST']._serialized_end=299
+  _globals['_STOPVIEWPORTSTREAMRESPONSE']._serialized_start=301
+  _globals['_STOPVIEWPORTSTREAMRESPONSE']._serialized_end=346
+  _globals['_GETVIEWPORTINFOREQUEST']._serialized_start=348
+  _globals['_GETVIEWPORTINFOREQUEST']._serialized_end=372
+  _globals['_GETVIEWPORTINFORESPONSE']._serialized_start=374
+  _globals['_GETVIEWPORTINFORESPONSE']._serialized_end=485
+  _globals['_VIEWPORTSERVICE']._serialized_start=488
+  _globals['_VIEWPORTSERVICE']._serialized_end=677
 # @@protoc_insertion_point(module_scope)
