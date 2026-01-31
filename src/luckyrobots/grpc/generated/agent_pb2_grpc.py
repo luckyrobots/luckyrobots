@@ -5,31 +5,29 @@ import warnings
 
 from . import agent_pb2 as agent__pb2
 
-GRPC_GENERATED_VERSION = "1.76.0"
+GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     raise RuntimeError(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + " but the generated code in agent_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + ' but the generated code in agent_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
 class AgentServiceStub(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this)."""
+    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -38,45 +36,43 @@ class AgentServiceStub(object):
             channel: A grpc.Channel.
         """
         self.GetAgentSchema = channel.unary_unary(
-            "/hazel.rpc.v1.AgentService/GetAgentSchema",
-            request_serializer=agent__pb2.GetAgentSchemaRequest.SerializeToString,
-            response_deserializer=agent__pb2.GetAgentSchemaResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.AgentService/GetAgentSchema',
+                request_serializer=agent__pb2.GetAgentSchemaRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetAgentSchemaResponse.FromString,
+                _registered_method=True)
         self.GetObservation = channel.unary_unary(
-            "/hazel.rpc.v1.AgentService/GetObservation",
-            request_serializer=agent__pb2.GetObservationRequest.SerializeToString,
-            response_deserializer=agent__pb2.GetObservationResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.AgentService/GetObservation',
+                request_serializer=agent__pb2.GetObservationRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetObservationResponse.FromString,
+                _registered_method=True)
         self.StreamAgent = channel.unary_stream(
-            "/hazel.rpc.v1.AgentService/StreamAgent",
-            request_serializer=agent__pb2.StreamAgentRequest.SerializeToString,
-            response_deserializer=agent__pb2.AgentFrame.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.AgentService/StreamAgent',
+                request_serializer=agent__pb2.StreamAgentRequest.SerializeToString,
+                response_deserializer=agent__pb2.AgentFrame.FromString,
+                _registered_method=True)
         self.ResetAgent = channel.unary_unary(
-            "/hazel.rpc.v1.AgentService/ResetAgent",
-            request_serializer=agent__pb2.ResetAgentRequest.SerializeToString,
-            response_deserializer=agent__pb2.ResetAgentResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.AgentService/ResetAgent',
+                request_serializer=agent__pb2.ResetAgentRequest.SerializeToString,
+                response_deserializer=agent__pb2.ResetAgentResponse.FromString,
+                _registered_method=True)
 
 
 class AgentServiceServicer(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this)."""
+    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """
 
     def GetAgentSchema(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetObservation(self, request, context):
-        """Single-shot observation snapshot (unified observation surface)."""
+        """Single-shot observation snapshot (unified observation surface).
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def StreamAgent(self, request, context):
         """Server-streaming observations (and optional action echo) for a single agent.
@@ -86,71 +82,67 @@ class AgentServiceServicer(object):
         (SendControl); AgentFrame.actions is primarily used for telemetry.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def ResetAgent(self, request, context):
         """Reset a specific agent (full reset: clear buffers, reset state, resample commands, apply MuJoCo state).
         Useful for multi-env RL where individual agents need to be reset without resetting the entire scene.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_AgentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "GetAgentSchema": grpc.unary_unary_rpc_method_handler(
-            servicer.GetAgentSchema,
-            request_deserializer=agent__pb2.GetAgentSchemaRequest.FromString,
-            response_serializer=agent__pb2.GetAgentSchemaResponse.SerializeToString,
-        ),
-        "GetObservation": grpc.unary_unary_rpc_method_handler(
-            servicer.GetObservation,
-            request_deserializer=agent__pb2.GetObservationRequest.FromString,
-            response_serializer=agent__pb2.GetObservationResponse.SerializeToString,
-        ),
-        "StreamAgent": grpc.unary_stream_rpc_method_handler(
-            servicer.StreamAgent,
-            request_deserializer=agent__pb2.StreamAgentRequest.FromString,
-            response_serializer=agent__pb2.AgentFrame.SerializeToString,
-        ),
-        "ResetAgent": grpc.unary_unary_rpc_method_handler(
-            servicer.ResetAgent,
-            request_deserializer=agent__pb2.ResetAgentRequest.FromString,
-            response_serializer=agent__pb2.ResetAgentResponse.SerializeToString,
-        ),
+            'GetAgentSchema': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAgentSchema,
+                    request_deserializer=agent__pb2.GetAgentSchemaRequest.FromString,
+                    response_serializer=agent__pb2.GetAgentSchemaResponse.SerializeToString,
+            ),
+            'GetObservation': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetObservation,
+                    request_deserializer=agent__pb2.GetObservationRequest.FromString,
+                    response_serializer=agent__pb2.GetObservationResponse.SerializeToString,
+            ),
+            'StreamAgent': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamAgent,
+                    request_deserializer=agent__pb2.StreamAgentRequest.FromString,
+                    response_serializer=agent__pb2.AgentFrame.SerializeToString,
+            ),
+            'ResetAgent': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResetAgent,
+                    request_deserializer=agent__pb2.ResetAgentRequest.FromString,
+                    response_serializer=agent__pb2.ResetAgentResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "hazel.rpc.v1.AgentService", rpc_method_handlers
-    )
+            'hazel.rpc.AgentService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers(
-        "hazel.rpc.v1.AgentService", rpc_method_handlers
-    )
+    server.add_registered_method_handlers('hazel.rpc.AgentService', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class AgentService(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this)."""
+    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """
 
     @staticmethod
-    def GetAgentSchema(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetAgentSchema(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.AgentService/GetAgentSchema",
+            '/hazel.rpc.AgentService/GetAgentSchema',
             agent__pb2.GetAgentSchemaRequest.SerializeToString,
             agent__pb2.GetAgentSchemaResponse.FromString,
             options,
@@ -161,26 +153,23 @@ class AgentService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def GetObservation(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetObservation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.AgentService/GetObservation",
+            '/hazel.rpc.AgentService/GetObservation',
             agent__pb2.GetObservationRequest.SerializeToString,
             agent__pb2.GetObservationResponse.FromString,
             options,
@@ -191,26 +180,23 @@ class AgentService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def StreamAgent(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def StreamAgent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_stream(
             request,
             target,
-            "/hazel.rpc.v1.AgentService/StreamAgent",
+            '/hazel.rpc.AgentService/StreamAgent',
             agent__pb2.StreamAgentRequest.SerializeToString,
             agent__pb2.AgentFrame.FromString,
             options,
@@ -221,26 +207,23 @@ class AgentService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def ResetAgent(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def ResetAgent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.AgentService/ResetAgent",
+            '/hazel.rpc.AgentService/ResetAgent',
             agent__pb2.ResetAgentRequest.SerializeToString,
             agent__pb2.ResetAgentResponse.FromString,
             options,
@@ -251,5 +234,4 @@ class AgentService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)

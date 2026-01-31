@@ -38,7 +38,7 @@ except Exception as e:  # pragma: no cover
     ) from e
 
 # Import Pydantic models for type-checked responses
-from .models import ObservationResponse, StateSnapshot
+from .models import ObservationResponse, StateSnapshot, DomainRandomizationConfig
 
 
 class GrpcConnectionError(Exception):
@@ -150,7 +150,7 @@ class LuckyEngineClient:
         self._viewport = viewport_pb2_grpc.ViewportServiceStub(self._channel)
         self._camera = camera_pb2_grpc.CameraServiceStub(self._channel)
 
-        logger.info(f"Connected to LuckyEngine gRPC server at {target}")
+        logger.info(f"Channel opened to {target} (server not verified yet)")
 
     def close(self) -> None:
         """Close the gRPC channel."""
@@ -221,6 +221,7 @@ class LuckyEngineClient:
                     pass
 
             if self.health_check(timeout=10.0):
+                logger.info(f"Connected to LuckyEngine gRPC server at {self.host}:{self.port}")
                 return True
 
             time.sleep(poll_interval)
@@ -595,7 +596,12 @@ class LuckyEngineClient:
             ),
         )
 
-    def reset_agent(self, agent_name: str = "", timeout: Optional[float] = None):
+    def reset_agent(
+        self,
+        agent_name: str = "",
+        randomization_cfg: Optional[Any] = None,
+        timeout: Optional[float] = None,
+    ):
         """
         Reset a specific agent (full reset: clear buffers, reset state, resample commands, apply MuJoCo state).
 
@@ -604,16 +610,104 @@ class LuckyEngineClient:
         Args:
             agent_name: Agent logical name. Convention is `agent_0`, `agent_1`, ...
                 Empty string means "default agent" (agent_0).
+            randomization_cfg: Optional domain randomization config for this reset.
             timeout: Timeout in seconds (uses default if None).
 
         Returns:
             ResetAgentResponse with success and message fields.
         """
         timeout = timeout or self.timeout
+
+        # Build request with optional randomization config
+        request_kwargs = {"agent_name": agent_name}
+
+        if randomization_cfg is not None:
+            randomization_proto = self._randomization_to_proto(randomization_cfg)
+            request_kwargs["dr_config"] = randomization_proto
+
         return self.agent.ResetAgent(
-            self.pb.agent.ResetAgentRequest(agent_name=agent_name),
+            self.pb.agent.ResetAgentRequest(**request_kwargs),
             timeout=timeout,
         )
+
+    def _randomization_to_proto(self, randomization_cfg: Any):
+        """Convert domain randomization config to proto message.
+
+        Accepts any object with randomization config fields (DomainRandomizationConfig,
+        PhysicsDRCfg from luckylab, or similar).
+        """
+        proto_kwargs = {}
+
+        # Helper to get attribute value, checking for None
+        def get_val(name: str, default=None):
+            val = getattr(randomization_cfg, name, default)
+            # Handle both None and empty tuples/lists
+            if val is None or (isinstance(val, (tuple, list)) and len(val) == 0):
+                return None
+            return val
+
+        # Initial state randomization
+        pose_pos = get_val("pose_position_noise")
+        if pose_pos is not None:
+            proto_kwargs["pose_position_noise"] = list(pose_pos)
+
+        pose_ori = get_val("pose_orientation_noise")
+        if pose_ori is not None and pose_ori != 0.0:
+            proto_kwargs["pose_orientation_noise"] = pose_ori
+
+        joint_pos = get_val("joint_position_noise")
+        if joint_pos is not None and joint_pos != 0.0:
+            proto_kwargs["joint_position_noise"] = joint_pos
+
+        joint_vel = get_val("joint_velocity_noise")
+        if joint_vel is not None and joint_vel != 0.0:
+            proto_kwargs["joint_velocity_noise"] = joint_vel
+
+        # Physics parameters (ranges)
+        friction = get_val("friction_range")
+        if friction is not None:
+            proto_kwargs["friction_range"] = list(friction)
+
+        restitution = get_val("restitution_range")
+        if restitution is not None:
+            proto_kwargs["restitution_range"] = list(restitution)
+
+        mass_scale = get_val("mass_scale_range")
+        if mass_scale is not None:
+            proto_kwargs["mass_scale_range"] = list(mass_scale)
+
+        com_offset = get_val("com_offset_range")
+        if com_offset is not None:
+            proto_kwargs["com_offset_range"] = list(com_offset)
+
+        # Motor/actuator
+        motor_strength = get_val("motor_strength_range")
+        if motor_strength is not None:
+            proto_kwargs["motor_strength_range"] = list(motor_strength)
+
+        motor_offset = get_val("motor_offset_range")
+        if motor_offset is not None:
+            proto_kwargs["motor_offset_range"] = list(motor_offset)
+
+        # External disturbances
+        push_interval = get_val("push_interval_range")
+        if push_interval is not None:
+            proto_kwargs["push_interval_range"] = list(push_interval)
+
+        push_velocity = get_val("push_velocity_range")
+        if push_velocity is not None:
+            proto_kwargs["push_velocity_range"] = list(push_velocity)
+
+        # Terrain
+        terrain_type = get_val("terrain_type")
+        if terrain_type is not None and terrain_type != "":
+            proto_kwargs["terrain_type"] = terrain_type
+
+        terrain_diff = get_val("terrain_difficulty")
+        if terrain_diff is not None and terrain_diff != 0.0:
+            proto_kwargs["terrain_difficulty"] = terrain_diff
+
+        return self.pb.agent.DomainRandomizationConfig(**proto_kwargs)
 
     def stream_telemetry(self, target_fps: int = 30):
         """

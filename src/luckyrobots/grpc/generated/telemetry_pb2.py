@@ -9,35 +9,39 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
-
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC, 6, 31, 1, "", "telemetry.proto"
+    _runtime_version.Domain.PUBLIC,
+    6,
+    31,
+    1,
+    '',
+    'telemetry.proto'
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x0ftelemetry.proto\x12\x0chazel.rpc.v1"Z\n\x0fTelemetrySchema\x12\x19\n\x11observation_names\x18\x01 \x03(\t\x12\x14\n\x0c\x61\x63tion_names\x18\x02 \x03(\t\x12\n\n\x02nq\x18\x03 \x01(\r\x12\n\n\x02nu\x18\x04 \x01(\r"\x1b\n\x19GetTelemetrySchemaRequest"K\n\x1aGetTelemetrySchemaResponse\x12-\n\x06schema\x18\x01 \x01(\x0b\x32\x1d.hazel.rpc.v1.TelemetrySchema",\n\x16StreamTelemetryRequest\x12\x12\n\ntarget_fps\x18\x01 \x01(\r"\x7f\n\x0eTelemetryFrame\x12\x14\n\x0ctimestamp_ms\x18\x01 \x01(\x04\x12\x14\n\x0c\x66rame_number\x18\x02 \x01(\r\x12\x12\n\ntask_index\x18\x03 \x01(\r\x12\x18\n\x10observation_qpos\x18\x04 \x03(\x02\x12\x13\n\x0b\x61\x63tion_ctrl\x18\x05 \x03(\x02\x32\xd4\x01\n\x10TelemetryService\x12g\n\x12GetTelemetrySchema\x12\'.hazel.rpc.v1.GetTelemetrySchemaRequest\x1a(.hazel.rpc.v1.GetTelemetrySchemaResponse\x12W\n\x0fStreamTelemetry\x12$.hazel.rpc.v1.StreamTelemetryRequest\x1a\x1c.hazel.rpc.v1.TelemetryFrame0\x01\x42\x03\xf8\x01\x01\x62\x06proto3'
-)
+
+
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0ftelemetry.proto\x12\thazel.rpc\"Z\n\x0fTelemetrySchema\x12\x19\n\x11observation_names\x18\x01 \x03(\t\x12\x14\n\x0c\x61\x63tion_names\x18\x02 \x03(\t\x12\n\n\x02nq\x18\x03 \x01(\r\x12\n\n\x02nu\x18\x04 \x01(\r\"\x1b\n\x19GetTelemetrySchemaRequest\"H\n\x1aGetTelemetrySchemaResponse\x12*\n\x06schema\x18\x01 \x01(\x0b\x32\x1a.hazel.rpc.TelemetrySchema\",\n\x16StreamTelemetryRequest\x12\x12\n\ntarget_fps\x18\x01 \x01(\r\"\x7f\n\x0eTelemetryFrame\x12\x14\n\x0ctimestamp_ms\x18\x01 \x01(\x04\x12\x14\n\x0c\x66rame_number\x18\x02 \x01(\r\x12\x12\n\ntask_index\x18\x03 \x01(\r\x12\x18\n\x10observation_qpos\x18\x04 \x03(\x02\x12\x13\n\x0b\x61\x63tion_ctrl\x18\x05 \x03(\x02\x32\xc8\x01\n\x10TelemetryService\x12\x61\n\x12GetTelemetrySchema\x12$.hazel.rpc.GetTelemetrySchemaRequest\x1a%.hazel.rpc.GetTelemetrySchemaResponse\x12Q\n\x0fStreamTelemetry\x12!.hazel.rpc.StreamTelemetryRequest\x1a\x19.hazel.rpc.TelemetryFrame0\x01\x42\x03\xf8\x01\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "telemetry_pb2", _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'telemetry_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-    _globals["DESCRIPTOR"]._loaded_options = None
-    _globals["DESCRIPTOR"]._serialized_options = b"\370\001\001"
-    _globals["_TELEMETRYSCHEMA"]._serialized_start = 33
-    _globals["_TELEMETRYSCHEMA"]._serialized_end = 123
-    _globals["_GETTELEMETRYSCHEMAREQUEST"]._serialized_start = 125
-    _globals["_GETTELEMETRYSCHEMAREQUEST"]._serialized_end = 152
-    _globals["_GETTELEMETRYSCHEMARESPONSE"]._serialized_start = 154
-    _globals["_GETTELEMETRYSCHEMARESPONSE"]._serialized_end = 229
-    _globals["_STREAMTELEMETRYREQUEST"]._serialized_start = 231
-    _globals["_STREAMTELEMETRYREQUEST"]._serialized_end = 275
-    _globals["_TELEMETRYFRAME"]._serialized_start = 277
-    _globals["_TELEMETRYFRAME"]._serialized_end = 404
-    _globals["_TELEMETRYSERVICE"]._serialized_start = 407
-    _globals["_TELEMETRYSERVICE"]._serialized_end = 619
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'\370\001\001'
+  _globals['_TELEMETRYSCHEMA']._serialized_start=30
+  _globals['_TELEMETRYSCHEMA']._serialized_end=120
+  _globals['_GETTELEMETRYSCHEMAREQUEST']._serialized_start=122
+  _globals['_GETTELEMETRYSCHEMAREQUEST']._serialized_end=149
+  _globals['_GETTELEMETRYSCHEMARESPONSE']._serialized_start=151
+  _globals['_GETTELEMETRYSCHEMARESPONSE']._serialized_end=223
+  _globals['_STREAMTELEMETRYREQUEST']._serialized_start=225
+  _globals['_STREAMTELEMETRYREQUEST']._serialized_end=269
+  _globals['_TELEMETRYFRAME']._serialized_start=271
+  _globals['_TELEMETRYFRAME']._serialized_end=398
+  _globals['_TELEMETRYSERVICE']._serialized_start=401
+  _globals['_TELEMETRYSERVICE']._serialized_end=601
 # @@protoc_insertion_point(module_scope)

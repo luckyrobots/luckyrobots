@@ -5,31 +5,29 @@ import warnings
 
 from . import scene_pb2 as scene__pb2
 
-GRPC_GENERATED_VERSION = "1.76.0"
+GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     raise RuntimeError(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + " but the generated code in scene_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + ' but the generated code in scene_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
 class SceneServiceStub(object):
-    """Scene inspection + basic editing."""
+    """Scene inspection + basic editing.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -38,112 +36,105 @@ class SceneServiceStub(object):
             channel: A grpc.Channel.
         """
         self.GetSceneInfo = channel.unary_unary(
-            "/hazel.rpc.v1.SceneService/GetSceneInfo",
-            request_serializer=scene__pb2.GetSceneInfoRequest.SerializeToString,
-            response_deserializer=scene__pb2.GetSceneInfoResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.SceneService/GetSceneInfo',
+                request_serializer=scene__pb2.GetSceneInfoRequest.SerializeToString,
+                response_deserializer=scene__pb2.GetSceneInfoResponse.FromString,
+                _registered_method=True)
         self.ListEntities = channel.unary_unary(
-            "/hazel.rpc.v1.SceneService/ListEntities",
-            request_serializer=scene__pb2.ListEntitiesRequest.SerializeToString,
-            response_deserializer=scene__pb2.ListEntitiesResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.SceneService/ListEntities',
+                request_serializer=scene__pb2.ListEntitiesRequest.SerializeToString,
+                response_deserializer=scene__pb2.ListEntitiesResponse.FromString,
+                _registered_method=True)
         self.GetEntity = channel.unary_unary(
-            "/hazel.rpc.v1.SceneService/GetEntity",
-            request_serializer=scene__pb2.GetEntityRequest.SerializeToString,
-            response_deserializer=scene__pb2.GetEntityResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.SceneService/GetEntity',
+                request_serializer=scene__pb2.GetEntityRequest.SerializeToString,
+                response_deserializer=scene__pb2.GetEntityResponse.FromString,
+                _registered_method=True)
         self.SetEntityTransform = channel.unary_unary(
-            "/hazel.rpc.v1.SceneService/SetEntityTransform",
-            request_serializer=scene__pb2.SetEntityTransformRequest.SerializeToString,
-            response_deserializer=scene__pb2.SetEntityTransformResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.SceneService/SetEntityTransform',
+                request_serializer=scene__pb2.SetEntityTransformRequest.SerializeToString,
+                response_deserializer=scene__pb2.SetEntityTransformResponse.FromString,
+                _registered_method=True)
 
 
 class SceneServiceServicer(object):
-    """Scene inspection + basic editing."""
+    """Scene inspection + basic editing.
+    """
 
     def GetSceneInfo(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def ListEntities(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetEntity(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def SetEntityTransform(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_SceneServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "GetSceneInfo": grpc.unary_unary_rpc_method_handler(
-            servicer.GetSceneInfo,
-            request_deserializer=scene__pb2.GetSceneInfoRequest.FromString,
-            response_serializer=scene__pb2.GetSceneInfoResponse.SerializeToString,
-        ),
-        "ListEntities": grpc.unary_unary_rpc_method_handler(
-            servicer.ListEntities,
-            request_deserializer=scene__pb2.ListEntitiesRequest.FromString,
-            response_serializer=scene__pb2.ListEntitiesResponse.SerializeToString,
-        ),
-        "GetEntity": grpc.unary_unary_rpc_method_handler(
-            servicer.GetEntity,
-            request_deserializer=scene__pb2.GetEntityRequest.FromString,
-            response_serializer=scene__pb2.GetEntityResponse.SerializeToString,
-        ),
-        "SetEntityTransform": grpc.unary_unary_rpc_method_handler(
-            servicer.SetEntityTransform,
-            request_deserializer=scene__pb2.SetEntityTransformRequest.FromString,
-            response_serializer=scene__pb2.SetEntityTransformResponse.SerializeToString,
-        ),
+            'GetSceneInfo': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSceneInfo,
+                    request_deserializer=scene__pb2.GetSceneInfoRequest.FromString,
+                    response_serializer=scene__pb2.GetSceneInfoResponse.SerializeToString,
+            ),
+            'ListEntities': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListEntities,
+                    request_deserializer=scene__pb2.ListEntitiesRequest.FromString,
+                    response_serializer=scene__pb2.ListEntitiesResponse.SerializeToString,
+            ),
+            'GetEntity': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetEntity,
+                    request_deserializer=scene__pb2.GetEntityRequest.FromString,
+                    response_serializer=scene__pb2.GetEntityResponse.SerializeToString,
+            ),
+            'SetEntityTransform': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetEntityTransform,
+                    request_deserializer=scene__pb2.SetEntityTransformRequest.FromString,
+                    response_serializer=scene__pb2.SetEntityTransformResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "hazel.rpc.v1.SceneService", rpc_method_handlers
-    )
+            'hazel.rpc.SceneService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers(
-        "hazel.rpc.v1.SceneService", rpc_method_handlers
-    )
+    server.add_registered_method_handlers('hazel.rpc.SceneService', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class SceneService(object):
-    """Scene inspection + basic editing."""
+    """Scene inspection + basic editing.
+    """
 
     @staticmethod
-    def GetSceneInfo(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetSceneInfo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.SceneService/GetSceneInfo",
+            '/hazel.rpc.SceneService/GetSceneInfo',
             scene__pb2.GetSceneInfoRequest.SerializeToString,
             scene__pb2.GetSceneInfoResponse.FromString,
             options,
@@ -154,26 +145,23 @@ class SceneService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def ListEntities(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def ListEntities(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.SceneService/ListEntities",
+            '/hazel.rpc.SceneService/ListEntities',
             scene__pb2.ListEntitiesRequest.SerializeToString,
             scene__pb2.ListEntitiesResponse.FromString,
             options,
@@ -184,26 +172,23 @@ class SceneService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def GetEntity(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetEntity(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.SceneService/GetEntity",
+            '/hazel.rpc.SceneService/GetEntity',
             scene__pb2.GetEntityRequest.SerializeToString,
             scene__pb2.GetEntityResponse.FromString,
             options,
@@ -214,26 +199,23 @@ class SceneService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def SetEntityTransform(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def SetEntityTransform(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.SceneService/SetEntityTransform",
+            '/hazel.rpc.SceneService/SetEntityTransform',
             scene__pb2.SetEntityTransformRequest.SerializeToString,
             scene__pb2.SetEntityTransformResponse.FromString,
             options,
@@ -244,5 +226,4 @@ class SceneService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)

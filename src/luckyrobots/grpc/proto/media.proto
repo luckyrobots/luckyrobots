@@ -2,7 +2,7 @@ syntax = "proto3";
 
 // Media / image payload types shared across services.
 
-package hazel.rpc.v1;
+package hazel.rpc;
 
 option cc_enable_arenas = true;
 

@@ -9,9 +9,13 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
-
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC, 6, 31, 1, "", "scene.proto"
+    _runtime_version.Domain.PUBLIC,
+    6,
+    31,
+    1,
+    '',
+    'scene.proto'
 )
 # @@protoc_insertion_point(imports)
 
@@ -21,34 +25,32 @@ _sym_db = _symbol_database.Default()
 from . import common_pb2 as common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x0bscene.proto\x12\x0chazel.rpc.v1\x1a\x0c\x63ommon.proto"~\n\nEntityInfo\x12"\n\x02id\x18\x01 \x01(\x0b\x32\x16.hazel.rpc.v1.EntityId\x12\x0c\n\x04name\x18\x02 \x01(\t\x12*\n\ttransform\x18\x03 \x01(\x0b\x32\x17.hazel.rpc.v1.Transform\x12\x12\n\ncomponents\x18\x04 \x03(\t"\x15\n\x13GetSceneInfoRequest"T\n\x14GetSceneInfoResponse\x12\x12\n\nscene_name\x18\x01 \x01(\t\x12\x12\n\nscene_path\x18\x02 \x01(\t\x12\x14\n\x0c\x65ntity_count\x18\x03 \x01(\r"M\n\x13ListEntitiesRequest\x12\x1a\n\x12include_transforms\x18\x01 \x01(\x08\x12\x1a\n\x12include_components\x18\x02 \x01(\x08"B\n\x14ListEntitiesResponse\x12*\n\x08\x65ntities\x18\x01 \x03(\x0b\x32\x18.hazel.rpc.v1.EntityInfo"V\n\x10GetEntityRequest\x12$\n\x02id\x18\x01 \x01(\x0b\x32\x16.hazel.rpc.v1.EntityIdH\x00\x12\x0e\n\x04name\x18\x02 \x01(\tH\x00\x42\x0c\n\nidentifier"L\n\x11GetEntityResponse\x12\r\n\x05\x66ound\x18\x01 \x01(\x08\x12(\n\x06\x65ntity\x18\x02 \x01(\x0b\x32\x18.hazel.rpc.v1.EntityInfo"k\n\x19SetEntityTransformRequest\x12"\n\x02id\x18\x01 \x01(\x0b\x32\x16.hazel.rpc.v1.EntityId\x12*\n\ttransform\x18\x02 \x01(\x0b\x32\x17.hazel.rpc.v1.Transform">\n\x1aSetEntityTransformResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xf3\x02\n\x0cSceneService\x12U\n\x0cGetSceneInfo\x12!.hazel.rpc.v1.GetSceneInfoRequest\x1a".hazel.rpc.v1.GetSceneInfoResponse\x12U\n\x0cListEntities\x12!.hazel.rpc.v1.ListEntitiesRequest\x1a".hazel.rpc.v1.ListEntitiesResponse\x12L\n\tGetEntity\x12\x1e.hazel.rpc.v1.GetEntityRequest\x1a\x1f.hazel.rpc.v1.GetEntityResponse\x12g\n\x12SetEntityTransform\x12\'.hazel.rpc.v1.SetEntityTransformRequest\x1a(.hazel.rpc.v1.SetEntityTransformResponseB\x03\xf8\x01\x01\x62\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bscene.proto\x12\thazel.rpc\x1a\x0c\x63ommon.proto\"x\n\nEntityInfo\x12\x1f\n\x02id\x18\x01 \x01(\x0b\x32\x13.hazel.rpc.EntityId\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\'\n\ttransform\x18\x03 \x01(\x0b\x32\x14.hazel.rpc.Transform\x12\x12\n\ncomponents\x18\x04 \x03(\t\"\x15\n\x13GetSceneInfoRequest\"T\n\x14GetSceneInfoResponse\x12\x12\n\nscene_name\x18\x01 \x01(\t\x12\x12\n\nscene_path\x18\x02 \x01(\t\x12\x14\n\x0c\x65ntity_count\x18\x03 \x01(\r\"M\n\x13ListEntitiesRequest\x12\x1a\n\x12include_transforms\x18\x01 \x01(\x08\x12\x1a\n\x12include_components\x18\x02 \x01(\x08\"?\n\x14ListEntitiesResponse\x12\'\n\x08\x65ntities\x18\x01 \x03(\x0b\x32\x15.hazel.rpc.EntityInfo\"S\n\x10GetEntityRequest\x12!\n\x02id\x18\x01 \x01(\x0b\x32\x13.hazel.rpc.EntityIdH\x00\x12\x0e\n\x04name\x18\x02 \x01(\tH\x00\x42\x0c\n\nidentifier\"I\n\x11GetEntityResponse\x12\r\n\x05\x66ound\x18\x01 \x01(\x08\x12%\n\x06\x65ntity\x18\x02 \x01(\x0b\x32\x15.hazel.rpc.EntityInfo\"e\n\x19SetEntityTransformRequest\x12\x1f\n\x02id\x18\x01 \x01(\x0b\x32\x13.hazel.rpc.EntityId\x12\'\n\ttransform\x18\x02 \x01(\x0b\x32\x14.hazel.rpc.Transform\">\n\x1aSetEntityTransformResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xdb\x02\n\x0cSceneService\x12O\n\x0cGetSceneInfo\x12\x1e.hazel.rpc.GetSceneInfoRequest\x1a\x1f.hazel.rpc.GetSceneInfoResponse\x12O\n\x0cListEntities\x12\x1e.hazel.rpc.ListEntitiesRequest\x1a\x1f.hazel.rpc.ListEntitiesResponse\x12\x46\n\tGetEntity\x12\x1b.hazel.rpc.GetEntityRequest\x1a\x1c.hazel.rpc.GetEntityResponse\x12\x61\n\x12SetEntityTransform\x12$.hazel.rpc.SetEntityTransformRequest\x1a%.hazel.rpc.SetEntityTransformResponseB\x03\xf8\x01\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "scene_pb2", _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'scene_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-    _globals["DESCRIPTOR"]._loaded_options = None
-    _globals["DESCRIPTOR"]._serialized_options = b"\370\001\001"
-    _globals["_ENTITYINFO"]._serialized_start = 43
-    _globals["_ENTITYINFO"]._serialized_end = 169
-    _globals["_GETSCENEINFOREQUEST"]._serialized_start = 171
-    _globals["_GETSCENEINFOREQUEST"]._serialized_end = 192
-    _globals["_GETSCENEINFORESPONSE"]._serialized_start = 194
-    _globals["_GETSCENEINFORESPONSE"]._serialized_end = 278
-    _globals["_LISTENTITIESREQUEST"]._serialized_start = 280
-    _globals["_LISTENTITIESREQUEST"]._serialized_end = 357
-    _globals["_LISTENTITIESRESPONSE"]._serialized_start = 359
-    _globals["_LISTENTITIESRESPONSE"]._serialized_end = 425
-    _globals["_GETENTITYREQUEST"]._serialized_start = 427
-    _globals["_GETENTITYREQUEST"]._serialized_end = 513
-    _globals["_GETENTITYRESPONSE"]._serialized_start = 515
-    _globals["_GETENTITYRESPONSE"]._serialized_end = 591
-    _globals["_SETENTITYTRANSFORMREQUEST"]._serialized_start = 593
-    _globals["_SETENTITYTRANSFORMREQUEST"]._serialized_end = 700
-    _globals["_SETENTITYTRANSFORMRESPONSE"]._serialized_start = 702
-    _globals["_SETENTITYTRANSFORMRESPONSE"]._serialized_end = 764
-    _globals["_SCENESERVICE"]._serialized_start = 767
-    _globals["_SCENESERVICE"]._serialized_end = 1138
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'\370\001\001'
+  _globals['_ENTITYINFO']._serialized_start=40
+  _globals['_ENTITYINFO']._serialized_end=160
+  _globals['_GETSCENEINFOREQUEST']._serialized_start=162
+  _globals['_GETSCENEINFOREQUEST']._serialized_end=183
+  _globals['_GETSCENEINFORESPONSE']._serialized_start=185
+  _globals['_GETSCENEINFORESPONSE']._serialized_end=269
+  _globals['_LISTENTITIESREQUEST']._serialized_start=271
+  _globals['_LISTENTITIESREQUEST']._serialized_end=348
+  _globals['_LISTENTITIESRESPONSE']._serialized_start=350
+  _globals['_LISTENTITIESRESPONSE']._serialized_end=413
+  _globals['_GETENTITYREQUEST']._serialized_start=415
+  _globals['_GETENTITYREQUEST']._serialized_end=498
+  _globals['_GETENTITYRESPONSE']._serialized_start=500
+  _globals['_GETENTITYRESPONSE']._serialized_end=573
+  _globals['_SETENTITYTRANSFORMREQUEST']._serialized_start=575
+  _globals['_SETENTITYTRANSFORMREQUEST']._serialized_end=676
+  _globals['_SETENTITYTRANSFORMRESPONSE']._serialized_start=678
+  _globals['_SETENTITYTRANSFORMRESPONSE']._serialized_end=740
+  _globals['_SCENESERVICE']._serialized_start=743
+  _globals['_SCENESERVICE']._serialized_end=1090
 # @@protoc_insertion_point(module_scope)

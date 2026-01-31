@@ -5,31 +5,29 @@ import warnings
 
 from . import mujoco_pb2 as mujoco__pb2
 
-GRPC_GENERATED_VERSION = "1.76.0"
+GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     raise RuntimeError(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + " but the generated code in mujoco_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + ' but the generated code in mujoco_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
 class MujocoServiceStub(object):
-    """MuJoCo state + control IO."""
+    """MuJoCo state + control IO.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -38,112 +36,106 @@ class MujocoServiceStub(object):
             channel: A grpc.Channel.
         """
         self.GetJointState = channel.unary_unary(
-            "/hazel.rpc.v1.MujocoService/GetJointState",
-            request_serializer=mujoco__pb2.GetJointStateRequest.SerializeToString,
-            response_deserializer=mujoco__pb2.GetJointStateResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.MujocoService/GetJointState',
+                request_serializer=mujoco__pb2.GetJointStateRequest.SerializeToString,
+                response_deserializer=mujoco__pb2.GetJointStateResponse.FromString,
+                _registered_method=True)
         self.SendControl = channel.unary_unary(
-            "/hazel.rpc.v1.MujocoService/SendControl",
-            request_serializer=mujoco__pb2.SendControlRequest.SerializeToString,
-            response_deserializer=mujoco__pb2.SendControlResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.MujocoService/SendControl',
+                request_serializer=mujoco__pb2.SendControlRequest.SerializeToString,
+                response_deserializer=mujoco__pb2.SendControlResponse.FromString,
+                _registered_method=True)
         self.GetMujocoInfo = channel.unary_unary(
-            "/hazel.rpc.v1.MujocoService/GetMujocoInfo",
-            request_serializer=mujoco__pb2.GetMujocoInfoRequest.SerializeToString,
-            response_deserializer=mujoco__pb2.GetMujocoInfoResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.MujocoService/GetMujocoInfo',
+                request_serializer=mujoco__pb2.GetMujocoInfoRequest.SerializeToString,
+                response_deserializer=mujoco__pb2.GetMujocoInfoResponse.FromString,
+                _registered_method=True)
         self.StreamJointState = channel.unary_stream(
-            "/hazel.rpc.v1.MujocoService/StreamJointState",
-            request_serializer=mujoco__pb2.GetJointStateRequest.SerializeToString,
-            response_deserializer=mujoco__pb2.GetJointStateResponse.FromString,
-            _registered_method=True,
-        )
+                '/hazel.rpc.MujocoService/StreamJointState',
+                request_serializer=mujoco__pb2.GetJointStateRequest.SerializeToString,
+                response_deserializer=mujoco__pb2.GetJointStateResponse.FromString,
+                _registered_method=True)
 
 
 class MujocoServiceServicer(object):
-    """MuJoCo state + control IO."""
+    """MuJoCo state + control IO.
+    """
 
     def GetJointState(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def SendControl(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetMujocoInfo(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def StreamJointState(self, request, context):
-        """Streaming variant for continuous state observation"""
+        """Streaming variant for continuous state observation
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_MujocoServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "GetJointState": grpc.unary_unary_rpc_method_handler(
-            servicer.GetJointState,
-            request_deserializer=mujoco__pb2.GetJointStateRequest.FromString,
-            response_serializer=mujoco__pb2.GetJointStateResponse.SerializeToString,
-        ),
-        "SendControl": grpc.unary_unary_rpc_method_handler(
-            servicer.SendControl,
-            request_deserializer=mujoco__pb2.SendControlRequest.FromString,
-            response_serializer=mujoco__pb2.SendControlResponse.SerializeToString,
-        ),
-        "GetMujocoInfo": grpc.unary_unary_rpc_method_handler(
-            servicer.GetMujocoInfo,
-            request_deserializer=mujoco__pb2.GetMujocoInfoRequest.FromString,
-            response_serializer=mujoco__pb2.GetMujocoInfoResponse.SerializeToString,
-        ),
-        "StreamJointState": grpc.unary_stream_rpc_method_handler(
-            servicer.StreamJointState,
-            request_deserializer=mujoco__pb2.GetJointStateRequest.FromString,
-            response_serializer=mujoco__pb2.GetJointStateResponse.SerializeToString,
-        ),
+            'GetJointState': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetJointState,
+                    request_deserializer=mujoco__pb2.GetJointStateRequest.FromString,
+                    response_serializer=mujoco__pb2.GetJointStateResponse.SerializeToString,
+            ),
+            'SendControl': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendControl,
+                    request_deserializer=mujoco__pb2.SendControlRequest.FromString,
+                    response_serializer=mujoco__pb2.SendControlResponse.SerializeToString,
+            ),
+            'GetMujocoInfo': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMujocoInfo,
+                    request_deserializer=mujoco__pb2.GetMujocoInfoRequest.FromString,
+                    response_serializer=mujoco__pb2.GetMujocoInfoResponse.SerializeToString,
+            ),
+            'StreamJointState': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamJointState,
+                    request_deserializer=mujoco__pb2.GetJointStateRequest.FromString,
+                    response_serializer=mujoco__pb2.GetJointStateResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "hazel.rpc.v1.MujocoService", rpc_method_handlers
-    )
+            'hazel.rpc.MujocoService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers(
-        "hazel.rpc.v1.MujocoService", rpc_method_handlers
-    )
+    server.add_registered_method_handlers('hazel.rpc.MujocoService', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class MujocoService(object):
-    """MuJoCo state + control IO."""
+    """MuJoCo state + control IO.
+    """
 
     @staticmethod
-    def GetJointState(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetJointState(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.MujocoService/GetJointState",
+            '/hazel.rpc.MujocoService/GetJointState',
             mujoco__pb2.GetJointStateRequest.SerializeToString,
             mujoco__pb2.GetJointStateResponse.FromString,
             options,
@@ -154,26 +146,23 @@ class MujocoService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def SendControl(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def SendControl(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.MujocoService/SendControl",
+            '/hazel.rpc.MujocoService/SendControl',
             mujoco__pb2.SendControlRequest.SerializeToString,
             mujoco__pb2.SendControlResponse.FromString,
             options,
@@ -184,26 +173,23 @@ class MujocoService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def GetMujocoInfo(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetMujocoInfo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/hazel.rpc.v1.MujocoService/GetMujocoInfo",
+            '/hazel.rpc.MujocoService/GetMujocoInfo',
             mujoco__pb2.GetMujocoInfoRequest.SerializeToString,
             mujoco__pb2.GetMujocoInfoResponse.FromString,
             options,
@@ -214,26 +200,23 @@ class MujocoService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def StreamJointState(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def StreamJointState(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_stream(
             request,
             target,
-            "/hazel.rpc.v1.MujocoService/StreamJointState",
+            '/hazel.rpc.MujocoService/StreamJointState',
             mujoco__pb2.GetJointStateRequest.SerializeToString,
             mujoco__pb2.GetJointStateResponse.FromString,
             options,
@@ -244,5 +227,4 @@ class MujocoService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)

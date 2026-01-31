@@ -4,6 +4,8 @@ import time
 from collections.abc import Sequence
 from typing import Optional
 
+from typing import Any
+
 from .engine import launch_luckyengine, stop_luckyengine
 from .models import ObservationResponse
 from .client import LuckyEngineClient, GrpcConnectionError
@@ -170,12 +172,19 @@ class LuckyRobots:
             time.sleep(sleep_s)
         return self.get_observation()
 
-    def reset(self, agent_name: str = "") -> ObservationResponse:
+    def reset(
+        self,
+        agent_name: str = "",
+        randomization_cfg: Optional[Any] = None,
+    ) -> ObservationResponse:
         """
         Reset the agent and return a fresh observation.
 
         Args:
             agent_name: Agent logical name. Empty string means default agent.
+            randomization_cfg: Optional domain randomization config for this reset.
+                Use this to randomize physics parameters (friction, mass, etc.)
+                at the start of each episode for sim-to-real transfer.
 
         Returns:
             ObservationResponse after reset.
@@ -184,7 +193,7 @@ class LuckyRobots:
             RuntimeError: If reset fails.
         """
         client = self._require_client()
-        resp = client.reset_agent(agent_name=agent_name)
+        resp = client.reset_agent(agent_name=agent_name, randomization_cfg=randomization_cfg)
         if hasattr(resp, "success") and not resp.success:
             raise RuntimeError(f"Reset failed: {getattr(resp, 'message', '')}")
         return self.get_observation(agent_name=agent_name)
