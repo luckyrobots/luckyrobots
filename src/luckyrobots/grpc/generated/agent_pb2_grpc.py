@@ -55,6 +55,11 @@ class AgentServiceStub(object):
                 request_serializer=agent__pb2.ResetAgentRequest.SerializeToString,
                 response_deserializer=agent__pb2.ResetAgentResponse.FromString,
                 _registered_method=True)
+        self.Step = channel.unary_unary(
+                '/hazel.rpc.AgentService/Step',
+                request_serializer=agent__pb2.StepRequest.SerializeToString,
+                response_deserializer=agent__pb2.StepResponse.FromString,
+                _registered_method=True)
 
 
 class AgentServiceServicer(object):
@@ -93,6 +98,15 @@ class AgentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Step(self, request, context):
+        """Synchronous RL step: apply action, wait for physics, return observation.
+        This is the recommended interface for RL training as it eliminates
+        one network round-trip compared to separate SendControl + GetObservation.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -115,6 +129,11 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     servicer.ResetAgent,
                     request_deserializer=agent__pb2.ResetAgentRequest.FromString,
                     response_serializer=agent__pb2.ResetAgentResponse.SerializeToString,
+            ),
+            'Step': grpc.unary_unary_rpc_method_handler(
+                    servicer.Step,
+                    request_deserializer=agent__pb2.StepRequest.FromString,
+                    response_serializer=agent__pb2.StepResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -226,6 +245,33 @@ class AgentService(object):
             '/hazel.rpc.AgentService/ResetAgent',
             agent__pb2.ResetAgentRequest.SerializeToString,
             agent__pb2.ResetAgentResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Step(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/Step',
+            agent__pb2.StepRequest.SerializeToString,
+            agent__pb2.StepResponse.FromString,
             options,
             channel_credentials,
             insecure,

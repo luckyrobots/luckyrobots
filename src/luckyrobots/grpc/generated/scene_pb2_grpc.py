@@ -55,6 +55,16 @@ class SceneServiceStub(object):
                 request_serializer=scene__pb2.SetEntityTransformRequest.SerializeToString,
                 response_deserializer=scene__pb2.SetEntityTransformResponse.FromString,
                 _registered_method=True)
+        self.SetSimulationMode = channel.unary_unary(
+                '/hazel.rpc.SceneService/SetSimulationMode',
+                request_serializer=scene__pb2.SetSimulationModeRequest.SerializeToString,
+                response_deserializer=scene__pb2.SetSimulationModeResponse.FromString,
+                _registered_method=True)
+        self.GetSimulationMode = channel.unary_unary(
+                '/hazel.rpc.SceneService/GetSimulationMode',
+                request_serializer=scene__pb2.GetSimulationModeRequest.SerializeToString,
+                response_deserializer=scene__pb2.GetSimulationModeResponse.FromString,
+                _registered_method=True)
 
 
 class SceneServiceServicer(object):
@@ -85,6 +95,20 @@ class SceneServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SetSimulationMode(self, request, context):
+        """Set simulation timing mode (realtime, deterministic, or fast).
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSimulationMode(self, request, context):
+        """Get current simulation timing mode.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SceneServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -107,6 +131,16 @@ def add_SceneServiceServicer_to_server(servicer, server):
                     servicer.SetEntityTransform,
                     request_deserializer=scene__pb2.SetEntityTransformRequest.FromString,
                     response_serializer=scene__pb2.SetEntityTransformResponse.SerializeToString,
+            ),
+            'SetSimulationMode': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetSimulationMode,
+                    request_deserializer=scene__pb2.SetSimulationModeRequest.FromString,
+                    response_serializer=scene__pb2.SetSimulationModeResponse.SerializeToString,
+            ),
+            'GetSimulationMode': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSimulationMode,
+                    request_deserializer=scene__pb2.GetSimulationModeRequest.FromString,
+                    response_serializer=scene__pb2.GetSimulationModeResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -218,6 +252,60 @@ class SceneService(object):
             '/hazel.rpc.SceneService/SetEntityTransform',
             scene__pb2.SetEntityTransformRequest.SerializeToString,
             scene__pb2.SetEntityTransformResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetSimulationMode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.SceneService/SetSimulationMode',
+            scene__pb2.SetSimulationModeRequest.SerializeToString,
+            scene__pb2.SetSimulationModeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSimulationMode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.SceneService/GetSimulationMode',
+            scene__pb2.GetSimulationModeRequest.SerializeToString,
+            scene__pb2.GetSimulationModeResponse.FromString,
             options,
             channel_credentials,
             insecure,

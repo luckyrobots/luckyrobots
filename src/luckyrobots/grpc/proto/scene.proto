@@ -61,10 +61,44 @@ message SetEntityTransformResponse {
     string message = 2;
 }
 
+// =============================================================================
+// Simulation Mode
+// =============================================================================
+
+// Simulation timing mode controls how physics stepping relates to wall-clock time.
+enum SimulationMode {
+    // Real-time: physics runs at 1x wall-clock speed (for visualization, games).
+    SIMULATION_MODE_REALTIME = 0;
+    // Deterministic: physics runs at fixed rate regardless of wall-clock (for reproducibility).
+    SIMULATION_MODE_DETERMINISTIC = 1;
+    // Fast: physics runs as fast as possible without real-time limiting (for RL training).
+    SIMULATION_MODE_FAST = 2;
+}
+
+message SetSimulationModeRequest {
+    SimulationMode mode = 1;
+}
+
+message SetSimulationModeResponse {
+    bool success = 1;
+    string message = 2;
+    SimulationMode current_mode = 3;
+}
+
+message GetSimulationModeRequest {}
+
+message GetSimulationModeResponse {
+    SimulationMode mode = 1;
+}
+
 // Scene inspection + basic editing.
 service SceneService {
     rpc GetSceneInfo(GetSceneInfoRequest) returns (GetSceneInfoResponse);
     rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesResponse);
     rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
     rpc SetEntityTransform(SetEntityTransformRequest) returns (SetEntityTransformResponse);
+    // Set simulation timing mode (realtime, deterministic, or fast).
+    rpc SetSimulationMode(SetSimulationModeRequest) returns (SetSimulationModeResponse);
+    // Get current simulation timing mode.
+    rpc GetSimulationMode(GetSimulationModeRequest) returns (GetSimulationModeResponse);
 }
