@@ -164,13 +164,44 @@ class LuckyRobots:
             raise RuntimeError(f"SendControl failed: {getattr(resp, 'message', '')}")
 
     def step(
-        self, controls: Sequence[float], sleep_s: float = 0.01
+        self,
+        actions: Sequence[float],
+        agent_name: str = "",
     ) -> ObservationResponse:
-        """Send controls, wait briefly for physics, then return a fresh observation."""
-        self.send_control(controls)
-        if sleep_s > 0:
-            time.sleep(sleep_s)
-        return self.get_observation()
+        """
+        Synchronous RL step: apply action, wait for physics, return observation.
+
+        This is the recommended interface for RL training. It uses the gRPC Step RPC
+        which combines SendControl + physics step + GetObservation into a single call,
+        eliminating one network round-trip.
+
+        Args:
+            actions: Action vector to apply for this step.
+            agent_name: Agent name (empty = default agent).
+
+        Returns:
+            ObservationResponse with observation after physics step.
+        """
+        client = self._require_client()
+        return client.step(actions=list(actions), agent_name=agent_name)
+
+    def set_simulation_mode(self, mode: str = "fast"):
+        """
+        Set simulation timing mode.
+
+        Args:
+            mode: "realtime", "deterministic", or "fast"
+                - realtime: Physics runs at 1x wall-clock speed (for visualization)
+                - deterministic: Physics runs at fixed rate (for reproducibility)
+                - fast: Physics runs as fast as possible (for RL training)
+        """
+        client = self._require_client()
+        return client.set_simulation_mode(mode=mode)
+
+    def get_simulation_mode(self):
+        """Get current simulation timing mode."""
+        client = self._require_client()
+        return client.get_simulation_mode()
 
     def reset(
         self,

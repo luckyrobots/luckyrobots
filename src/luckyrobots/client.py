@@ -630,6 +630,109 @@ class LuckyEngineClient:
             timeout=timeout,
         )
 
+    def step(
+        self,
+        actions: list[float],
+        agent_name: str = "",
+        timeout_ms: int = 0,
+        timeout: Optional[float] = None,
+    ) -> ObservationResponse:
+        """
+        Synchronous RL step: apply action, wait for physics, return observation.
+
+        This is the recommended interface for RL training as it eliminates
+        one network round-trip compared to separate SendControl + GetObservation.
+
+        Args:
+            actions: Action vector to apply for this step.
+            agent_name: Agent name (empty = default agent).
+            timeout_ms: Server-side timeout for the step in milliseconds (0 = use default).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            ObservationResponse with observation after physics step.
+        """
+        timeout = timeout or self.timeout
+
+        resp = self.agent.Step(
+            self.pb.agent.StepRequest(
+                agent_name=agent_name,
+                actions=actions,
+                timeout_ms=timeout_ms,
+            ),
+            timeout=timeout,
+        )
+
+        if not resp.success:
+            raise RuntimeError(f"Step failed: {resp.message}")
+
+        # Extract observation from AgentFrame
+        agent_frame = resp.observation
+        observations = list(agent_frame.observations) if agent_frame.observations else []
+        actions_out = list(agent_frame.actions) if agent_frame.actions else []
+        timestamp_ms = getattr(agent_frame, "timestamp_ms", 0)
+        frame_number = getattr(agent_frame, "frame_number", 0)
+
+        # Look up cached schema for named access
+        cache_key = agent_name or "agent_0"
+        obs_names, action_names = self._schema_cache.get(cache_key, (None, None))
+
+        return ObservationResponse(
+            observation=observations,
+            actions=actions_out,
+            timestamp_ms=timestamp_ms,
+            frame_number=frame_number,
+            agent_name=cache_key,
+            observation_names=obs_names,
+            action_names=action_names,
+        )
+
+    def set_simulation_mode(
+        self,
+        mode: str = "fast",
+        timeout: Optional[float] = None,
+    ):
+        """
+        Set simulation timing mode.
+
+        Args:
+            mode: "realtime", "deterministic", or "fast"
+                - realtime: Physics runs at 1x wall-clock speed (for visualization)
+                - deterministic: Physics runs at fixed rate (for reproducibility)
+                - fast: Physics runs as fast as possible (for RL training)
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            SetSimulationModeResponse with success and current mode.
+        """
+        timeout = timeout or self.timeout
+
+        mode_map = {
+            "realtime": 0,
+            "deterministic": 1,
+            "fast": 2,
+        }
+        mode_value = mode_map.get(mode.lower(), 2)  # Default to fast
+
+        return self.scene.SetSimulationMode(
+            self.pb.scene.SetSimulationModeRequest(mode=mode_value),
+            timeout=timeout,
+        )
+
+    def get_simulation_mode(self, timeout: Optional[float] = None):
+        """
+        Get current simulation timing mode.
+
+        Returns:
+            GetSimulationModeResponse with mode field (0=realtime, 1=deterministic, 2=fast).
+        """
+        timeout = timeout or self.timeout
+
+        return self.scene.GetSimulationMode(
+            self.pb.scene.GetSimulationModeRequest(),
+            timeout=timeout,
+        )
+
     def _randomization_to_proto(self, randomization_cfg: Any):
         """Convert domain randomization config to proto message.
 

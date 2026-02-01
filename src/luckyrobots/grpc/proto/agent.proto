@@ -167,6 +167,31 @@ message GetObservationResponse {
     repeated NamedImageFrame viewport_frames = 9;
 }
 
+// =============================================================================
+// Step RPC (synchronous RL step)
+// =============================================================================
+
+// Request to step the simulation with the provided action.
+// This is the recommended interface for RL training - it combines
+// SendControl + physics step + GetObservation into a single RPC.
+message StepRequest {
+    // Agent logical name. Empty means default agent.
+    string agent_name = 1;
+    // Action vector to apply for this step.
+    repeated float actions = 2;
+    // Optional timeout in milliseconds. 0 means use server default.
+    uint32 timeout_ms = 3;
+}
+
+message StepResponse {
+    bool success = 1;
+    string message = 2;
+    // Observation after the physics step completed.
+    AgentFrame observation = 3;
+    // Time taken for the physics step in microseconds (for profiling).
+    uint64 physics_step_duration_us = 4;
+}
+
 // Per-agent RL-style observation streaming (training / inference clients consume this).
 service AgentService {
     rpc GetAgentSchema(GetAgentSchemaRequest) returns (GetAgentSchemaResponse);
@@ -181,4 +206,8 @@ service AgentService {
     // Reset a specific agent (full reset: clear buffers, reset state, resample commands, apply MuJoCo state).
     // Useful for multi-env RL where individual agents need to be reset without resetting the entire scene.
     rpc ResetAgent(ResetAgentRequest) returns (ResetAgentResponse);
+    // Synchronous RL step: apply action, wait for physics, return observation.
+    // This is the recommended interface for RL training as it eliminates
+    // one network round-trip compared to separate SendControl + GetObservation.
+    rpc Step(StepRequest) returns (StepResponse);
 }
