@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "luckyrobots"
-version = "0.1.71"
+version = "0.1.73"
 description = "Robotics-AI Training in Hyperrealistic Game Environments"
 readme = "README.md"
 requires-python = ">=3.10"

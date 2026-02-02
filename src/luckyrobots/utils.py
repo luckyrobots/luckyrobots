@@ -1,49 +1,7 @@
-"""
-Utility functions and classes for LuckyRobots.
-"""
+"""Utility functions for LuckyRobots."""
 
-import time
 import yaml
 import importlib.resources
-from collections import deque
-
-
-class FPS:
-    """Utility for measuring frames per second with a rolling window.
-
-    Usage:
-        fps = FPS(frame_window=30)
-        while running:
-            # ... do work ...
-            current_fps = fps.measure()
-    """
-
-    def __init__(self, frame_window: int = 30):
-        """Initialize FPS counter.
-
-        Args:
-            frame_window: Number of frames to average over.
-        """
-        self.frame_window = frame_window
-        self.frame_times: deque[float] = deque(maxlen=frame_window)
-        self.last_frame_time = time.perf_counter()
-
-    def measure(self) -> float:
-        """Record a frame and return current FPS.
-
-        Returns:
-            Current frames per second (averaged over window).
-        """
-        current_time = time.perf_counter()
-        frame_delta = current_time - self.last_frame_time
-        self.last_frame_time = current_time
-
-        self.frame_times.append(frame_delta)
-
-        if len(self.frame_times) >= 2:
-            avg_frame_time = sum(self.frame_times) / len(self.frame_times)
-            return 1.0 / avg_frame_time if avg_frame_time > 0 else 0.0
-        return 0.0
 
 
 def get_robot_config(robot: str = None) -> dict:

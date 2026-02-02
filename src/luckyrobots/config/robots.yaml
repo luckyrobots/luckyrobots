@@ -149,103 +149,127 @@ unitreego1:
     - locomotion
   action_space:
     actuator_names:
-      - FR_hip
-      - FR_thigh
-      - FR_calf
-      - FL_hip
-      - FL_thigh
-      - FL_calf
-      - RR_hip
-      - RR_thigh
-      - RR_calf
-      - RL_hip
-      - RL_thigh
-      - RL_calf
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
+      - FL_hip_joint
+      - FL_thigh_joint
+      - FL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
+      - RL_hip_joint
+      - RL_thigh_joint
+      - RL_calf_joint
     actuator_limits:
-      - name: FR_hip
+      - name: FR_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: FR_thigh
+        default: 0.1
+      - name: FR_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: FR_calf
+        default: 0.9
+      - name: FR_calf_joint
         lower: -2.818
         upper: -0.888
-      - name: FL_hip
+        default: -1.8
+      - name: FL_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: FL_thigh
+        default: -0.1
+      - name: FL_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: FL_calf
+        default: 0.9
+      - name: FL_calf_joint
         lower: -2.818
         upper: -0.888
-      - name: RR_hip
+        default: -1.8
+      - name: RR_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: RR_thigh
+        default: 0.1
+      - name: RR_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: RR_calf
+        default: 0.9
+      - name: RR_calf_joint
         lower: -2.818
         upper: -0.888
-      - name: RL_hip
+        default: -1.8
+      - name: RL_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: RL_thigh
+        default: -0.1
+      - name: RL_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: RL_calf
+        default: 0.9
+      - name: RL_calf_joint
         lower: -2.818
         upper: -0.888
+        default: -1.8
   observation_space:
     actuator_names:
-      - FR_hip
-      - FR_thigh
-      - FR_calf
-      - FL_hip
-      - FL_thigh
-      - FL_calf
-      - RR_hip
-      - RR_thigh
-      - RR_calf
-      - RL_hip
-      - RL_thigh
-      - RL_calf
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
+      - FL_hip_joint
+      - FL_thigh_joint
+      - FL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
+      - RL_hip_joint
+      - RL_thigh_joint
+      - RL_calf_joint
     actuator_limits:
-      - name: FR_hip
+      - name: FR_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: FR_thigh
+        default: 0.1
+      - name: FR_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: FR_calf
+        default: 0.9
+      - name: FR_calf_joint
         lower: -2.818
         upper: -0.888
-      - name: FL_hip
+        default: -1.8
+      - name: FL_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: FL_thigh
+        default: -0.1
+      - name: FL_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: FL_calf
+        default: 0.9
+      - name: FL_calf_joint
         lower: -2.818
         upper: -0.888
-      - name: RR_hip
+        default: -1.8
+      - name: RR_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: RR_thigh
+        default: 0.1
+      - name: RR_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: RR_calf
+        default: 0.9
+      - name: RR_calf_joint
         lower: -2.818
         upper: -0.888
-      - name: RL_hip
+        default: -1.8
+      - name: RL_hip_joint
         lower: -0.863
         upper: 0.863
-      - name: RL_thigh
+        default: -0.1
+      - name: RL_thigh_joint
         lower: -0.686
         upper: 4.501
-      - name: RL_calf
+        default: 0.9
+      - name: RL_calf_joint
         lower: -2.818
         upper: -0.888
+        default: -1.8
