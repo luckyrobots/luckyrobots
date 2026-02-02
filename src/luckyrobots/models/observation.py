@@ -1,12 +1,6 @@
-"""
-RL observation models for LuckyRobots.
+"""RL observation models for LuckyRobots."""
 
-These are the primary return types for the simplified API:
-- ObservationResponse: returned by get_observation()
-- StateSnapshot: returned by get_state()
-"""
-
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -14,11 +8,11 @@ class ObservationResponse(BaseModel):
     """RL observation data from an agent.
 
     This is the return type for LuckyEngineClient.get_observation() and
-    LuckyRobots.get_observation(). It contains the RL observation vector
+    LuckyEngineClient.step(). It contains the RL observation vector
     with optional named access for debugging.
 
     Usage:
-        obs = client.get_observation()
+        obs = client.step(actions)
 
         # Flat vector for RL training
         obs.observation  # [0.1, 0.2, 0.3, ...]
@@ -110,26 +104,3 @@ class ObservationResponse(BaseModel):
         if self.action_names is not None:
             return dict(zip(self.action_names, self.actions))
         return {f"action_{i}": v for i, v in enumerate(self.actions)}
-
-
-class StateSnapshot(BaseModel):
-    """Bundled snapshot of multiple data sources.
-
-    Use LuckyEngineClient.get_state() to get a bundled snapshot when you need
-    multiple data types in one efficient call. For streaming data like telemetry,
-    use the dedicated streaming methods instead.
-    """
-
-    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
-
-    observation: Optional[ObservationResponse] = Field(
-        default=None, description="RL observation data (if include_observation=True)"
-    )
-    joint_state: Optional[Any] = Field(
-        default=None, description="Joint positions/velocities (if include_joint_state=True)"
-    )
-    camera_frames: Optional[List[Any]] = Field(
-        default=None, description="Camera frames (if camera_names provided)"
-    )
-    timestamp_ms: int = Field(default=0, description="Wall-clock timestamp in milliseconds")
-    frame_number: int = Field(default=0, description="Monotonic frame counter")
