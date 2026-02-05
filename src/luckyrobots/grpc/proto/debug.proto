@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+// Debug visualization service for the LuckyEngine / Hazel ScriptCore gRPC API (v1).
+
+package hazel.rpc;
+
+option cc_enable_arenas = true;
+
+// A 3D vector for debug drawing.
+message DebugVector3 {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+// RGBA color (0-1 range).
+message DebugColor {
+    float r = 1;
+    float g = 2;
+    float b = 3;
+    float a = 4;
+}
+
+// A debug line to draw.
+message DebugLine {
+    DebugVector3 start = 1;
+    DebugVector3 end = 2;
+    DebugColor color = 3;
+}
+
+// A debug arrow (line with arrowhead).
+message DebugArrow {
+    DebugVector3 origin = 1;
+    DebugVector3 direction = 2;  // Direction and magnitude
+    DebugColor color = 3;
+    float scale = 4;  // Scale factor for visualization
+}
+
+// Velocity command visualization.
+message DebugVelocityCommand {
+    DebugVector3 origin = 1;      // Robot position
+    float lin_vel_x = 2;          // Forward velocity command
+    float lin_vel_y = 3;          // Lateral velocity command
+    float ang_vel_z = 4;          // Angular velocity command
+    float scale = 5;              // Visualization scale
+}
+
+// Collection of debug primitives to draw for one frame.
+message DebugDrawRequest {
+    repeated DebugLine lines = 1;
+    repeated DebugArrow arrows = 2;
+    DebugVelocityCommand velocity_command = 3;
+    bool clear_previous = 4;  // Clear previous frame's debug draws
+}
+
+message DebugDrawResponse {
+    bool success = 1;
+}
+
+// Debug visualization service.
+service DebugService {
+    rpc Draw(DebugDrawRequest) returns (DebugDrawResponse);
+}
