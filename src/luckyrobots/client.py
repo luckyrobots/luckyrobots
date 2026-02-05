@@ -18,6 +18,8 @@ try:
     from .grpc.generated import agent_pb2  # type: ignore
     from .grpc.generated import agent_pb2_grpc  # type: ignore
     from .grpc.generated import common_pb2  # type: ignore
+    from .grpc.generated import debug_pb2  # type: ignore
+    from .grpc.generated import debug_pb2_grpc  # type: ignore
     from .grpc.generated import mujoco_pb2  # type: ignore
     from .grpc.generated import mujoco_pb2_grpc  # type: ignore
     from .grpc.generated import scene_pb2  # type: ignore
@@ -87,6 +89,7 @@ class LuckyEngineClient:
         self._scene = None
         self._mujoco = None
         self._agent = None
+        self._debug = None
 
         # Cached agent schemas: agent_name -> (observation_names, action_names)
         self._schema_cache: dict[str, tuple[list[str], list[str]]] = {}
@@ -97,6 +100,7 @@ class LuckyEngineClient:
             scene=scene_pb2,
             mujoco=mujoco_pb2,
             agent=agent_pb2,
+            debug=debug_pb2,
         )
 
     def connect(self) -> None:
@@ -122,6 +126,7 @@ class LuckyEngineClient:
         self._scene = scene_pb2_grpc.SceneServiceStub(self._channel)
         self._mujoco = mujoco_pb2_grpc.MujocoServiceStub(self._channel)
         self._agent = agent_pb2_grpc.AgentServiceStub(self._channel)
+        self._debug = debug_pb2_grpc.DebugServiceStub(self._channel)
 
         logger.info(f"Channel opened to {target} (server not verified yet)")
 
@@ -136,6 +141,7 @@ class LuckyEngineClient:
             self._scene = None
             self._mujoco = None
             self._agent = None
+            self._debug = None
             logger.info("gRPC channel closed")
 
     def is_connected(self) -> bool:
@@ -230,6 +236,13 @@ class LuckyEngineClient:
         if self._agent is None:
             raise GrpcConnectionError("Not connected. Call connect() first.")
         return self._agent
+
+    @property
+    def debug(self) -> Any:
+        """DebugService stub."""
+        if self._debug is None:
+            raise GrpcConnectionError("Not connected. Call connect() first.")
+        return self._debug
 
     def get_mujoco_info(self, robot_name: str = "", timeout: Optional[float] = None):
         """Get MuJoCo model information (joint names, limits, etc.)."""
@@ -524,3 +537,141 @@ class LuckyEngineClient:
             proto_kwargs["terrain_difficulty"] = terrain_diff
 
         return self.pb.agent.DomainRandomizationConfig(**proto_kwargs)
+
+    def draw_velocity_command(
+        self,
+        origin: tuple[float, float, float],
+        lin_vel_x: float,
+        lin_vel_y: float,
+        ang_vel_z: float,
+        scale: float = 1.0,
+        clear_previous: bool = True,
+        timeout: Optional[float] = None,
+    ) -> bool:
+        """
+        Draw velocity command visualization in LuckyEngine.
+
+        Args:
+            origin: (x, y, z) position of the robot.
+            lin_vel_x: Forward velocity command.
+            lin_vel_y: Lateral velocity command.
+            ang_vel_z: Angular velocity command (yaw rate).
+            scale: Scale factor for visualization.
+            clear_previous: Clear previous debug draws before drawing.
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            True if draw succeeded, False otherwise.
+        """
+        timeout = timeout or self.timeout
+
+        velocity_cmd = self.pb.debug.DebugVelocityCommand(
+            origin=self.pb.debug.DebugVector3(x=origin[0], y=origin[1], z=origin[2]),
+            lin_vel_x=lin_vel_x,
+            lin_vel_y=lin_vel_y,
+            ang_vel_z=ang_vel_z,
+            scale=scale,
+        )
+
+        request = self.pb.debug.DebugDrawRequest(
+            velocity_command=velocity_cmd,
+            clear_previous=clear_previous,
+        )
+
+        try:
+            resp = self.debug.Draw(request, timeout=timeout)
+            return resp.success
+        except Exception as e:
+            logger.debug(f"Debug draw failed: {e}")
+            return False
+
+    def draw_arrow(
+        self,
+        origin: tuple[float, float, float],
+        direction: tuple[float, float, float],
+        color: tuple[float, float, float, float] = (1.0, 0.0, 0.0, 1.0),
+        scale: float = 1.0,
+        clear_previous: bool = False,
+        timeout: Optional[float] = None,
+    ) -> bool:
+        """
+        Draw a debug arrow in LuckyEngine.
+
+        Args:
+            origin: (x, y, z) start position.
+            direction: (x, y, z) direction and magnitude.
+            color: (r, g, b, a) color values (0-1 range).
+            scale: Scale factor for visualization.
+            clear_previous: Clear previous debug draws before drawing.
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            True if draw succeeded, False otherwise.
+        """
+        timeout = timeout or self.timeout
+
+        arrow = self.pb.debug.DebugArrow(
+            origin=self.pb.debug.DebugVector3(x=origin[0], y=origin[1], z=origin[2]),
+            direction=self.pb.debug.DebugVector3(
+                x=direction[0], y=direction[1], z=direction[2]
+            ),
+            color=self.pb.debug.DebugColor(
+                r=color[0], g=color[1], b=color[2], a=color[3]
+            ),
+            scale=scale,
+        )
+
+        request = self.pb.debug.DebugDrawRequest(
+            arrows=[arrow],
+            clear_previous=clear_previous,
+        )
+
+        try:
+            resp = self.debug.Draw(request, timeout=timeout)
+            return resp.success
+        except Exception as e:
+            logger.debug(f"Debug draw failed: {e}")
+            return False
+
+    def draw_line(
+        self,
+        start: tuple[float, float, float],
+        end: tuple[float, float, float],
+        color: tuple[float, float, float, float] = (1.0, 1.0, 1.0, 1.0),
+        clear_previous: bool = False,
+        timeout: Optional[float] = None,
+    ) -> bool:
+        """
+        Draw a debug line in LuckyEngine.
+
+        Args:
+            start: (x, y, z) start position.
+            end: (x, y, z) end position.
+            color: (r, g, b, a) color values (0-1 range).
+            clear_previous: Clear previous debug draws before drawing.
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            True if draw succeeded, False otherwise.
+        """
+        timeout = timeout or self.timeout
+
+        line = self.pb.debug.DebugLine(
+            start=self.pb.debug.DebugVector3(x=start[0], y=start[1], z=start[2]),
+            end=self.pb.debug.DebugVector3(x=end[0], y=end[1], z=end[2]),
+            color=self.pb.debug.DebugColor(
+                r=color[0], g=color[1], b=color[2], a=color[3]
+            ),
+        )
+
+        request = self.pb.debug.DebugDrawRequest(
+            lines=[line],
+            clear_previous=clear_previous,
+        )
+
+        try:
+            resp = self.debug.Draw(request, timeout=timeout)
+            return resp.success
+        except Exception as e:
+            logger.debug(f"Debug draw failed: {e}")
+            return False
