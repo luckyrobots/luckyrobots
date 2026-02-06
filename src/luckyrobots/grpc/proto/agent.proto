@@ -179,8 +179,8 @@ message StepRequest {
     string agent_name = 1;
     // Action vector to apply for this step.
     repeated float actions = 2;
-    // Optional timeout in milliseconds. 0 means use server default.
-    uint32 timeout_ms = 3;
+    // Optional timeout in seconds for the physics step. 0 means use server default.
+    float timeout_s = 3;
 }
 
 message StepResponse {

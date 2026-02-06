@@ -12,6 +12,8 @@ import time
 from types import SimpleNamespace
 from typing import Any, Optional
 
+import grpc  # type: ignore
+
 logger = logging.getLogger("luckyrobots.client")
 
 try:
@@ -110,13 +112,6 @@ class LuckyEngineClient:
         Raises:
             GrpcConnectionError: If connection fails.
         """
-        try:
-            import grpc  # type: ignore
-        except ImportError as e:
-            raise RuntimeError(
-                "Missing grpcio. Install with: pip install grpcio protobuf"
-            ) from e
-
         target = f"{self.host}:{self.port}"
         logger.info(f"Connecting to LuckyEngine gRPC server at {target}")
 
@@ -385,7 +380,7 @@ class LuckyEngineClient:
         self,
         actions: list[float],
         agent_name: str = "",
-        timeout_ms: int = 0,
+        step_timeout_s: float = 0.0,
         timeout: Optional[float] = None,
     ) -> ObservationResponse:
         """
@@ -394,7 +389,8 @@ class LuckyEngineClient:
         Args:
             actions: Action vector to apply for this step.
             agent_name: Agent name (empty = default agent).
-            timeout_ms: Server-side timeout for the step in milliseconds.
+            step_timeout_s: Server-side timeout for waiting for the physics step (seconds).
+                0 means use server default.
             timeout: RPC timeout in seconds.
 
         Returns:
@@ -402,17 +398,28 @@ class LuckyEngineClient:
         """
         timeout = timeout or self.timeout
 
-        resp = self.agent.Step(
-            self.pb.agent.StepRequest(
-                agent_name=agent_name,
-                actions=actions,
-                timeout_ms=timeout_ms,
-            ),
-            timeout=timeout,
-        )
+        try:
+            resp = self.agent.Step(
+                self.pb.agent.StepRequest(
+                    agent_name=agent_name,
+                    actions=actions,
+                    timeout_s=step_timeout_s,
+                ),
+                timeout=timeout,
+            )
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise RuntimeError(
+                    f"Client-side gRPC timeout ({timeout}s): the server did not respond in time. "
+                    "This usually means the engine is frozen or the network is unreachable."
+                ) from e
+            raise
 
         if not resp.success:
-            raise RuntimeError(f"Step failed: {resp.message}")
+            raise RuntimeError(
+                f"Server-side physics timeout: {resp.message} "
+                f"(server waited up to its configured timeout for the physics step to complete)"
+            )
 
         agent_frame = resp.observation
         observations = list(agent_frame.observations) if agent_frame.observations else []
