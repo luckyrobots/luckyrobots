@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import debug_pb2 as debug__pb2
+from . import debug_pb2 as debug__pb2
 
 GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__

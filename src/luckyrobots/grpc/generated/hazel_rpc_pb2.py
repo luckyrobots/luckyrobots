@@ -22,15 +22,15 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-import common_pb2 as common__pb2
-import scene_pb2 as scene__pb2
-import mujoco_pb2 as mujoco__pb2
-import telemetry_pb2 as telemetry__pb2
-import media_pb2 as media__pb2
-import agent_pb2 as agent__pb2
-import viewport_pb2 as viewport__pb2
-import camera_pb2 as camera__pb2
-import debug_pb2 as debug__pb2
+from . import common_pb2 as common__pb2
+from . import scene_pb2 as scene__pb2
+from . import mujoco_pb2 as mujoco__pb2
+from . import telemetry_pb2 as telemetry__pb2
+from . import media_pb2 as media__pb2
+from . import agent_pb2 as agent__pb2
+from . import viewport_pb2 as viewport__pb2
+from . import camera_pb2 as camera__pb2
+from . import debug_pb2 as debug__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fhazel_rpc.proto\x12\thazel.rpc\x1a\x0c\x63ommon.proto\x1a\x0bscene.proto\x1a\x0cmujoco.proto\x1a\x0ftelemetry.proto\x1a\x0bmedia.proto\x1a\x0b\x61gent.proto\x1a\x0eviewport.proto\x1a\x0c\x63\x61mera.proto\x1a\x0b\x64\x65\x62ug.protoB\x03\xf8\x01\x01\x62\x06proto3')
