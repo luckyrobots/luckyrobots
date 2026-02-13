@@ -140,7 +140,7 @@ two_pandas:
         lower: 0.0
         upper: 255.0
 
-unitreego1:
+unitreego2:
   observation_types:
     - agent_pos
   available_scenes:
@@ -149,151 +149,151 @@ unitreego1:
     - locomotion
   action_space:
     actuator_names:
-      - FR_hip_joint
-      - FR_thigh_joint
-      - FR_calf_joint
       - FL_hip_joint
       - FL_thigh_joint
       - FL_calf_joint
-      - RR_hip_joint
-      - RR_thigh_joint
-      - RR_calf_joint
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
       - RL_hip_joint
       - RL_thigh_joint
       - RL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
     actuator_limits:
-      - name: FR_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: 0.1
-        scale: 0.3727530387083568
-      - name: FR_thigh_joint
-        lower: -0.686
-        upper: 4.501
-        default: 0.9
-        scale: 0.3727530387083568
-      - name: FR_calf_joint
-        lower: -2.818
-        upper: -0.888
-        default: -1.8
-        scale: 0.24850202580557115
       - name: FL_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: -0.1
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
         scale: 0.3727530387083568
       - name: FL_thigh_joint
-        lower: -0.686
-        upper: 4.501
+        lower: -1.571
+        upper: 3.491
         default: 0.9
         scale: 0.3727530387083568
       - name: FL_calf_joint
-        lower: -2.818
-        upper: -0.888
+        lower: -2.723
+        upper: -0.838
         default: -1.8
         scale: 0.24850202580557115
-      - name: RR_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: 0.1
+      - name: FR_hip_joint
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
         scale: 0.3727530387083568
-      - name: RR_thigh_joint
-        lower: -0.686
-        upper: 4.501
+      - name: FR_thigh_joint
+        lower: -1.571
+        upper: 3.491
         default: 0.9
         scale: 0.3727530387083568
-      - name: RR_calf_joint
-        lower: -2.818
-        upper: -0.888
+      - name: FR_calf_joint
+        lower: -2.723
+        upper: -0.838
         default: -1.8
         scale: 0.24850202580557115
       - name: RL_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: -0.1
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
         scale: 0.3727530387083568
       - name: RL_thigh_joint
-        lower: -0.686
-        upper: 4.501
+        lower: -0.524
+        upper: 4.538
         default: 0.9
         scale: 0.3727530387083568
       - name: RL_calf_joint
-        lower: -2.818
-        upper: -0.888
+        lower: -2.723
+        upper: -0.838
+        default: -1.8
+        scale: 0.24850202580557115
+      - name: RR_hip_joint
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
+        scale: 0.3727530387083568
+      - name: RR_thigh_joint
+        lower: -0.524
+        upper: 4.538
+        default: 0.9
+        scale: 0.3727530387083568
+      - name: RR_calf_joint
+        lower: -2.723
+        upper: -0.838
         default: -1.8
         scale: 0.24850202580557115
   observation_space:
     actuator_names:
-      - FR_hip_joint
-      - FR_thigh_joint
-      - FR_calf_joint
       - FL_hip_joint
       - FL_thigh_joint
       - FL_calf_joint
-      - RR_hip_joint
-      - RR_thigh_joint
-      - RR_calf_joint
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
       - RL_hip_joint
       - RL_thigh_joint
       - RL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
     actuator_limits:
-      - name: FR_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: 0.1
-        scale: 0.3727530387083568
-      - name: FR_thigh_joint
-        lower: -0.686
-        upper: 4.501
-        default: 0.9
-        scale: 0.3727530387083568
-      - name: FR_calf_joint
-        lower: -2.818
-        upper: -0.888
-        default: -1.8
-        scale: 0.24850202580557115
       - name: FL_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: -0.1
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
         scale: 0.3727530387083568
       - name: FL_thigh_joint
-        lower: -0.686
-        upper: 4.501
+        lower: -1.571
+        upper: 3.491
         default: 0.9
         scale: 0.3727530387083568
       - name: FL_calf_joint
-        lower: -2.818
-        upper: -0.888
+        lower: -2.723
+        upper: -0.838
         default: -1.8
         scale: 0.24850202580557115
-      - name: RR_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: 0.1
+      - name: FR_hip_joint
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
         scale: 0.3727530387083568
-      - name: RR_thigh_joint
-        lower: -0.686
-        upper: 4.501
+      - name: FR_thigh_joint
+        lower: -1.571
+        upper: 3.491
         default: 0.9
         scale: 0.3727530387083568
-      - name: RR_calf_joint
-        lower: -2.818
-        upper: -0.888
+      - name: FR_calf_joint
+        lower: -2.723
+        upper: -0.838
         default: -1.8
         scale: 0.24850202580557115
       - name: RL_hip_joint
-        lower: -0.863
-        upper: 0.863
-        default: -0.1
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
         scale: 0.3727530387083568
       - name: RL_thigh_joint
-        lower: -0.686
-        upper: 4.501
+        lower: -0.524
+        upper: 4.538
         default: 0.9
         scale: 0.3727530387083568
       - name: RL_calf_joint
-        lower: -2.818
-        upper: -0.888
+        lower: -2.723
+        upper: -0.838
+        default: -1.8
+        scale: 0.24850202580557115
+      - name: RR_hip_joint
+        lower: -1.047
+        upper: 1.047
+        default: 0.0
+        scale: 0.3727530387083568
+      - name: RR_thigh_joint
+        lower: -0.524
+        upper: 4.538
+        default: 0.9
+        scale: 0.3727530387083568
+      - name: RR_calf_joint
+        lower: -2.723
+        upper: -0.838
         default: -1.8
         scale: 0.24850202580557115
