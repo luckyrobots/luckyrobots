@@ -369,7 +369,7 @@ class LuckyEngineClient:
 
         if randomization_cfg is not None:
             randomization_proto = self._randomization_to_proto(randomization_cfg)
-            request_kwargs["dr_config"] = randomization_proto
+            request_kwargs["simulation_contract"] = randomization_proto
 
         return self.agent.ResetAgent(
             self.pb.agent.ResetAgentRequest(**request_kwargs),
@@ -543,7 +543,28 @@ class LuckyEngineClient:
         if terrain_diff is not None and terrain_diff != 0.0:
             proto_kwargs["terrain_difficulty"] = terrain_diff
 
-        return self.pb.agent.DomainRandomizationConfig(**proto_kwargs)
+        # Velocity command ranges (sampled by engine)
+        vel_x = get_val("vel_command_x_range")
+        if vel_x is not None:
+            proto_kwargs["vel_command_x_range"] = list(vel_x)
+
+        vel_y = get_val("vel_command_y_range")
+        if vel_y is not None:
+            proto_kwargs["vel_command_y_range"] = list(vel_y)
+
+        vel_yaw = get_val("vel_command_yaw_range")
+        if vel_yaw is not None:
+            proto_kwargs["vel_command_yaw_range"] = list(vel_yaw)
+
+        resample_time = get_val("vel_command_resampling_time_range")
+        if resample_time is not None:
+            proto_kwargs["vel_command_resampling_time_range"] = list(resample_time)
+
+        standing_prob = get_val("vel_command_standing_probability")
+        if standing_prob is not None and standing_prob != 0.0:
+            proto_kwargs["vel_command_standing_probability"] = standing_prob
+
+        return self.pb.agent.SimulationContract(**proto_kwargs)
 
     def draw_velocity_command(
         self,

@@ -37,9 +37,10 @@ message StreamAgentRequest {
     uint32 target_fps = 2;
 }
 
-// Domain randomization configuration for physics parameters.
+// Simulation contract between luckylab and LuckyEngine.
+// Defines domain randomization, command ranges, and other shared parameters.
 // All range fields are [min, max] pairs. Empty ranges mean "use defaults".
-message DomainRandomizationConfig {
+message SimulationContract {
     // Initial state randomization
     repeated float pose_position_noise = 1;   // [x, y, z] position noise std
     float pose_orientation_noise = 2;         // Orientation noise std (radians)
@@ -63,6 +64,13 @@ message DomainRandomizationConfig {
     // Terrain configuration
     string terrain_type = 13;                 // Terrain type identifier
     float terrain_difficulty = 14;            // Terrain difficulty level
+
+    // Velocity command ranges (sampled by engine, returned in observation vector)
+    repeated float vel_command_x_range = 15;              // [min, max] m/s
+    repeated float vel_command_y_range = 16;              // [min, max] m/s
+    repeated float vel_command_yaw_range = 17;            // [min, max] rad/s
+    repeated float vel_command_resampling_time_range = 18; // [min, max] seconds
+    float vel_command_standing_probability = 19;           // probability [0, 1]
 }
 
 message ResetAgentRequest {
@@ -70,9 +78,9 @@ message ResetAgentRequest {
     // Empty typically means "default agent" (agent_0).
     string agent_name = 1;
 
-    // Optional domain randomization config for this reset.
+    // Optional simulation contract for this reset.
     // If not provided, use defaults or keep previous values.
-    DomainRandomizationConfig dr_config = 2;
+    SimulationContract simulation_contract = 2;
 }
 
 message ResetAgentResponse {
