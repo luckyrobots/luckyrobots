@@ -6,5 +6,7 @@ simulation environment via gRPC.
 
 from luckyrobots.client import GrpcConnectionError as GrpcConnectionError
 from luckyrobots.client import LuckyEngineClient as LuckyEngineClient
-from luckyrobots.luckyrobots import LuckyRobots as LuckyRobots
+from luckyrobots.models import BenchmarkResult as BenchmarkResult
+from luckyrobots.models import FPS as FPS
 from luckyrobots.models import ObservationResponse as ObservationResponse
+from luckyrobots.robot import LuckyRobots as LuckyRobots

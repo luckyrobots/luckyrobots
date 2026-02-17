@@ -36,6 +36,16 @@ dependencies = [
     "watchdog>=3.0.0",
 ]
 
+[project.optional-dependencies]
+sysid = [
+    "mujoco>=3.2.0",
+    "scipy>=1.10.0",
+    "click>=8.0.0",
+]
+
+[project.scripts]
+luckyrobots-sysid = "luckyrobots.sysid.cli:cli"
+
 [project.urls]
 Homepage = "https://github.com/luckyrobots/luckyrobots"
 Documentation = "https://luckyrobots.readthedocs.io"

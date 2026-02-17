@@ -1,6 +1,4 @@
 import logging
-import time
-
 from collections.abc import Sequence
 from typing import Optional
 
@@ -197,11 +195,6 @@ class LuckyRobots:
         """
         client = self._require_client()
         return client.set_simulation_mode(mode=mode)
-
-    def get_simulation_mode(self):
-        """Get current simulation timing mode."""
-        client = self._require_client()
-        return client.get_simulation_mode()
 
     def reset(
         self,

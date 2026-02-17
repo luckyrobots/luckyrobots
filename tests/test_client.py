@@ -245,22 +245,3 @@ class TestLuckyEngineClientIntegration:
         assert result.actual_fps >= MIN_FPS_TARGET, (
             f"get_observation FPS ({result.actual_fps:.1f}) below target ({MIN_FPS_TARGET})"
         )
-
-    def test_benchmark_stream_agent(self, client):
-        """Benchmark stream_agent() performance."""
-        result = client.benchmark(
-            duration_seconds=3.0,
-            method="stream_agent",
-            print_results=True,
-        )
-
-        assert result.frame_count > 0
-
-        status = "PASS" if result.actual_fps >= MIN_FPS_TARGET else "FAIL"
-        print(f"\n[{status}] stream_agent: {result.actual_fps:.1f} FPS (target: {MIN_FPS_TARGET})")
-        print("       Note: This reflects actual simulation step rate (new frames only).")
-        print("       This is the meaningful rate for control loops.")
-
-        assert result.actual_fps >= MIN_FPS_TARGET, (
-            f"stream_agent FPS ({result.actual_fps:.1f}) below target ({MIN_FPS_TARGET})"
-        )

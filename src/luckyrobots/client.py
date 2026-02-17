@@ -8,6 +8,8 @@ Uses checked-in Python stubs generated from the `.proto` files under
 from __future__ import annotations
 
 import logging
+import math
+import statistics
 import time
 from types import SimpleNamespace
 from typing import Any, Optional
@@ -33,6 +35,8 @@ except Exception as e:  # pragma: no cover
     ) from e
 
 from .models import ObservationResponse
+from .models.benchmark import BenchmarkResult
+from . import sim_contract
 
 
 class GrpcConnectionError(Exception):
@@ -50,7 +54,7 @@ class LuckyEngineClient:
     Provides access to gRPC services for RL training:
     - AgentService: observations, stepping, resets
     - SceneService: simulation mode control
-    - MujocoService: health checks
+    - MujocoService: health checks, joint state, send control
 
     Usage:
         client = LuckyEngineClient(host="127.0.0.1", port=50051)
@@ -239,6 +243,28 @@ class LuckyEngineClient:
             raise GrpcConnectionError("Not connected. Call connect() first.")
         return self._debug
 
+    # ── MujocoService RPCs ──
+
+    def get_joint_state(self, robot_name: str = "", timeout: Optional[float] = None):
+        """Get current joint state (positions and velocities).
+
+        Args:
+            robot_name: Robot entity name (uses default if empty).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            GetJointStateResponse with state.positions (qpos) and
+            state.velocities (qvel).
+        """
+        timeout = timeout or self.timeout
+        robot_name = robot_name or self._robot_name
+        if not robot_name:
+            raise ValueError("robot_name is required")
+        return self.mujoco.GetJointState(
+            self.pb.mujoco.GetJointStateRequest(robot_name=robot_name),
+            timeout=timeout,
+        )
+
     def get_mujoco_info(self, robot_name: str = "", timeout: Optional[float] = None):
         """Get MuJoCo model information (joint names, limits, etc.)."""
         timeout = timeout or self.timeout
@@ -249,6 +275,36 @@ class LuckyEngineClient:
             self.pb.mujoco.GetMujocoInfoRequest(robot_name=robot_name),
             timeout=timeout,
         )
+
+    def send_control(
+        self,
+        controls: list[float],
+        robot_name: str = "",
+        timeout: Optional[float] = None,
+    ):
+        """Send control commands to a robot via MujocoService.SendControl.
+
+        Args:
+            controls: Control input vector.
+            robot_name: Robot entity name (uses default if empty).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            SendControlResponse with success and message fields.
+        """
+        timeout = timeout or self.timeout
+        robot_name = robot_name or self._robot_name
+        if not robot_name:
+            raise ValueError("robot_name is required")
+        return self.mujoco.SendControl(
+            self.pb.mujoco.SendControlRequest(
+                robot_name=robot_name,
+                controls=controls,
+            ),
+            timeout=timeout,
+        )
+
+    # ── AgentService RPCs ──
 
     def get_agent_schema(self, agent_name: str = "", timeout: Optional[float] = None):
         """Get agent schema (observation/action sizes and names).
@@ -357,7 +413,7 @@ class LuckyEngineClient:
 
         Args:
             agent_name: Agent logical name. Empty string means default agent.
-            randomization_cfg: Optional domain randomization config for this reset.
+            randomization_cfg: Optional simulation contract config for this reset.
             timeout: Timeout in seconds (uses default if None).
 
         Returns:
@@ -368,8 +424,8 @@ class LuckyEngineClient:
         request_kwargs = {"agent_name": agent_name}
 
         if randomization_cfg is not None:
-            randomization_proto = self._randomization_to_proto(randomization_cfg)
-            request_kwargs["simulation_contract"] = randomization_proto
+            contract = sim_contract.to_proto(self.pb.agent, randomization_cfg)
+            request_kwargs["simulation_contract"] = contract
 
         return self.agent.ResetAgent(
             self.pb.agent.ResetAgentRequest(**request_kwargs),
@@ -440,6 +496,8 @@ class LuckyEngineClient:
             action_names=action_names,
         )
 
+    # ── SceneService RPCs ──
+
     def set_simulation_mode(
         self,
         mode: str = "fast",
@@ -472,234 +530,87 @@ class LuckyEngineClient:
             timeout=timeout,
         )
 
-    def _randomization_to_proto(self, randomization_cfg: Any):
-        """Convert domain randomization config to proto message."""
-        proto_kwargs = {}
+    # ── Benchmarking ──
 
-        def get_val(name: str, default=None):
-            val = getattr(randomization_cfg, name, default)
-            if val is None or (isinstance(val, (tuple, list)) and len(val) == 0):
-                return None
-            return val
-
-        # Initial state randomization
-        pose_pos = get_val("pose_position_noise")
-        if pose_pos is not None:
-            proto_kwargs["pose_position_noise"] = list(pose_pos)
-
-        pose_ori = get_val("pose_orientation_noise")
-        if pose_ori is not None and pose_ori != 0.0:
-            proto_kwargs["pose_orientation_noise"] = pose_ori
-
-        joint_pos = get_val("joint_position_noise")
-        if joint_pos is not None and joint_pos != 0.0:
-            proto_kwargs["joint_position_noise"] = joint_pos
-
-        joint_vel = get_val("joint_velocity_noise")
-        if joint_vel is not None and joint_vel != 0.0:
-            proto_kwargs["joint_velocity_noise"] = joint_vel
-
-        # Physics parameters
-        friction = get_val("friction_range")
-        if friction is not None:
-            proto_kwargs["friction_range"] = list(friction)
-
-        restitution = get_val("restitution_range")
-        if restitution is not None:
-            proto_kwargs["restitution_range"] = list(restitution)
-
-        mass_scale = get_val("mass_scale_range")
-        if mass_scale is not None:
-            proto_kwargs["mass_scale_range"] = list(mass_scale)
-
-        com_offset = get_val("com_offset_range")
-        if com_offset is not None:
-            proto_kwargs["com_offset_range"] = list(com_offset)
-
-        # Motor/actuator
-        motor_strength = get_val("motor_strength_range")
-        if motor_strength is not None:
-            proto_kwargs["motor_strength_range"] = list(motor_strength)
-
-        motor_offset = get_val("motor_offset_range")
-        if motor_offset is not None:
-            proto_kwargs["motor_offset_range"] = list(motor_offset)
-
-        # External disturbances
-        push_interval = get_val("push_interval_range")
-        if push_interval is not None:
-            proto_kwargs["push_interval_range"] = list(push_interval)
-
-        push_velocity = get_val("push_velocity_range")
-        if push_velocity is not None:
-            proto_kwargs["push_velocity_range"] = list(push_velocity)
-
-        # Terrain
-        terrain_type = get_val("terrain_type")
-        if terrain_type is not None and terrain_type != "":
-            proto_kwargs["terrain_type"] = terrain_type
-
-        terrain_diff = get_val("terrain_difficulty")
-        if terrain_diff is not None and terrain_diff != 0.0:
-            proto_kwargs["terrain_difficulty"] = terrain_diff
-
-        # Velocity command ranges (sampled by engine)
-        vel_x = get_val("vel_command_x_range")
-        if vel_x is not None:
-            proto_kwargs["vel_command_x_range"] = list(vel_x)
-
-        vel_y = get_val("vel_command_y_range")
-        if vel_y is not None:
-            proto_kwargs["vel_command_y_range"] = list(vel_y)
-
-        vel_yaw = get_val("vel_command_yaw_range")
-        if vel_yaw is not None:
-            proto_kwargs["vel_command_yaw_range"] = list(vel_yaw)
-
-        resample_time = get_val("vel_command_resampling_time_range")
-        if resample_time is not None:
-            proto_kwargs["vel_command_resampling_time_range"] = list(resample_time)
-
-        standing_prob = get_val("vel_command_standing_probability")
-        if standing_prob is not None and standing_prob != 0.0:
-            proto_kwargs["vel_command_standing_probability"] = standing_prob
-
-        return self.pb.agent.SimulationContract(**proto_kwargs)
-
-    def draw_velocity_command(
+    def benchmark(
         self,
-        origin: tuple[float, float, float],
-        lin_vel_x: float,
-        lin_vel_y: float,
-        ang_vel_z: float,
-        scale: float = 1.0,
-        clear_previous: bool = True,
-        timeout: Optional[float] = None,
-    ) -> bool:
-        """
-        Draw velocity command visualization in LuckyEngine.
+        duration_seconds: float = 5.0,
+        method: str = "get_observation",
+        print_results: bool = False,
+    ) -> BenchmarkResult:
+        """Benchmark a client method by calling it in a tight loop.
 
         Args:
-            origin: (x, y, z) position of the robot.
-            lin_vel_x: Forward velocity command.
-            lin_vel_y: Lateral velocity command.
-            ang_vel_z: Angular velocity command (yaw rate).
-            scale: Scale factor for visualization.
-            clear_previous: Clear previous debug draws before drawing.
-            timeout: RPC timeout in seconds.
+            duration_seconds: How long to run the benchmark.
+            method: Method to benchmark. Currently supports "get_observation".
+            print_results: Print results to stdout.
 
         Returns:
-            True if draw succeeded, False otherwise.
+            BenchmarkResult with timing statistics.
+
+        Raises:
+            ValueError: If method is not recognized.
         """
-        timeout = timeout or self.timeout
+        if method == "get_observation":
+            call_fn = self.get_observation
+        else:
+            raise ValueError(
+                f"Unknown method '{method}'. Supported: 'get_observation'"
+            )
 
-        velocity_cmd = self.pb.debug.DebugVelocityCommand(
-            origin=self.pb.debug.DebugVector3(x=origin[0], y=origin[1], z=origin[2]),
-            lin_vel_x=lin_vel_x,
-            lin_vel_y=lin_vel_y,
-            ang_vel_z=ang_vel_z,
-            scale=scale,
-        )
+        latencies: list[float] = []
+        start = time.perf_counter()
+        deadline = start + duration_seconds
 
-        request = self.pb.debug.DebugDrawRequest(
-            velocity_command=velocity_cmd,
-            clear_previous=clear_previous,
-        )
+        while time.perf_counter() < deadline:
+            t0 = time.perf_counter()
+            call_fn()
+            t1 = time.perf_counter()
+            latencies.append((t1 - t0) * 1000.0)  # ms
 
-        try:
-            resp = self.debug.Draw(request, timeout=timeout)
-            return resp.success
-        except Exception as e:
-            logger.debug(f"Debug draw failed: {e}")
-            return False
+        elapsed = time.perf_counter() - start
+        count = len(latencies)
 
-    def draw_arrow(
-        self,
-        origin: tuple[float, float, float],
-        direction: tuple[float, float, float],
-        color: tuple[float, float, float, float] = (1.0, 0.0, 0.0, 1.0),
-        scale: float = 1.0,
-        clear_previous: bool = False,
-        timeout: Optional[float] = None,
-    ) -> bool:
-        """
-        Draw a debug arrow in LuckyEngine.
+        if count == 0:
+            result = BenchmarkResult(
+                method=method,
+                duration_seconds=elapsed,
+                frame_count=0,
+                actual_fps=0.0,
+                avg_latency_ms=0.0,
+                min_latency_ms=0.0,
+                max_latency_ms=0.0,
+                std_latency_ms=0.0,
+                p50_latency_ms=0.0,
+                p99_latency_ms=0.0,
+            )
+        else:
+            sorted_lat = sorted(latencies)
+            p50_idx = int(math.floor(0.50 * (count - 1)))
+            p99_idx = int(math.floor(0.99 * (count - 1)))
 
-        Args:
-            origin: (x, y, z) start position.
-            direction: (x, y, z) direction and magnitude.
-            color: (r, g, b, a) color values (0-1 range).
-            scale: Scale factor for visualization.
-            clear_previous: Clear previous debug draws before drawing.
-            timeout: RPC timeout in seconds.
+            result = BenchmarkResult(
+                method=method,
+                duration_seconds=elapsed,
+                frame_count=count,
+                actual_fps=count / elapsed if elapsed > 0 else 0.0,
+                avg_latency_ms=statistics.mean(latencies),
+                min_latency_ms=sorted_lat[0],
+                max_latency_ms=sorted_lat[-1],
+                std_latency_ms=statistics.stdev(latencies) if count > 1 else 0.0,
+                p50_latency_ms=sorted_lat[p50_idx],
+                p99_latency_ms=sorted_lat[p99_idx],
+            )
 
-        Returns:
-            True if draw succeeded, False otherwise.
-        """
-        timeout = timeout or self.timeout
+        if print_results:
+            print(f"\n--- Benchmark: {method} ({elapsed:.1f}s) ---")
+            print(f"  Frames: {result.frame_count}")
+            print(f"  FPS:    {result.actual_fps:.1f}")
+            print(f"  Avg:    {result.avg_latency_ms:.2f} ms")
+            print(f"  Min:    {result.min_latency_ms:.2f} ms")
+            print(f"  Max:    {result.max_latency_ms:.2f} ms")
+            print(f"  Std:    {result.std_latency_ms:.2f} ms")
+            print(f"  P50:    {result.p50_latency_ms:.2f} ms")
+            print(f"  P99:    {result.p99_latency_ms:.2f} ms")
 
-        arrow = self.pb.debug.DebugArrow(
-            origin=self.pb.debug.DebugVector3(x=origin[0], y=origin[1], z=origin[2]),
-            direction=self.pb.debug.DebugVector3(
-                x=direction[0], y=direction[1], z=direction[2]
-            ),
-            color=self.pb.debug.DebugColor(
-                r=color[0], g=color[1], b=color[2], a=color[3]
-            ),
-            scale=scale,
-        )
-
-        request = self.pb.debug.DebugDrawRequest(
-            arrows=[arrow],
-            clear_previous=clear_previous,
-        )
-
-        try:
-            resp = self.debug.Draw(request, timeout=timeout)
-            return resp.success
-        except Exception as e:
-            logger.debug(f"Debug draw failed: {e}")
-            return False
-
-    def draw_line(
-        self,
-        start: tuple[float, float, float],
-        end: tuple[float, float, float],
-        color: tuple[float, float, float, float] = (1.0, 1.0, 1.0, 1.0),
-        clear_previous: bool = False,
-        timeout: Optional[float] = None,
-    ) -> bool:
-        """
-        Draw a debug line in LuckyEngine.
-
-        Args:
-            start: (x, y, z) start position.
-            end: (x, y, z) end position.
-            color: (r, g, b, a) color values (0-1 range).
-            clear_previous: Clear previous debug draws before drawing.
-            timeout: RPC timeout in seconds.
-
-        Returns:
-            True if draw succeeded, False otherwise.
-        """
-        timeout = timeout or self.timeout
-
-        line = self.pb.debug.DebugLine(
-            start=self.pb.debug.DebugVector3(x=start[0], y=start[1], z=start[2]),
-            end=self.pb.debug.DebugVector3(x=end[0], y=end[1], z=end[2]),
-            color=self.pb.debug.DebugColor(
-                r=color[0], g=color[1], b=color[2], a=color[3]
-            ),
-        )
-
-        request = self.pb.debug.DebugDrawRequest(
-            lines=[line],
-            clear_previous=clear_previous,
-        )
-
-        try:
-            resp = self.debug.Draw(request, timeout=timeout)
-            return resp.success
-        except Exception as e:
-            logger.debug(f"Debug draw failed: {e}")
-            return False
+        return result
