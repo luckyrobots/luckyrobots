@@ -133,16 +133,16 @@ pip install luckyrobots[sysid]
 
 ```bash
 # Collect trajectory data from the engine
-luckyrobots-sysid collect --robot unitreego2 --signal chirp --duration 15 -o traj.npz
+luckyrobots sysid collect --robot unitreego2 --signal chirp --duration 15 -o traj.npz
 
 # Identify model parameters
-luckyrobots-sysid identify traj.npz -m go2.xml --preset go2:motor -o result.json
+luckyrobots sysid identify traj.npz -m go2.xml --preset go2:motor -o result.json
 
 # Apply calibrated parameters to create a new model
-luckyrobots-sysid apply result.json -m go2.xml -o go2_calibrated.xml
+luckyrobots sysid apply result.json -m go2.xml -o go2_calibrated.xml
 
 # List available parameter presets
-luckyrobots-sysid presets
+luckyrobots sysid presets
 ```
 
 ### Python API
@@ -246,7 +246,7 @@ src/luckyrobots/
     ├── calibrate.py     # apply_params() to MuJoCo XML
     ├── collector.py     # Collector ABC + EngineCollector
     ├── excitation.py    # Signal generators (chirp, multisine, random_steps)
-    └── cli.py           # luckyrobots-sysid CLI
+    └── cli.py           # luckyrobots sysid CLI
 ```
 
 ### Contributing

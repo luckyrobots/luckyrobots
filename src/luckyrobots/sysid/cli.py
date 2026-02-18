@@ -1,6 +1,7 @@
 """CLI for luckyrobots system identification.
 
-Entry point: ``luckyrobots-sysid`` (installed via pyproject.toml console_scripts).
+Registered as the ``sysid`` subcommand of the top-level ``luckyrobots`` CLI.
+Usage: ``luckyrobots sysid <command>``
 """
 
 from __future__ import annotations
@@ -10,13 +11,13 @@ from pathlib import Path
 import click
 
 
-@click.group()
-def cli():
-    """luckyrobots-sysid - System identification for LuckyRobots."""
+@click.group("sysid")
+def sysid():
+    """System identification for sim-to-real calibration."""
     pass
 
 
-@cli.command()
+@sysid.command()
 @click.option("--host", default="127.0.0.1", help="LuckyEngine gRPC host.")
 @click.option("--port", default=50051, type=int, help="LuckyEngine gRPC port.")
 @click.option("--robot", default="unitreego2", help="Robot name.")
@@ -59,7 +60,7 @@ def collect(host, port, robot, signal, duration, dt, amplitude, num_joints, outp
     click.echo(f"Saved {traj.num_steps} steps ({traj.duration:.1f}s) to {path}")
 
 
-@cli.command()
+@sysid.command()
 @click.argument("data_path", type=click.Path(exists=True))
 @click.option("-m", "--model", required=True, type=click.Path(exists=True), help="MuJoCo XML model.")
 @click.option("--preset", default=None, help="Parameter preset (e.g. go2:motor).")
@@ -105,7 +106,7 @@ def identify(data_path, model, preset, max_iter, report_dir, output):
         )
 
 
-@cli.command()
+@sysid.command()
 @click.argument("result_path", type=click.Path(exists=True))
 @click.option("-m", "--model", required=True, type=click.Path(exists=True), help="MuJoCo XML model.")
 @click.option("-o", "--output", required=True, help="Output calibrated XML path.")
@@ -120,7 +121,7 @@ def apply(result_path, model, output):
     click.echo(f"Modified {len(result.params)} parameters")
 
 
-@cli.command()
+@sysid.command()
 @click.option("--robot", default=None, help="Filter by robot name.")
 def presets(robot):
     """List available parameter presets."""
@@ -145,4 +146,4 @@ def presets(robot):
 
 
 if __name__ == "__main__":
-    cli()
+    sysid()
