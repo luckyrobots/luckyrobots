@@ -56,36 +56,33 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
 
 ## Basic Usage
 
+### Low-level client (direct gRPC)
+
 ```python
 from luckyrobots import LuckyEngineClient
 
-# Connect to LuckyEngine
-client = LuckyEngineClient(
-    host="127.0.0.1",
-    port=50051,
-    robot_name="unitreego1",
-)
+client = LuckyEngineClient(host="127.0.0.1", port=50051, robot_name="unitreego2")
 client.wait_for_server()
 
-# Optional: Fetch schema for named observation access
-client.fetch_schema()
+# RL step: send action, get observation
+obs = client.step(actions=[0.0] * 12)
+print(f"Observation: {obs.observation[:5]}...")
 
-# Get RL observation
-obs = client.get_observation()
-print(f"Observation: {obs.observation[:5]}...")  # Flat vector for RL
-print(f"Timestamp: {obs.timestamp_ms}")
-
-# Named access (if schema fetched)
-# obs["proj_grav_x"]  # Access by name
-# obs.to_dict()       # Convert to dict
-
-# Send controls
+# Or separately:
 client.send_control(controls=[0.1, 0.2, -0.1, ...])
-
-# Get joint state (separate from RL observation)
+obs = client.get_observation()
 joints = client.get_joint_state()
-print(f"Positions: {joints.positions}")
-print(f"Velocities: {joints.velocities}")
+```
+
+### High-level session (manages engine lifecycle)
+
+```python
+from luckyrobots import Session
+
+with Session() as session:
+    session.start(scene="velocity", robot="unitreego2", task="locomotion")
+    obs = session.step(actions=[0.0] * 12)
+    obs = session.reset()
 ```
 
 ## API Overview
@@ -94,23 +91,28 @@ print(f"Velocities: {joints.velocities}")
 
 **`LuckyEngineClient`** - Low-level gRPC client
 - `wait_for_server(timeout)` - Wait for LuckyEngine connection
+- `step(actions)` - Send actions + physics step + get observation (single RPC)
 - `get_observation()` - Get RL observation vector
 - `get_joint_state()` - Get joint positions/velocities
 - `send_control(controls)` - Send actuator commands
 - `get_agent_schema()` - Get observation/action names and sizes
 - `reset_agent()` - Reset agent state
+- `set_simulation_mode(mode)` - Set timing: "fast", "realtime", "deterministic"
+- `benchmark(duration, method)` - Benchmark RPC latency
 
-**`LuckyRobots`** - High-level wrapper (launches LuckyEngine)
-- `start(scene, robot, task)` - Launch and connect
-- `get_observation()` - Get observation
-- `step(controls)` - Send controls and get next observation
+**`Session`** - Managed session (launches + connects to LuckyEngine)
+- `start(scene, robot, task)` - Launch engine and connect
+- `connect(robot=)` - Connect to already-running engine
+- `step(actions)` - RL step
+- `reset()` - Reset agent
+- `close()` - Disconnect and stop engine
 
 ### Models
 
 ```python
-from luckyrobots import ObservationResponse, StateSnapshot
+from luckyrobots import ObservationResponse
 
-# ObservationResponse - returned by get_observation()
+# ObservationResponse - returned by step() and get_observation()
 obs.observation      # List[float] - flat RL observation vector
 obs.actions          # List[float] - last applied actions
 obs.timestamp_ms     # int - wall-clock timestamp
@@ -119,10 +121,53 @@ obs["name"]          # Named access (if schema fetched)
 obs.to_dict()        # Convert to name->value dict
 ```
 
+## System Identification (optional)
+
+Calibrate MuJoCo model parameters to match real robot behavior.
+
+```bash
+pip install luckyrobots[sysid]
+```
+
+### CLI
+
+```bash
+# Collect trajectory data from the engine
+luckyrobots-sysid collect --robot unitreego2 --signal chirp --duration 15 -o traj.npz
+
+# Identify model parameters
+luckyrobots-sysid identify traj.npz -m go2.xml --preset go2:motor -o result.json
+
+# Apply calibrated parameters to create a new model
+luckyrobots-sysid apply result.json -m go2.xml -o go2_calibrated.xml
+
+# List available parameter presets
+luckyrobots-sysid presets
+```
+
+### Python API
+
+```python
+from luckyrobots.sysid import identify, apply_params, TrajectoryData, load_preset, chirp
+
+# Generate excitation signal
+ctrl = chirp(duration=15.0, dt=0.02, amplitude=0.3, num_joints=12)
+
+# Load recorded trajectory
+traj = TrajectoryData.load("trajectory.npz")
+
+# Identify parameters
+specs = load_preset("go2", "motor")  # armature, damping, frictionloss per joint
+result = identify("go2.xml", traj, specs)
+
+# Apply to MuJoCo XML
+apply_params("go2.xml", result, "go2_calibrated.xml")
+```
+
 ## Available Robots & Environments
 
 ### Robots
-- **unitreego1**: Quadruped robot
+- **unitreego2**: Unitree Go2 quadruped (12 joints)
 - **so100**: 6-DOF manipulator with gripper
 - **stretch_v1**: Mobile manipulator
 
@@ -181,16 +226,27 @@ python -m grpc_tools.protoc \
 
 ```
 src/luckyrobots/
-├── client.py            # LuckyEngineClient (main API)
-├── luckyrobots.py       # LuckyRobots high-level wrapper
-├── models/              # Pydantic models
-│   ├── observation.py   # ObservationResponse, StateSnapshot
-│   └── camera.py        # CameraData, CameraShape
-├── engine/              # Engine management
+├── client.py            # LuckyEngineClient — low-level gRPC client
+├── session.py           # Session — managed engine lifecycle
+├── debug.py             # Draw helpers (velocity arrows, lines)
+├── sim_contract.py      # Simulation contract → protobuf builder
+├── utils.py             # Shared utilities
+├── models/              # Data classes
+│   ├── observation.py   # ObservationResponse
+│   └── benchmark.py     # BenchmarkResult, FPS
+├── engine/              # Engine process management
 ├── grpc/                # gRPC internals
 │   ├── generated/       # Protobuf stubs
 │   └── proto/           # .proto files
-└── config/              # Robot configurations
+├── config/              # Robot configurations (robots.yaml)
+└── sysid/               # System identification (optional)
+    ├── trajectory.py    # TrajectoryData (save/load recordings)
+    ├── parameters.py    # ParamSpec, get/set MuJoCo params, presets
+    ├── sysid.py         # identify() optimizer + SysIdResult
+    ├── calibrate.py     # apply_params() to MuJoCo XML
+    ├── collector.py     # Collector ABC + EngineCollector
+    ├── excitation.py    # Signal generators (chirp, multisine, random_steps)
+    └── cli.py           # luckyrobots-sysid CLI
 ```
 
 ### Contributing

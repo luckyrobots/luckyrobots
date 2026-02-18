@@ -9,4 +9,4 @@ from luckyrobots.client import LuckyEngineClient as LuckyEngineClient
 from luckyrobots.models import BenchmarkResult as BenchmarkResult
 from luckyrobots.models import FPS as FPS
 from luckyrobots.models import ObservationResponse as ObservationResponse
-from luckyrobots.robot import LuckyRobots as LuckyRobots
+from luckyrobots.session import Session as Session

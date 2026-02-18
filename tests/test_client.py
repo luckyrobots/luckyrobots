@@ -197,7 +197,7 @@ class TestLuckyEngineClientIntegration:
         """Create a connected client."""
         host = request.config.getoption("--host", default="127.0.0.1")
         port = request.config.getoption("--port", default=50051)
-        robot = request.config.getoption("--robot", default="unitreego1")
+        robot = request.config.getoption("--robot", default="unitreego2")
 
         client = LuckyEngineClient(host=host, port=int(port), robot_name=robot)
         if not client.wait_for_server(timeout=10.0):

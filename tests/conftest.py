@@ -22,7 +22,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--robot",
         action="store",
-        default="unitreego1",
+        default="unitreego2",
         help="Robot name to use for tests",
     )
 
