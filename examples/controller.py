@@ -19,7 +19,7 @@ from luckyrobots import (
     FPS,
     GrpcConnectionError,
     LuckyEngineClient,
-    LuckyRobots,
+    Session,
 )
 from luckyrobots.engine import launch_luckyengine, stop_luckyengine
 
@@ -40,7 +40,7 @@ class Controller:
             robot_name=robot,
         )
 
-        robot_cfg = LuckyRobots.get_robot_config(robot)
+        robot_cfg = Session.get_robot_config(robot)
         limits = robot_cfg["action_space"]["actuator_limits"]
         self._lower = np.array([a["lower"] for a in limits], dtype=np.float32)
         self._upper = np.array([a["upper"] for a in limits], dtype=np.float32)
@@ -141,7 +141,7 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=50051)
     parser.add_argument("--scene", type=str, default="velocity")
     parser.add_argument("--task", type=str, default="locomotion")
-    parser.add_argument("--robot", type=str, default="unitreego1")
+    parser.add_argument("--robot", type=str, default="unitreego2")
     parser.add_argument("--rate", type=float, default=30.0)
     parser.add_argument("--duration", type=float, default=60.0)
     parser.add_argument(

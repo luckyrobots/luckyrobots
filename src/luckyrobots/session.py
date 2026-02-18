@@ -1,6 +1,4 @@
 import logging
-import time
-
 from collections.abc import Sequence
 from typing import Optional
 
@@ -14,14 +12,12 @@ from .utils import validate_params, get_robot_config
 logger = logging.getLogger("luckyrobots")
 
 
-class LuckyRobots:
+class Session:
     """
-    gRPC-only control surface for LuckyEngine.
+    Managed session with LuckyEngine.
 
-    This is a small convenience wrapper around `LuckyEngineClient` that can:
-    - launch the LuckyEngine executable (optional)
-    - connect to the LuckyEngine gRPC server
-    - send controls and fetch unified observations
+    High-level wrapper around `LuckyEngineClient` that manages the full
+    lifecycle: launch engine -> connect via gRPC -> interact -> close.
     """
 
     def __init__(
@@ -198,11 +194,6 @@ class LuckyRobots:
         client = self._require_client()
         return client.set_simulation_mode(mode=mode)
 
-    def get_simulation_mode(self):
-        """Get current simulation timing mode."""
-        client = self._require_client()
-        return client.get_simulation_mode()
-
     def reset(
         self,
         agent_name: str = "",
@@ -240,7 +231,7 @@ class LuckyRobots:
         if stop_engine:
             stop_luckyengine()
 
-    def __enter__(self) -> "LuckyRobots":
+    def __enter__(self) -> "Session":
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
