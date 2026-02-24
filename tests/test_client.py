@@ -161,7 +161,7 @@ class TestBenchmarkResult:
     def test_benchmark_result_creation(self):
         """Test BenchmarkResult can be created."""
         result = BenchmarkResult(
-            method="get_observation",
+            method="step",
             duration_seconds=5.0,
             frame_count=150,
             actual_fps=30.0,
@@ -173,7 +173,7 @@ class TestBenchmarkResult:
             p99_latency_ms=44.0,
         )
 
-        assert result.method == "get_observation"
+        assert result.method == "step"
         assert result.actual_fps == 30.0
         assert result.frame_count == 150
 
@@ -214,9 +214,9 @@ class TestLuckyEngineClientIntegration:
         assert hasattr(info, "nq")
         assert hasattr(info, "nv")
 
-    def test_get_observation(self, client):
-        """Test fetching observation."""
-        obs = client.get_observation()
+    def test_step(self, client):
+        """Test stepping with zero actions returns observation."""
+        obs = client.step(actions=[0.0] * 12)
         assert isinstance(obs, ObservationResponse)
         assert isinstance(obs.observation, list)
 
@@ -227,21 +227,19 @@ class TestLuckyEngineClientIntegration:
         assert hasattr(resp.state, "positions")
         assert hasattr(resp.state, "velocities")
 
-    def test_benchmark_get_observation(self, client):
-        """Benchmark get_observation() performance."""
+    def test_benchmark_step(self, client):
+        """Benchmark step() performance."""
         result = client.benchmark(
             duration_seconds=3.0,
-            method="get_observation",
+            method="step",
             print_results=True,
         )
 
         assert result.frame_count > 0
 
         status = "PASS" if result.actual_fps >= MIN_FPS_TARGET else "FAIL"
-        print(f"\n[{status}] get_observation: {result.actual_fps:.1f} FPS (target: {MIN_FPS_TARGET})")
-        print("       Note: This measures polling speed, not simulation rate.")
-        print("       May return the same observation multiple times between sim steps.")
+        print(f"\n[{status}] step: {result.actual_fps:.1f} FPS (target: {MIN_FPS_TARGET})")
 
         assert result.actual_fps >= MIN_FPS_TARGET, (
-            f"get_observation FPS ({result.actual_fps:.1f}) below target ({MIN_FPS_TARGET})"
+            f"step FPS ({result.actual_fps:.1f}) below target ({MIN_FPS_TARGET})"
         )

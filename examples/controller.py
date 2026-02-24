@@ -4,9 +4,8 @@ Minimal example: control a robot in LuckyEngine via gRPC.
 This example demonstrates how to:
 1. Launch LuckyEngine
 2. Connect to LuckyEngine via gRPC
-3. Send control commands (MujocoService.SendControl)
-4. Read back robot state and observations
-5. Reset the agent periodically during the control loop
+3. Step the simulation with actions (AgentService.Step)
+4. Reset the agent periodically during the control loop
 """
 
 import argparse
@@ -73,12 +72,8 @@ class Controller:
         return np.random.uniform(low=self._lower, high=self._upper).astype(np.float32)
 
     def step(self, controls: np.ndarray) -> np.ndarray:
-        """Send a control vector and read back a unified observation snapshot."""
-        resp = self.client.send_control(controls=[float(x) for x in controls])
-        if hasattr(resp, "success") and not resp.success:
-            raise RuntimeError(f"SendControl failed: {getattr(resp, 'message', '')}")
-
-        obs = self.client.get_observation()
+        """Send a control vector, advance physics, and return observation."""
+        obs = self.client.step(actions=[float(x) for x in controls])
         return np.array(obs.observation, dtype=np.float32)
 
     def run_loop(self, rate_hz: float, duration_s: float) -> None:

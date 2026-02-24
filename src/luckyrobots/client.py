@@ -52,9 +52,9 @@ class LuckyEngineClient:
     Client for connecting to the LuckyEngine gRPC server.
 
     Provides access to gRPC services for RL training:
-    - AgentService: observations, stepping, resets
+    - AgentService: stepping, resets
     - SceneService: simulation mode control
-    - MujocoService: health checks, joint state, send control
+    - MujocoService: health checks, joint state
 
     Usage:
         client = LuckyEngineClient(host="127.0.0.1", port=50051)
@@ -276,40 +276,12 @@ class LuckyEngineClient:
             timeout=timeout,
         )
 
-    def send_control(
-        self,
-        controls: list[float],
-        robot_name: str = "",
-        timeout: Optional[float] = None,
-    ):
-        """Send control commands to a robot via MujocoService.SendControl.
-
-        Args:
-            controls: Control input vector.
-            robot_name: Robot entity name (uses default if empty).
-            timeout: RPC timeout in seconds.
-
-        Returns:
-            SendControlResponse with success and message fields.
-        """
-        timeout = timeout or self.timeout
-        robot_name = robot_name or self._robot_name
-        if not robot_name:
-            raise ValueError("robot_name is required")
-        return self.mujoco.SendControl(
-            self.pb.mujoco.SendControlRequest(
-                robot_name=robot_name,
-                controls=controls,
-            ),
-            timeout=timeout,
-        )
-
     # ── AgentService RPCs ──
 
     def get_agent_schema(self, agent_name: str = "", timeout: Optional[float] = None):
         """Get agent schema (observation/action sizes and names).
 
-        The schema is cached for subsequent get_observation() calls to enable
+        The schema is cached for subsequent step() calls to enable
         named access to observation values.
 
         Args:
@@ -341,66 +313,6 @@ class LuckyEngineClient:
             )
 
         return resp
-
-    def get_observation(
-        self,
-        agent_name: str = "",
-        timeout: Optional[float] = None,
-    ) -> ObservationResponse:
-        """
-        Get the RL observation vector for an agent.
-
-        Args:
-            agent_name: Agent name (empty = default agent).
-            timeout: RPC timeout.
-
-        Returns:
-            ObservationResponse with observation vector, actions, timestamp.
-        """
-        timeout = timeout or self.timeout
-
-        resolved_robot_name = self._robot_name
-        if not resolved_robot_name:
-            raise ValueError(
-                "robot_name is required (set it once via "
-                "LuckyEngineClient(robot_name=...) / client.set_robot_name(...))."
-            )
-
-        resp = self.agent.GetObservation(
-            self.pb.agent.GetObservationRequest(
-                robot_name=resolved_robot_name,
-                agent_name=agent_name,
-                include_joint_state=False,
-                include_agent_frame=True,
-                include_telemetry=False,
-            ),
-            timeout=timeout,
-        )
-
-        agent_frame = getattr(resp, "agent_frame", None)
-        observations = []
-        actions = []
-        timestamp_ms = getattr(resp, "timestamp_ms", 0)
-        frame_number = getattr(resp, "frame_number", 0)
-
-        if agent_frame is not None:
-            observations = list(agent_frame.observations) if agent_frame.observations else []
-            actions = list(agent_frame.actions) if agent_frame.actions else []
-            timestamp_ms = getattr(agent_frame, "timestamp_ms", timestamp_ms)
-            frame_number = getattr(agent_frame, "frame_number", frame_number)
-
-        cache_key = agent_name or "agent_0"
-        obs_names, action_names = self._schema_cache.get(cache_key, (None, None))
-
-        return ObservationResponse(
-            observation=observations,
-            actions=actions,
-            timestamp_ms=timestamp_ms,
-            frame_number=frame_number,
-            agent_name=cache_key,
-            observation_names=obs_names,
-            action_names=action_names,
-        )
 
     def reset_agent(
         self,
@@ -535,14 +447,14 @@ class LuckyEngineClient:
     def benchmark(
         self,
         duration_seconds: float = 5.0,
-        method: str = "get_observation",
+        method: str = "step",
         print_results: bool = False,
     ) -> BenchmarkResult:
         """Benchmark a client method by calling it in a tight loop.
 
         Args:
             duration_seconds: How long to run the benchmark.
-            method: Method to benchmark. Currently supports "get_observation".
+            method: Method to benchmark. Currently supports "step".
             print_results: Print results to stdout.
 
         Returns:
@@ -551,11 +463,12 @@ class LuckyEngineClient:
         Raises:
             ValueError: If method is not recognized.
         """
-        if method == "get_observation":
-            call_fn = self.get_observation
+        if method == "step":
+            # Use zero actions for benchmarking
+            call_fn = lambda: self.step(actions=[0.0] * 12)
         else:
             raise ValueError(
-                f"Unknown method '{method}'. Supported: 'get_observation'"
+                f"Unknown method '{method}'. Supported: 'step'"
             )
 
         latencies: list[float] = []

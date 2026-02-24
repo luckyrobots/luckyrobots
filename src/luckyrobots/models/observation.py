@@ -7,8 +7,7 @@ from pydantic import BaseModel, Field, ConfigDict
 class ObservationResponse(BaseModel):
     """RL observation data from an agent.
 
-    This is the return type for LuckyEngineClient.get_observation() and
-    LuckyEngineClient.step(). It contains the RL observation vector
+    This is the return type for LuckyEngineClient.step(). It contains the RL observation vector
     with optional named access for debugging.
 
     Usage:

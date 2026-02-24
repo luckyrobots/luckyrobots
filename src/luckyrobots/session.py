@@ -1,8 +1,6 @@
 import logging
 from collections.abc import Sequence
-from typing import Optional
-
-from typing import Any
+from typing import Any, Optional
 
 from .engine import launch_luckyengine, stop_luckyengine
 from .models import ObservationResponse
@@ -116,25 +114,6 @@ class Session:
             raise GrpcConnectionError("Not connected. Call start() or connect() first.")
         return self._engine_client
 
-    def get_observation(self, agent_name: str = "") -> ObservationResponse:
-        """
-        Get observation vector.
-
-        This returns only the flat observation vector defined by the agent's
-        observation spec. For sensor data, use the dedicated methods:
-        - get_joint_state() for joint positions/velocities
-        - engine_client.stream_telemetry() for telemetry
-        - engine_client.stream_camera() for camera frames
-
-        Args:
-            agent_name: Agent name (empty = default agent).
-
-        Returns:
-            ObservationResponse with observation vector, actions, timestamp.
-        """
-        client = self._require_client()
-        return client.get_observation(agent_name=agent_name)
-
     def get_joint_state(self):
         """
         Get joint positions/velocities.
@@ -146,19 +125,6 @@ class Session:
             raise ValueError("Robot name is not set.")
         return client.get_joint_state(robot_name=self._robot_name)
 
-    def send_control(self, controls: Sequence[float]) -> None:
-        """Send control commands to the robot via gRPC."""
-        client = self._require_client()
-        if not self._robot_name:
-            raise ValueError("Robot name is not set.")
-
-        resp = client.send_control(
-            controls=[float(x) for x in controls],
-            robot_name=self._robot_name,
-        )
-        if hasattr(resp, "success") and not resp.success:
-            raise RuntimeError(f"SendControl failed: {getattr(resp, 'message', '')}")
-
     def step(
         self,
         actions: Sequence[float],
@@ -168,8 +134,8 @@ class Session:
         Synchronous RL step: apply action, wait for physics, return observation.
 
         This is the recommended interface for RL training. It uses the gRPC Step RPC
-        which combines SendControl + physics step + GetObservation into a single call,
-        eliminating one network round-trip.
+        which atomically applies the action, advances physics, and returns the
+        observation in a single call.
 
         Args:
             actions: Action vector to apply for this step.
@@ -218,7 +184,8 @@ class Session:
         resp = client.reset_agent(agent_name=agent_name, randomization_cfg=randomization_cfg)
         if hasattr(resp, "success") and not resp.success:
             raise RuntimeError(f"Reset failed: {getattr(resp, 'message', '')}")
-        return self.get_observation(agent_name=agent_name)
+        # Step with zero actions to get the initial observation after reset.
+        return client.step(actions=[0.0] * 12, agent_name=agent_name)
 
     def close(self, stop_engine: bool = True) -> None:
         """Close gRPC client and optionally stop the engine executable."""

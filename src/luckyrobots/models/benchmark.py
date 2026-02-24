@@ -12,7 +12,7 @@ class BenchmarkResult:
     """Result of a client benchmark run.
 
     Attributes:
-        method: The method that was benchmarked (e.g. "get_observation").
+        method: The method that was benchmarked (e.g. "step").
         duration_seconds: Total wall-clock time of the benchmark.
         frame_count: Number of frames/calls completed.
         actual_fps: Measured frames per second.
