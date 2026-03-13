@@ -35,6 +35,7 @@ except Exception as e:  # pragma: no cover
     ) from e
 
 from .models import ObservationResponse
+from .models.observation import CameraFrame
 from .models.benchmark import BenchmarkResult
 from . import sim_contract
 
@@ -99,6 +100,9 @@ class LuckyEngineClient:
 
         # Cached agent schemas: agent_name -> (observation_names, action_names)
         self._schema_cache: dict[str, tuple[list[str], list[str]]] = {}
+
+        # Camera requests included on every Step RPC (configured via configure_cameras).
+        self._camera_requests: list = []
 
         # Protobuf modules (for discoverability + explicit imports).
         self._pb = SimpleNamespace(
@@ -243,6 +247,26 @@ class LuckyEngineClient:
             raise GrpcConnectionError("Not connected. Call connect() first.")
         return self._debug
 
+    # ── Camera configuration ──
+
+    def configure_cameras(self, cameras: list[dict]) -> None:
+        """Configure cameras to capture on every Step RPC.
+
+        Args:
+            cameras: List of camera configs. Each dict has keys:
+                name: Camera entity name in the scene.
+                width: Desired image width (0 = native resolution).
+                height: Desired image height (0 = native resolution).
+        """
+        self._camera_requests = [
+            self.pb.agent.GetCameraFrameRequest(
+                name=c["name"],
+                width=c.get("width", 0),
+                height=c.get("height", 0),
+            )
+            for c in cameras
+        ]
+
     # ── MujocoService RPCs ──
 
     def get_joint_state(self, robot_name: str = "", timeout: Optional[float] = None):
@@ -372,6 +396,7 @@ class LuckyEngineClient:
                     agent_name=agent_name,
                     actions=actions,
                     timeout_s=step_timeout_s,
+                    camera_requests=self._camera_requests,
                 ),
                 timeout=timeout,
             )
@@ -398,6 +423,18 @@ class LuckyEngineClient:
         cache_key = agent_name or "agent_0"
         obs_names, action_names = self._schema_cache.get(cache_key, (None, None))
 
+        camera_frames = [
+            CameraFrame(
+                name=nf.name,
+                data=bytes(nf.frame.data),
+                width=nf.frame.width,
+                height=nf.frame.height,
+                channels=nf.frame.channels,
+                frame_number=nf.frame.frame_number,
+            )
+            for nf in resp.camera_frames
+        ]
+
         return ObservationResponse(
             observation=observations,
             actions=actions_out,
@@ -406,6 +443,7 @@ class LuckyEngineClient:
             agent_name=cache_key,
             observation_names=obs_names,
             action_names=action_names,
+            camera_frames=camera_frames,
         )
 
     # ── SceneService RPCs ──

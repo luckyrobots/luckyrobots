@@ -125,6 +125,21 @@ class Session:
             raise ValueError("Robot name is not set.")
         return client.get_joint_state(robot_name=self._robot_name)
 
+    def configure_cameras(self, cameras: list[dict]) -> None:
+        """Configure cameras to capture on every step.
+
+        Once configured, every call to step() and reset() will include
+        synchronized camera frames in the returned ObservationResponse.
+
+        Args:
+            cameras: List of camera configs. Each dict has keys:
+                name: Camera entity name in the scene.
+                width: Desired image width (0 = native resolution).
+                height: Desired image height (0 = native resolution).
+        """
+        client = self._require_client()
+        client.configure_cameras(cameras)
+
     def step(
         self,
         actions: Sequence[float],

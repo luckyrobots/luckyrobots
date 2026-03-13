@@ -1,7 +1,19 @@
 """RL observation models for LuckyRobots."""
 
+from dataclasses import dataclass
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, ConfigDict
+
+
+@dataclass(frozen=True)
+class CameraFrame:
+    """A single camera frame returned from the engine."""
+    name: str
+    data: bytes
+    width: int
+    height: int
+    channels: int
+    frame_number: int
 
 
 class ObservationResponse(BaseModel):
@@ -39,6 +51,10 @@ class ObservationResponse(BaseModel):
     action_names: Optional[List[str]] = Field(
         default=None,
         description="Action names from agent schema",
+    )
+    camera_frames: List[CameraFrame] = Field(
+        default_factory=list,
+        description="Camera frames synchronized with this observation",
     )
 
     def __getitem__(self, key: str) -> float:

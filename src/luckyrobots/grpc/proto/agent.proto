@@ -189,6 +189,8 @@ message StepRequest {
     repeated float actions = 2;
     // Optional timeout in seconds for the physics step. 0 means use server default.
     float timeout_s = 3;
+    // Optional camera snapshots to capture after the physics step.
+    repeated GetCameraFrameRequest camera_requests = 4;
 }
 
 message StepResponse {
@@ -198,6 +200,8 @@ message StepResponse {
     AgentFrame observation = 3;
     // Time taken for the physics step in microseconds (for profiling).
     uint64 physics_step_duration_us = 4;
+    // Camera frames synchronized with the observation.
+    repeated NamedImageFrame camera_frames = 5;
 }
 
 // Per-agent RL-style observation streaming (training / inference clients consume this).
