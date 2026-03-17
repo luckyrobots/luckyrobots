@@ -39,6 +39,15 @@ class EngineProcess:
         """Check if LuckyEngine is currently running."""
         return os.path.exists(LOCK_FILE)
 
+    def get_stderr(self) -> Optional[str]:
+        """Get stderr output from the engine process (if captured)."""
+        if self._process and self._process.stderr:
+            try:
+                return self._process.stderr.read()
+            except Exception:
+                return None
+        return None
+
     def launch(
         self,
         scene: str = "ArmLevel",
@@ -48,6 +57,9 @@ class EngineProcess:
         headless: bool = False,
         windowed: bool = True,
         verbose: bool = False,
+        auto_play: bool = True,
+        grpc_port: int = 50051,
+        sim_mode: str = "realtime",
     ) -> bool:
         """Launch LuckyEngine with the specified parameters.
 
@@ -59,6 +71,9 @@ class EngineProcess:
             headless: Run without rendering.
             windowed: Run in windowed mode (vs fullscreen).
             verbose: Show engine output.
+            auto_play: Automatically enter Play mode and start gRPC.
+            grpc_port: Port for the gRPC server.
+            sim_mode: Simulation time mode (realtime, deterministic, fast).
 
         Returns:
             True if launch succeeded, False otherwise.
@@ -93,40 +108,49 @@ class EngineProcess:
 
             logger.info(f"Launching LuckyEngine: {executable_path}")
 
-            command = [executable_path]
-            command.append(f"-Scene={scene}")
-            command.append(f"-Robot={robot}")
+            # Resolve the project path and working directory relative to the executable.
+            # The engine expects to run from the LuckyEditor/ directory with the project
+            # path relative to that (e.g. "RobotSandbox/RobotSandbox.hproj").
+            exe_dir = os.path.dirname(os.path.abspath(executable_path))
+            # Walk up from bin/Release-windows-x86_64/LuckyEditor/ to repo root
+            repo_root = os.path.normpath(os.path.join(exe_dir, "..", "..", ".."))
+            editor_dir = os.path.join(repo_root, "LuckyEditor")
+            project_path = os.path.join("RobotSandbox", "RobotSandbox.hproj")
 
-            if task:
-                command.append(f"-Task={task}")
+            command = [executable_path, project_path]
+            command.append(f"--scene={scene}")
+            command.append(f"--grpc-robot={robot}")
+            command.append(f"--grpc-port={grpc_port}")
+            command.append(f"--sim-mode={sim_mode}")
+
+            if auto_play:
+                command.append("--auto-play=1")
 
             if headless:
                 command.append("-Headless")
-            else:
-                if windowed:
-                    command.append("-windowed")
-                else:
-                    command.append("-fullscreen")
-
-            command.append("-Realtime")
 
             logger.info(f"Command: {' '.join(command)}")
+
+            # Use LuckyEditor/ as working directory so shader/resource paths resolve
+            cwd = editor_dir if os.path.isdir(editor_dir) else None
 
             if platform.system() == "Windows":
                 DETACHED_PROCESS = 0x00000008
                 self._process = subprocess.Popen(
                     command,
+                    cwd=cwd,
                     creationflags=DETACHED_PROCESS,
                     close_fds=True,
                     stdout=None if verbose else subprocess.DEVNULL,
-                    stderr=None if verbose else subprocess.DEVNULL,
+                    stderr=None if verbose else subprocess.PIPE,
                 )
             else:
                 self._process = subprocess.Popen(
                     command,
+                    cwd=cwd,
                     start_new_session=True,
                     stdout=None if verbose else subprocess.DEVNULL,
-                    stderr=None if verbose else subprocess.DEVNULL,
+                    stderr=None if verbose else subprocess.PIPE,
                 )
 
             self._shutdown_event.clear()
