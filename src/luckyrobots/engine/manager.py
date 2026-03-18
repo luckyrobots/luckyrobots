@@ -34,6 +34,12 @@ class EngineProcess:
         self._process: Optional[subprocess.Popen] = None
         self._monitor_thread: Optional[threading.Thread] = None
         self._shutdown_event = threading.Event()
+        self._shm_name: Optional[str] = None
+
+    @property
+    def shm_name(self) -> Optional[str]:
+        """The shared memory name for IPC transport, or None if not launched."""
+        return self._shm_name
 
     def is_running(self) -> bool:
         """Check if LuckyEngine is currently running."""
@@ -112,12 +118,22 @@ class EngineProcess:
 
             logger.info(f"Command: {' '.join(command)}")
 
+            # Generate a unique shm name for IPC transport and pass via env var
+            env = os.environ.copy()
+            shm_name = env.get("LUCKY_SHM_NAME")
+            if not shm_name:
+                shm_name = f"luckyengine_{os.getpid()}"
+                env["LUCKY_SHM_NAME"] = shm_name
+            self._shm_name = shm_name
+            logger.info(f"IPC shared memory name: {shm_name}")
+
             if platform.system() == "Windows":
                 DETACHED_PROCESS = 0x00000008
                 self._process = subprocess.Popen(
                     command,
                     creationflags=DETACHED_PROCESS,
                     close_fds=True,
+                    env=env,
                     stdout=None if verbose else subprocess.DEVNULL,
                     stderr=None if verbose else subprocess.DEVNULL,
                 )
@@ -125,6 +141,7 @@ class EngineProcess:
                 self._process = subprocess.Popen(
                     command,
                     start_new_session=True,
+                    env=env,
                     stdout=None if verbose else subprocess.DEVNULL,
                     stderr=None if verbose else subprocess.DEVNULL,
                 )
