@@ -20,6 +20,13 @@ try:
 except ImportError:
     pass
 
+try:
+    from .portfolio.cli import portfolio as _portfolio_group
+
+    cli.add_command(_portfolio_group)
+except ImportError:
+    pass
+
 
 if __name__ == "__main__":
     cli()
