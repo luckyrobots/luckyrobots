@@ -57,7 +57,6 @@ class EngineCollector(Collector):
         )
         self._client.connect()
         self._client.wait_for_server(timeout=30.0)
-        self._client.set_simulation_mode("deterministic")
 
     def collect(self, ctrl_sequence: np.ndarray, dt: float) -> TrajectoryData:
         if self._client is None:

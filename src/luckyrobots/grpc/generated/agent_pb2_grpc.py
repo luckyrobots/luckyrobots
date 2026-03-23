@@ -5,7 +5,7 @@ import warnings
 
 from . import agent_pb2 as agent__pb2
 
-GRPC_GENERATED_VERSION = '1.76.0'
+GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -60,6 +60,11 @@ class AgentServiceStub(object):
                 request_serializer=agent__pb2.StepRequest.SerializeToString,
                 response_deserializer=agent__pb2.StepResponse.FromString,
                 _registered_method=True)
+        self.ReportProgress = channel.unary_unary(
+                '/hazel.rpc.AgentService/ReportProgress',
+                request_serializer=agent__pb2.ProgressReport.SerializeToString,
+                response_deserializer=agent__pb2.ProgressAck.FromString,
+                _registered_method=True)
 
 
 class AgentServiceServicer(object):
@@ -107,6 +112,14 @@ class AgentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ReportProgress(self, request, context):
+        """Report evaluation/training progress from an external client.
+        Fire-and-forget: the server stores the latest report for UI display.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -134,6 +147,11 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     servicer.Step,
                     request_deserializer=agent__pb2.StepRequest.FromString,
                     response_serializer=agent__pb2.StepResponse.SerializeToString,
+            ),
+            'ReportProgress': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReportProgress,
+                    request_deserializer=agent__pb2.ProgressReport.FromString,
+                    response_serializer=agent__pb2.ProgressAck.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -272,6 +290,33 @@ class AgentService(object):
             '/hazel.rpc.AgentService/Step',
             agent__pb2.StepRequest.SerializeToString,
             agent__pb2.StepResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ReportProgress(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/ReportProgress',
+            agent__pb2.ProgressReport.SerializeToString,
+            agent__pb2.ProgressAck.FromString,
             options,
             channel_credentials,
             insecure,

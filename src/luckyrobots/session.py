@@ -196,11 +196,35 @@ class Session:
             RuntimeError: If reset fails.
         """
         client = self._require_client()
-        resp = client.reset_agent(agent_name=agent_name, randomization_cfg=randomization_cfg)
-        if hasattr(resp, "success") and not resp.success:
-            raise RuntimeError(f"Reset failed: {getattr(resp, 'message', '')}")
+
+        # The Learn pipeline may still be initializing when we first connect.
+        # Retry reset for up to 10 seconds if the batch isn't ready yet.
+        import time as _time
+        deadline = _time.perf_counter() + 10.0
+        while True:
+            resp = client.reset_agent(agent_name=agent_name, randomization_cfg=randomization_cfg)
+            if hasattr(resp, "success") and not resp.success:
+                msg = getattr(resp, "message", "")
+                if "not ready yet" in msg and _time.perf_counter() < deadline:
+                    _time.sleep(0.25)
+                    continue
+                raise RuntimeError(f"Reset failed: {msg}")
+            break
+
         # Step with zero actions to get the initial observation after reset.
-        return client.step(actions=[0.0] * 12, agent_name=agent_name)
+        # Query the agent schema for the correct action size (cached after first call).
+        schema = client.get_agent_schema(agent_name=agent_name)
+        action_size = schema.schema.action_size if schema.schema else 12
+        return client.step(actions=[0.0] * action_size, agent_name=agent_name)
+
+    def report_progress(self, **kwargs) -> None:
+        """Report evaluation/training progress to the engine for UI display.
+
+        Accepts all keyword arguments of LuckyEngineClient.report_progress().
+        Fire-and-forget: errors are silently ignored.
+        """
+        client = self._require_client()
+        client.report_progress(**kwargs)
 
     def close(self, stop_engine: bool = True) -> None:
         """Close gRPC client and optionally stop the engine executable."""

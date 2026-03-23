@@ -204,6 +204,34 @@ message StepResponse {
     repeated NamedImageFrame camera_frames = 5;
 }
 
+// =============================================================================
+// Progress Reporting (client-to-server evaluation/training progress)
+// =============================================================================
+
+// Client-to-server progress report for evaluation/training runs.
+// Lightweight and fire-and-forget — the client does not block on the response
+// beyond confirming receipt.
+message ProgressReport {
+    string  run_id           = 1;   // Unique run identifier (e.g. UUID or task+timestamp)
+    string  task_name        = 2;   // e.g. "piper_blockstacking"
+    string  policy_name      = 3;   // e.g. "ACT", "PPO"
+    string  phase            = 4;   // e.g. "connecting", "loading", "running", "complete"
+
+    int32   current_episode  = 5;   // 1-based current episode
+    int32   total_episodes   = 6;   // total planned episodes
+    int32   current_step     = 7;   // 0-based step within current episode
+    int32   max_steps        = 8;   // max steps per episode
+
+    float   elapsed_s        = 9;   // wall-clock seconds since run started
+    string  status_text      = 10;  // free-form status line (e.g. "Episode 3/10: step 250")
+
+    bool    finished         = 11;  // true when the run is complete (triggers auto-clear after timeout)
+}
+
+message ProgressAck {
+    bool accepted = 1;
+}
+
 // Per-agent RL-style observation streaming (training / inference clients consume this).
 service AgentService {
     rpc GetAgentSchema(GetAgentSchemaRequest) returns (GetAgentSchemaResponse);
@@ -222,4 +250,7 @@ service AgentService {
     // This is the recommended interface for RL training as it eliminates
     // one network round-trip compared to separate SendControl + GetObservation.
     rpc Step(StepRequest) returns (StepResponse);
+    // Report evaluation/training progress from an external client.
+    // Fire-and-forget: the server stores the latest report for UI display.
+    rpc ReportProgress(ProgressReport) returns (ProgressAck);
 }
