@@ -197,7 +197,7 @@ class LuckyEngineClient:
                 except Exception:
                     pass
 
-            if self.health_check(timeout=10.0):
+            if self.health_check(timeout=min(poll_interval, timeout - (time.perf_counter() - start))):
                 logger.info(f"Connected to LuckyEngine gRPC server at {self.host}:{self.port}")
                 return True
 
@@ -445,6 +445,47 @@ class LuckyEngineClient:
             action_names=action_names,
             camera_frames=camera_frames,
         )
+
+    # ── Progress reporting ──
+
+    def report_progress(
+        self,
+        *,
+        run_id: str = "",
+        task_name: str = "",
+        policy_name: str = "",
+        phase: str = "",
+        current_episode: int = 0,
+        total_episodes: int = 0,
+        current_step: int = 0,
+        max_steps: int = 0,
+        elapsed_s: float = 0.0,
+        status_text: str = "",
+        finished: bool = False,
+    ) -> None:
+        """Report evaluation/training progress to the engine for UI display.
+
+        Fire-and-forget: errors are logged but never raised.
+        """
+        try:
+            self.agent.ReportProgress(
+                self.pb.agent.ProgressReport(
+                    run_id=run_id,
+                    task_name=task_name,
+                    policy_name=policy_name,
+                    phase=phase,
+                    current_episode=current_episode,
+                    total_episodes=total_episodes,
+                    current_step=current_step,
+                    max_steps=max_steps,
+                    elapsed_s=elapsed_s,
+                    status_text=status_text,
+                    finished=finished,
+                ),
+                timeout=1.0,
+            )
+        except Exception as e:
+            logger.debug("report_progress failed (non-fatal): %s", e)
 
     # ── SceneService RPCs ──
 
