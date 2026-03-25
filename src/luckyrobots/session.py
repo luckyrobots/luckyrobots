@@ -59,7 +59,6 @@ class Session:
             headless: Launch without rendering.
             timeout_s: How long to wait for gRPC server to come up.
         """
-        validate_params(scene, robot, task, observation_type)
         self._robot_name = robot
 
         success = launch_luckyengine(
@@ -68,6 +67,8 @@ class Session:
             task=task,
             executable_path=executable_path,
             headless=headless,
+            auto_play=True,
+            grpc_port=self.port,
         )
         if not success:
             logger.error("Failed to launch LuckyEngine")
@@ -76,6 +77,27 @@ class Session:
             )
 
         self.connect(timeout_s=timeout_s, robot=robot)
+        self._wait_for_agents_ready(timeout_s=timeout_s)
+
+    def _wait_for_agents_ready(self, timeout_s: float = 120.0) -> None:
+        """Wait for the engine's agent pipeline to be ready (scene fully playing)."""
+        import time
+        logger.info("Waiting for agents to be ready...")
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            try:
+                schema = self._engine_client.get_agent_schema()
+                if schema.schema.observation_size > 0:
+                    logger.info("Agents ready (obs_size=%d, action_size=%d)",
+                                schema.schema.observation_size, schema.schema.action_size)
+                    return
+            except Exception:
+                pass
+            time.sleep(1.0)
+        raise RuntimeError(
+            f"Agents not ready after {timeout_s}s. "
+            "The scene may not have entered Play mode."
+        )
 
     def connect(self, timeout_s: float = 120.0, robot: Optional[str] = None) -> None:
         """Connect to LuckyEngine gRPC server and cache MuJoCo metadata."""
