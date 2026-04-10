@@ -176,6 +176,36 @@ message GetObservationResponse {
 }
 
 // =============================================================================
+// Reward signals — raw physics quantities for user-side reward computation
+// =============================================================================
+
+// Sent alongside observations in StepResponse.
+// The engine computes these from MuJoCo state at physics-rate resolution.
+// Users compose reward functions from these signals in Python (or any language).
+message RewardSignals {
+    // Map of signal_name -> scalar value.
+    // Available signals depend on robot/scene configuration.
+    // Examples: "lin_vel_error", "ang_vel_error", "joint_acc_norm",
+    //           "feet_air_time", "foot_contact_force", "orientation_error"
+    map<string, float> signals = 1;
+}
+
+// Describes a single reward signal the engine can provide.
+message RewardSignalDescriptor {
+    string name = 1;        // e.g., "lin_vel_error"
+    string description = 2; // Human-readable description
+    string unit = 3;        // e.g., "m/s", "rad", "N", "dimensionless"
+}
+
+message GetRewardSignalSchemaRequest {
+    string agent_name = 1;
+}
+
+message GetRewardSignalSchemaResponse {
+    repeated RewardSignalDescriptor signals = 1;
+}
+
+// =============================================================================
 // Step RPC (synchronous RL step)
 // =============================================================================
 
@@ -198,11 +228,25 @@ message StepResponse {
     AgentFrame observation = 3;
     // Time taken for the physics step in microseconds (for profiling).
     uint64 physics_step_duration_us = 4;
+
+    // Raw physics quantities for user-side reward computation.
+    // The engine populates this with whatever signals are available for the
+    // current robot/scene. Users write reward functions over these signals.
+    RewardSignals reward_signals = 5;
+
+    // Episode boundary flags (computed engine-side at full physics rate).
+    bool terminated = 6;    // Hard termination (e.g., robot fell over, divergence)
+    bool truncated = 7;     // Soft termination (e.g., time limit reached)
+
+    // Auxiliary info for diagnostics, timing, and per-scene custom data.
+    map<string, float> info = 8;
 }
 
 // Per-agent RL-style observation streaming (training / inference clients consume this).
 service AgentService {
     rpc GetAgentSchema(GetAgentSchemaRequest) returns (GetAgentSchemaResponse);
+    // Discover available reward signals for the current robot/scene.
+    rpc GetRewardSignalSchema(GetRewardSignalSchemaRequest) returns (GetRewardSignalSchemaResponse);
     // Single-shot observation snapshot (unified observation surface).
     rpc GetObservation(GetObservationRequest) returns (GetObservationResponse);
     // Server-streaming observations (and optional action echo) for a single agent.

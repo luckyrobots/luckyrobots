@@ -3,9 +3,9 @@
 import grpc
 import warnings
 
-from . import agent_pb2 as agent__pb2
+import agent_pb2 as agent__pb2
 
-GRPC_GENERATED_VERSION = '1.76.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -40,6 +40,11 @@ class AgentServiceStub(object):
                 request_serializer=agent__pb2.GetAgentSchemaRequest.SerializeToString,
                 response_deserializer=agent__pb2.GetAgentSchemaResponse.FromString,
                 _registered_method=True)
+        self.GetRewardSignalSchema = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetRewardSignalSchema',
+                request_serializer=agent__pb2.GetRewardSignalSchemaRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetRewardSignalSchemaResponse.FromString,
+                _registered_method=True)
         self.GetObservation = channel.unary_unary(
                 '/hazel.rpc.AgentService/GetObservation',
                 request_serializer=agent__pb2.GetObservationRequest.SerializeToString,
@@ -68,6 +73,13 @@ class AgentServiceServicer(object):
 
     def GetAgentSchema(self, request, context):
         """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetRewardSignalSchema(self, request, context):
+        """Discover available reward signals for the current robot/scene.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -114,6 +126,11 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     servicer.GetAgentSchema,
                     request_deserializer=agent__pb2.GetAgentSchemaRequest.FromString,
                     response_serializer=agent__pb2.GetAgentSchemaResponse.SerializeToString,
+            ),
+            'GetRewardSignalSchema': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRewardSignalSchema,
+                    request_deserializer=agent__pb2.GetRewardSignalSchemaRequest.FromString,
+                    response_serializer=agent__pb2.GetRewardSignalSchemaResponse.SerializeToString,
             ),
             'GetObservation': grpc.unary_unary_rpc_method_handler(
                     servicer.GetObservation,
@@ -164,6 +181,33 @@ class AgentService(object):
             '/hazel.rpc.AgentService/GetAgentSchema',
             agent__pb2.GetAgentSchemaRequest.SerializeToString,
             agent__pb2.GetAgentSchemaResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetRewardSignalSchema(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetRewardSignalSchema',
+            agent__pb2.GetRewardSignalSchemaRequest.SerializeToString,
+            agent__pb2.GetRewardSignalSchemaResponse.FromString,
             options,
             channel_credentials,
             insecure,

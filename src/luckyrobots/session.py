@@ -4,6 +4,7 @@ from typing import Any, Optional
 
 from .engine import launch_luckyengine, stop_luckyengine
 from .models import ObservationResponse
+from .models.step_result import StepResult
 from .client import LuckyEngineClient, GrpcConnectionError
 from .utils import validate_params, get_robot_config
 
@@ -146,6 +147,23 @@ class Session:
         """
         client = self._require_client()
         return client.step(actions=list(actions), agent_name=agent_name)
+
+    def gym_step(
+        self,
+        actions: Sequence[float],
+        agent_name: str = "",
+    ) -> StepResult:
+        """Gym-compatible step: apply action, return observations + reward signals + done flags.
+
+        Args:
+            actions: Action vector to apply for this step.
+            agent_name: Agent name (empty = default agent).
+
+        Returns:
+            StepResult with observations, reward_signals, terminated, truncated, info.
+        """
+        client = self._require_client()
+        return client.gym_step(actions=list(actions), agent_name=agent_name)
 
     def set_simulation_mode(self, mode: str = "fast"):
         """

@@ -22,8 +22,8 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-from . import common_pb2 as common__pb2
-from . import media_pb2 as media__pb2
+import common_pb2 as common__pb2
+import media_pb2 as media__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x63\x61mera.proto\x12\thazel.rpc\x1a\x0c\x63ommon.proto\x1a\x0bmedia.proto\";\n\nCameraInfo\x12\x1f\n\x02id\x18\x01 \x01(\x0b\x32\x13.hazel.rpc.EntityId\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x14\n\x12ListCamerasRequest\"=\n\x13ListCamerasResponse\x12&\n\x07\x63\x61meras\x18\x01 \x03(\x0b\x32\x15.hazel.rpc.CameraInfo\"\x99\x01\n\x13StreamCameraRequest\x12!\n\x02id\x18\x01 \x01(\x0b\x32\x13.hazel.rpc.EntityIdH\x00\x12\x0e\n\x04name\x18\x02 \x01(\tH\x00\x12\x12\n\ntarget_fps\x18\x03 \x01(\r\x12\r\n\x05width\x18\x04 \x01(\r\x12\x0e\n\x06height\x18\x05 \x01(\r\x12\x0e\n\x06\x66ormat\x18\x06 \x01(\tB\x0c\n\nidentifier2\xa6\x01\n\rCameraService\x12L\n\x0bListCameras\x12\x1d.hazel.rpc.ListCamerasRequest\x1a\x1e.hazel.rpc.ListCamerasResponse\x12G\n\x0cStreamCamera\x12\x1e.hazel.rpc.StreamCameraRequest\x1a\x15.hazel.rpc.ImageFrame0\x01\x42\x03\xf8\x01\x01\x62\x06proto3')

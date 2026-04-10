@@ -36,6 +36,7 @@ except Exception as e:  # pragma: no cover
 
 from .models import ObservationResponse
 from .models.benchmark import BenchmarkResult
+from .models.step_result import StepResult
 from . import sim_contract
 
 
@@ -406,6 +407,112 @@ class LuckyEngineClient:
             agent_name=cache_key,
             observation_names=obs_names,
             action_names=action_names,
+        )
+
+    def get_reward_signal_schema(
+        self,
+        agent_name: str = "",
+        timeout: Optional[float] = None,
+    ) -> list[dict[str, str]]:
+        """Get available reward signals for the current robot/scene.
+
+        Args:
+            agent_name: Agent name (empty = default agent).
+            timeout: RPC timeout.
+
+        Returns:
+            List of signal descriptors, each with 'name', 'description', 'unit'.
+        """
+        timeout = timeout or self.timeout
+        resp = self.agent.GetRewardSignalSchema(
+            self.pb.agent.GetRewardSignalSchemaRequest(agent_name=agent_name),
+            timeout=timeout,
+        )
+        return [
+            {
+                "name": s.name,
+                "description": s.description,
+                "unit": s.unit,
+            }
+            for s in resp.signals
+        ]
+
+    def gym_step(
+        self,
+        actions: list[float],
+        agent_name: str = "",
+        step_timeout_s: float = 0.0,
+        timeout: Optional[float] = None,
+    ) -> StepResult:
+        """Synchronous RL step returning a StepResult with reward signals and episode boundaries.
+
+        This is the Gym-compatible step interface. Unlike ``step()``, this returns
+        a ``StepResult`` that includes ``reward_signals``, ``terminated``,
+        ``truncated``, and ``info`` — everything needed for the Gym
+        ``obs, reward, terminated, truncated, info = env.step(action)`` loop.
+
+        Args:
+            actions: Action vector to apply for this step.
+            agent_name: Agent name (empty = default agent).
+            step_timeout_s: Server-side timeout for the physics step (seconds).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            StepResult with observations, reward_signals, terminated, truncated, info.
+        """
+        timeout = timeout or self.timeout
+
+        try:
+            resp = self.agent.Step(
+                self.pb.agent.StepRequest(
+                    agent_name=agent_name,
+                    actions=actions,
+                    timeout_s=step_timeout_s,
+                ),
+                timeout=timeout,
+            )
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise RuntimeError(
+                    f"Client-side gRPC timeout ({timeout}s): the server did not respond in time. "
+                    "This usually means the engine is frozen or the network is unreachable."
+                ) from e
+            raise
+
+        if not resp.success:
+            raise RuntimeError(
+                f"Server-side physics timeout: {resp.message} "
+                f"(server waited up to its configured timeout for the physics step to complete)"
+            )
+
+        agent_frame = resp.observation
+        observations = list(agent_frame.observations) if agent_frame.observations else []
+        actions_out = list(agent_frame.actions) if agent_frame.actions else []
+        timestamp_ms = getattr(agent_frame, "timestamp_ms", 0)
+        frame_number = getattr(agent_frame, "frame_number", 0)
+
+        # Parse reward signals
+        reward_signals = dict(resp.reward_signals.signals) if resp.reward_signals else {}
+
+        # Parse info map
+        info = dict(resp.info) if resp.info else {}
+        info["physics_step_duration_us"] = float(resp.physics_step_duration_us)
+
+        cache_key = agent_name or "agent_0"
+        obs_names, action_names = self._schema_cache.get(cache_key, (None, None))
+
+        return StepResult(
+            observations=observations,
+            observation_names=obs_names,
+            actions=actions_out,
+            action_names=action_names,
+            reward_signals=reward_signals,
+            terminated=resp.terminated,
+            truncated=resp.truncated,
+            info=info,
+            timestamp_ms=timestamp_ms,
+            frame_number=frame_number,
+            agent_name=cache_key,
         )
 
     # ── SceneService RPCs ──
