@@ -435,6 +435,13 @@ class LuckyEngineClient:
             for nf in resp.camera_frames
         ]
 
+        # Extract enriched step data if present
+        reward_signals = dict(resp.reward_signals) if resp.reward_signals else None
+        terminated = resp.terminated
+        truncated = resp.truncated
+        info = dict(resp.info) if resp.info else None
+        termination_flags = dict(resp.termination_flags) if resp.termination_flags else None
+
         return ObservationResponse(
             observation=observations,
             actions=actions_out,
@@ -444,6 +451,11 @@ class LuckyEngineClient:
             observation_names=obs_names,
             action_names=action_names,
             camera_frames=camera_frames,
+            reward_signals=reward_signals,
+            terminated=terminated,
+            truncated=truncated,
+            info=info,
+            termination_flags=termination_flags,
         )
 
     # ── Progress reporting ──
@@ -486,6 +498,219 @@ class LuckyEngineClient:
             )
         except Exception as e:
             logger.debug("report_progress failed (non-fatal): %s", e)
+
+    # ── Task Contract RPCs ──
+
+    def get_capability_manifest(
+        self,
+        robot_name: str = "",
+        scene: str = "",
+        timeout: Optional[float] = None,
+    ) -> dict:
+        """Discover what MDP components the engine supports.
+
+        Args:
+            robot_name: Filter by robot (empty = all).
+            scene: Filter by scene (empty = all).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            Dict with observations, rewards, terminations, randomizations lists.
+        """
+        timeout = timeout or self.timeout
+        resp = self.agent.GetCapabilityManifest(
+            self.pb.agent.GetCapabilityManifestRequest(
+                robot_name=robot_name,
+                scene=scene,
+            ),
+            timeout=timeout,
+        )
+        manifest = resp.manifest
+        return {
+            "engine_version": manifest.engine_version,
+            "manifest_version": manifest.manifest_version,
+            "observations": [
+                {"name": d.name, "description": d.description, "category": d.category}
+                for d in manifest.observations
+            ],
+            "rewards": [
+                {"name": d.name, "description": d.description, "category": d.category}
+                for d in manifest.rewards
+            ],
+            "terminations": [
+                {"name": d.name, "description": d.description, "category": d.category}
+                for d in manifest.terminations
+            ],
+            "randomizations": [
+                {
+                    "name": d.base.name,
+                    "description": d.base.description,
+                    "default_range": (d.default_range_min, d.default_range_max),
+                    "engine_target": d.engine_target,
+                }
+                for d in manifest.randomizations
+            ],
+        }
+
+    def negotiate_task(
+        self,
+        contract: dict,
+        timeout: Optional[float] = None,
+    ) -> dict:
+        """Validate and configure engine for a task contract.
+
+        Args:
+            contract: Task contract dict with observations, rewards, terminations, etc.
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            Dict with session_id, reward_terms, termination_terms on success.
+
+        Raises:
+            RuntimeError: If contract validation fails.
+        """
+        timeout = timeout or self.timeout
+
+        # Build protobuf contract from dict
+        proto_contract = self._build_task_contract(contract)
+
+        resp = self.agent.NegotiateTask(
+            self.pb.agent.NegotiateTaskRequest(contract=proto_contract),
+            timeout=timeout,
+        )
+
+        if not resp.success:
+            raise RuntimeError(f"Task contract negotiation failed: {resp.message}")
+
+        result = {
+            "session_id": resp.session.session_id if resp.session else "",
+            "reward_terms": list(resp.session.reward_terms) if resp.session else [],
+            "termination_terms": list(resp.session.termination_terms) if resp.session else [],
+        }
+
+        # Include warnings if any
+        if resp.validation and resp.validation.warnings:
+            result["warnings"] = [
+                {
+                    "component": w.component,
+                    "term_name": w.term_name,
+                    "message": w.message,
+                    "suggestion": w.suggestion,
+                }
+                for w in resp.validation.warnings
+            ]
+
+        return result
+
+    def _build_task_contract(self, contract: dict):
+        """Convert a Python dict to a TaskContract protobuf message."""
+        pb = self.pb.agent
+
+        # Build observation contract
+        obs_contract = None
+        if "observations" in contract:
+            obs = contract["observations"]
+            required = [
+                pb.ObservationTermRequest(
+                    name=t["name"],
+                    params=t.get("params", {}),
+                    group=t.get("group", "policy"),
+                )
+                for t in obs.get("required", [])
+            ]
+            optional = [
+                pb.ObservationTermRequest(
+                    name=t["name"],
+                    params=t.get("params", {}),
+                    group=t.get("group", "policy"),
+                )
+                for t in obs.get("optional", [])
+            ]
+            obs_contract = pb.ObservationContract(required=required, optional=optional)
+
+        # Build reward contract
+        reward_contract = None
+        if "rewards" in contract:
+            rew = contract["rewards"]
+            engine_terms = [
+                pb.RewardTermRequest(
+                    name=t["name"],
+                    weight=t.get("weight", 1.0),
+                    params=t.get("params", {}),
+                )
+                for t in rew.get("engine_terms", [])
+            ]
+            reward_contract = pb.RewardContract(
+                engine_terms=engine_terms,
+                python_terms=rew.get("python_terms", []),
+            )
+
+        # Build termination contract
+        term_contract = None
+        if "terminations" in contract:
+            terms = [
+                pb.TerminationTermRequest(
+                    name=t["name"],
+                    is_timeout=t.get("is_timeout", False),
+                    params=t.get("params", {}),
+                )
+                for t in contract["terminations"].get("terms", [])
+            ]
+            term_contract = pb.TerminationContract(terms=terms)
+
+        # Build action contract
+        action_contract = None
+        if "actions" in contract:
+            act = contract["actions"]
+            action_terms = [
+                pb.ActionTermRequest(
+                    type=t["type"],
+                    joint_pattern=t.get("joint_pattern", "*"),
+                    params=t.get("params", {}),
+                )
+                for t in act.get("terms", [])
+            ]
+            action_contract = pb.ActionContract(terms=action_terms)
+
+        # Build randomization contract
+        rand_contract = None
+        if "randomization" in contract:
+            rand = contract["randomization"]
+            custom_rands = [
+                pb.CustomRandomization(
+                    name=r["name"],
+                    range_min=r.get("range_min", 0.0),
+                    range_max=r.get("range_max", 1.0),
+                    target=r.get("target", ""),
+                )
+                for r in rand.get("custom_randomizations", [])
+            ]
+            rand_contract = pb.RandomizationContract(
+                custom_randomizations=custom_rands,
+            )
+
+        # Build auxiliary data requests
+        aux_data = []
+        if "auxiliary_data" in contract:
+            aux_data = [
+                pb.AuxiliaryDataRequest(
+                    name=a["name"],
+                    params=a.get("params", {}),
+                )
+                for a in contract["auxiliary_data"]
+            ]
+
+        return pb.TaskContract(
+            task_id=contract.get("task_id", ""),
+            robot=contract.get("robot", ""),
+            scene=contract.get("scene", ""),
+            observations=obs_contract,
+            actions=action_contract,
+            rewards=reward_contract,
+            terminations=term_contract,
+            randomization=rand_contract,
+            auxiliary_data=aux_data,
+        )
 
     # ── SceneService RPCs ──
 

@@ -21,7 +21,7 @@ https://github.com/user-attachments/assets/0ab2953d-b188-4af7-a225-71decdd2378c
 
 # Lucky Robots
 
-Hyperrealistic robotics simulation framework with Python API for embodied AI training and testing.
+Python SDK for LuckyEngine — a hyperrealistic robotics simulation with MuJoCo physics. Train RL policies with a standard Gymnasium interface, or use the low-level gRPC client for full control.
 
 <p align="center">
   <img width="49%" alt="Bedroom environment in LuckyEngine" src="https://github.com/user-attachments/assets/279a7864-9a8b-453e-8567-3a174f5db8ab" />
@@ -32,14 +32,8 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
 
 1. **Download LuckyEngine** from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest) and set the path:
    ```bash
-   # Set environment variable (choose one method):
-
-   # Method 1: Set LUCKYENGINE_PATH directly to the executable
    export LUCKYENGINE_PATH=/path/to/LuckyEngine      # Linux/Mac
-   export LUCKYENGINE_PATH=/path/to/LuckyEngine.exe  # Windows
-
-   # Method 2: Set LUCKYENGINE_HOME to the directory containing the executable
-   export LUCKYENGINE_HOME=/path/to/luckyengine/directory
+   export LUCKYENGINE_PATH=/path/to/LuckyEngine.exe   # Windows
    ```
 
 2. **Install**
@@ -47,79 +41,205 @@ Hyperrealistic robotics simulation framework with Python API for embodied AI tra
    pip install luckyrobots
    ```
 
-3. **Run Example**
-   ```bash
-   git clone https://github.com/luckyrobots/luckyrobots.git
-   cd luckyrobots/examples
-   python controller.py --skip-launch  # If LuckyEngine is already running
+3. **Train a robot in 20 lines**
+   ```python
+   from luckyrobots import LuckyEnv
+
+   def my_reward(signals):
+       return (2.0 * signals.get("track_linear_velocity", 0)
+               + 1.5 * signals.get("track_angular_velocity", 0)
+               - 0.01 * signals.get("action_rate", 0))
+
+   env = LuckyEnv(
+       robot="unitreego2",
+       scene="velocity",
+       reward_fn=my_reward,
+       reward_terms=["track_linear_velocity", "track_angular_velocity", "action_rate"],
+       termination_terms=["fell_over", "time_out"],
+   )
+
+   obs, info = env.reset()
+   for _ in range(100_000):
+       action = policy(obs)
+       obs, reward, terminated, truncated, info = env.step(action)
+       if terminated or truncated:
+           obs, info = env.reset()
    ```
 
-## Basic Usage
+## Three Ways to Use It
 
-### Low-level client (direct gRPC)
+### 1. LuckyEnv (Gymnasium interface)
+
+The recommended way to train RL policies. Standard Gymnasium API — works with SB3, skrl, CleanRL, or any Gym-compatible library.
 
 ```python
-from luckyrobots import LuckyEngineClient
+from luckyrobots import LuckyEnv
+import numpy as np
 
-client = LuckyEngineClient(host="127.0.0.1", port=50051, robot_name="unitreego2")
-client.wait_for_server()
+env = LuckyEnv(
+    robot="unitreego2",
+    scene="velocity",
+    reward_fn=lambda s: np.exp(-3 * s.get("track_linear_velocity", 0)),
+    reward_terms=["track_linear_velocity", "feet_air_time", "orientation_error"],
+    termination_terms=["fell_over", "time_out"],
+    observation_terms=["base_lin_vel", "base_ang_vel", "joint_pos", "joint_vel"],
+)
 
-# RL step: send action, get observation
-obs = client.step(actions=[0.0] * 12)
-print(f"Observation: {obs.observation[:5]}...")
-
-# Or separately:
-client.send_control(controls=[0.1, 0.2, -0.1, ...])
-obs = client.get_observation()
-joints = client.get_joint_state()
+obs, info = env.reset()
+obs, reward, terminated, truncated, info = env.step(action)
+# info["reward_signals"] contains per-term engine-computed signals
 ```
 
-### High-level session (manages engine lifecycle)
+**Key features:**
+- Engine computes reward signals and termination flags from MuJoCo state
+- You write a `reward_fn` to combine signals into a scalar reward
+- `terminated`/`truncated` distinction for proper value function bootstrapping
+- Contract negotiation validates your config against engine capabilities at startup
+
+### 2. Session (managed engine lifecycle)
+
+Higher-level wrapper that launches the engine process and manages the connection.
 
 ```python
 from luckyrobots import Session
 
 with Session() as session:
-    session.start(scene="velocity", robot="unitreego2", task="locomotion")
+    session.start(
+        scene="velocity",
+        robot="unitreego2",
+        task="locomotion",
+        task_contract={  # Optional: enable engine-side MDP computation
+            "rewards": {
+                "engine_terms": [{"name": "track_linear_velocity"}],
+            },
+            "terminations": {
+                "terms": [{"name": "fell_over"}, {"name": "time_out", "is_timeout": True}],
+            },
+        },
+    )
     obs = session.step(actions=[0.0] * 12)
+    print(obs.reward_signals)  # Engine-computed reward signals
     obs = session.reset()
 ```
 
-## API Overview
+### 3. LuckyEngineClient (low-level gRPC)
 
-### Core Classes
-
-**`LuckyEngineClient`** - Low-level gRPC client
-- `wait_for_server(timeout)` - Wait for LuckyEngine connection
-- `step(actions)` - Send actions + physics step + get observation (single RPC)
-- `get_observation()` - Get RL observation vector
-- `get_joint_state()` - Get joint positions/velocities
-- `send_control(controls)` - Send actuator commands
-- `get_agent_schema()` - Get observation/action names and sizes
-- `reset_agent()` - Reset agent state
-- `set_simulation_mode(mode)` - Set timing: "fast", "realtime", "deterministic"
-- `benchmark(duration, method)` - Benchmark RPC latency
-
-**`Session`** - Managed session (launches + connects to LuckyEngine)
-- `start(scene, robot, task)` - Launch engine and connect
-- `connect(robot=)` - Connect to already-running engine
-- `step(actions)` - RL step
-- `reset()` - Reset agent
-- `close()` - Disconnect and stop engine
-
-### Models
+Direct gRPC client for full control. Connect to an already-running engine.
 
 ```python
-from luckyrobots import ObservationResponse
+from luckyrobots import LuckyEngineClient
 
-# ObservationResponse - returned by step() and get_observation()
-obs.observation      # List[float] - flat RL observation vector
-obs.actions          # List[float] - last applied actions
-obs.timestamp_ms     # int - wall-clock timestamp
-obs.frame_number     # int - monotonic counter
-obs["name"]          # Named access (if schema fetched)
-obs.to_dict()        # Convert to name->value dict
+client = LuckyEngineClient(host="127.0.0.1", port=50051)
+client.connect()
+client.wait_for_server()
+
+# Fetch agent schema
+schema = client.get_agent_schema()
+
+# RL step
+obs = client.step(actions=[0.0] * 12)
+print(obs.observation)        # Flat observation vector
+print(obs.reward_signals)     # Engine reward signals (if contract negotiated)
+print(obs.terminated)         # Episode termination flag
+
+# Discover engine capabilities
+manifest = client.get_capability_manifest(robot_name="unitreego2")
+
+# Negotiate task contract
+session = client.negotiate_task({
+    "task_id": "go2_velocity",
+    "robot": "unitreego2",
+    "rewards": {"engine_terms": [{"name": "track_linear_velocity"}]},
+})
+
+# Reset with domain randomization
+client.reset_agent(randomization_cfg={"vel_command_x_range": [-1.0, 1.0]})
+
+client.close()
 ```
+
+## API Reference
+
+### LuckyEnv
+
+| Method | Description |
+|--------|-------------|
+| `LuckyEnv(robot, scene, reward_fn, reward_terms, termination_terms, ...)` | Create Gymnasium env |
+| `reset(seed, options)` | Reset environment, returns `(obs, info)` |
+| `step(action)` | Step environment, returns `(obs, reward, terminated, truncated, info)` |
+| `close()` | Disconnect from engine |
+
+**Constructor parameters:**
+- `reward_fn`: `Callable[[dict[str, float]], float]` — combines engine signals into scalar reward
+- `reward_terms`: List of engine reward signal names to request
+- `termination_terms`: List of engine termination condition names
+- `observation_terms`: List of observation terms (optional, uses agent defaults if omitted)
+- `host`, `port`, `timeout`: Connection settings
+
+### LuckyEngineClient
+
+| Method | Description |
+|--------|-------------|
+| `connect()` | Open gRPC channel |
+| `wait_for_server(timeout)` | Wait for engine to be ready |
+| `step(actions)` | Send actions + physics step + get observation |
+| `reset_agent(agent_name, randomization_cfg)` | Reset agent with optional domain randomization |
+| `get_agent_schema()` | Get observation/action names and sizes |
+| `get_capability_manifest(robot_name)` | Discover available MDP components |
+| `negotiate_task(contract)` | Validate and configure engine for task contract |
+| `set_simulation_mode(mode)` | Set timing: `"fast"`, `"realtime"`, `"deterministic"` |
+| `configure_cameras(cameras)` | Set up camera capture per step |
+| `benchmark(duration, method)` | Measure step RPC latency |
+| `close()` | Disconnect |
+
+### Session
+
+| Method | Description |
+|--------|-------------|
+| `start(scene, robot, task, task_contract)` | Launch engine + connect + negotiate contract |
+| `connect(robot)` | Connect to already-running engine |
+| `step(actions)` | RL step |
+| `reset(randomization_cfg)` | Reset agent |
+| `close(stop_engine)` | Disconnect and optionally stop engine |
+
+### ObservationResponse
+
+Returned by `step()`, `reset()`, and `get_observation()`.
+
+```python
+obs.observation          # List[float] — flat RL observation vector
+obs.actions              # List[float] — last applied actions
+obs.timestamp_ms         # int — wall-clock timestamp
+obs.frame_number         # int — monotonic counter
+obs.camera_frames        # List[CameraFrame] — synchronized camera images
+obs.reward_signals       # Dict[str, float] — engine-computed reward signals
+obs.terminated           # bool — hard termination (episode failure)
+obs.truncated            # bool — soft termination (time limit)
+obs.termination_flags    # Dict[str, bool] — per-condition flags
+obs.info                 # Dict[str, float] — auxiliary diagnostics
+obs["name"]              # Named access (if schema fetched)
+obs.to_dict()            # Convert to name->value dict
+```
+
+### Available Engine MDP Components
+
+**Observations:** `base_lin_vel`, `base_ang_vel`, `projected_gravity`, `joint_pos`, `joint_vel`, `vel_command`, `foot_contact`, `foot_heights`, `foot_contact_forces`, `actions`
+
+**Reward signals:** `track_linear_velocity`, `track_angular_velocity`, `lin_vel_z_penalty`, `ang_vel_xy_penalty`, `joint_acc_penalty`, `feet_air_time`, `orientation_error`, `action_rate`, `action_magnitude`, `foot_slip_penalty`, `stand_still`
+
+**Termination conditions:** `fell_over`, `time_out`, `illegal_contact`
+
+**Domain randomization:** `friction`, `mass_scale`, `motor_strength`, `motor_offset`, `push_disturbance`, `joint_position_noise`, `joint_velocity_noise`, `pose_position_noise`, `pose_orientation_noise`
+
+Use `client.get_capability_manifest()` to discover all available components at runtime.
+
+## Available Robots & Scenes
+
+| Robot | DOF | Type | Scenes |
+|-------|:---:|------|--------|
+| `unitreego2` | 12 | Quadruped | velocity |
+| `so100` | 6 | Manipulator | pickandplace |
+| `piper` | 7 | Manipulator | manipulation |
 
 ## System Identification (optional)
 
@@ -127,100 +247,34 @@ Calibrate MuJoCo model parameters to match real robot behavior.
 
 ```bash
 pip install luckyrobots[sysid]
-```
 
-### CLI
-
-```bash
-# Collect trajectory data from the engine
 luckyrobots sysid collect --robot unitreego2 --signal chirp --duration 15 -o traj.npz
-
-# Identify model parameters
 luckyrobots sysid identify traj.npz -m go2.xml --preset go2:motor -o result.json
-
-# Apply calibrated parameters to create a new model
 luckyrobots sysid apply result.json -m go2.xml -o go2_calibrated.xml
-
-# List available parameter presets
-luckyrobots sysid presets
 ```
-
-### Python API
-
-```python
-from luckyrobots.sysid import identify, apply_params, TrajectoryData, load_preset, chirp
-
-# Generate excitation signal
-ctrl = chirp(duration=15.0, dt=0.02, amplitude=0.3, num_joints=12)
-
-# Load recorded trajectory
-traj = TrajectoryData.load("trajectory.npz")
-
-# Identify parameters
-specs = load_preset("go2", "motor")  # armature, damping, frictionloss per joint
-result = identify("go2.xml", traj, specs)
-
-# Apply to MuJoCo XML
-apply_params("go2.xml", result, "go2_calibrated.xml")
-```
-
-## Available Robots & Environments
-
-### Robots
-- **unitreego2**: Unitree Go2 quadruped (12 joints)
-- **so100**: 6-DOF manipulator with gripper
-- **stretch_v1**: Mobile manipulator
-
-### Scenes
-- **velocity**: Velocity control training
-- **kitchen**: Residential kitchen environment
-
-### Tasks
-- **locomotion**: Walking/movement
-- **pickandplace**: Object manipulation
 
 ## Development
 
-### Setup with uv (recommended)
-
 ```bash
-# Clone and enter repo
 git clone https://github.com/luckyrobots/luckyrobots.git
 cd luckyrobots
-
-# Install uv if you haven't
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Create venv and install deps
 uv sync
-
-# Run tests
 uv run pytest
-
-# Run example
-uv run python examples/controller.py --skip-launch
-```
-
-### Setup with pip
-
-```bash
-git clone https://github.com/luckyrobots/luckyrobots.git
-cd luckyrobots
-pip install -e ".[dev]"
 ```
 
 ### Regenerating gRPC Stubs
 
-The Python gRPC stubs are in `src/luckyrobots/grpc/generated/` and are
-generated from protos in `src/luckyrobots/grpc/proto/`.
+After modifying `.proto` files:
 
 ```bash
 python -m grpc_tools.protoc \
-  -I "src/luckyrobots/grpc/proto" \
-  --python_out="src/luckyrobots/grpc/generated" \
-  --grpc_python_out="src/luckyrobots/grpc/generated" \
+  -I src/luckyrobots/grpc/proto \
+  --python_out=src/luckyrobots/grpc/generated \
+  --grpc_python_out=src/luckyrobots/grpc/generated \
   src/luckyrobots/grpc/proto/*.proto
 ```
+
+Then fix imports in generated files to be relative (`from . import common_pb2 as ...`).
 
 ### Project Structure
 
@@ -228,52 +282,20 @@ python -m grpc_tools.protoc \
 src/luckyrobots/
 ├── client.py            # LuckyEngineClient — low-level gRPC client
 ├── session.py           # Session — managed engine lifecycle
+├── lucky_env.py         # LuckyEnv — Gymnasium wrapper with reward_fn
 ├── debug.py             # Draw helpers (velocity arrows, lines)
-├── sim_contract.py      # Simulation contract → protobuf builder
-├── utils.py             # Shared utilities
-├── models/              # Data classes
-│   ├── observation.py   # ObservationResponse
+├── sim_contract.py      # SimulationContract protobuf builder
+├── utils.py             # Robot config, validation
+├── models/
+│   ├── observation.py   # ObservationResponse (obs + rewards + termination)
 │   └── benchmark.py     # BenchmarkResult, FPS
 ├── engine/              # Engine process management
-├── grpc/                # gRPC internals
-│   ├── generated/       # Protobuf stubs
-│   └── proto/           # .proto files
+├── grpc/
+│   ├── generated/       # Protobuf stubs (checked in)
+│   └── proto/           # .proto source files
 ├── config/              # Robot configurations (robots.yaml)
 └── sysid/               # System identification (optional)
-    ├── trajectory.py    # TrajectoryData (save/load recordings)
-    ├── parameters.py    # ParamSpec, get/set MuJoCo params, presets
-    ├── sysid.py         # identify() optimizer + SysIdResult
-    ├── calibrate.py     # apply_params() to MuJoCo XML
-    ├── collector.py     # Collector ABC + EngineCollector
-    ├── excitation.py    # Signal generators (chirp, multisine, random_steps)
-    └── cli.py           # luckyrobots sysid CLI
 ```
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make changes and add tests
-4. Run `uv run ruff check .` and `uv run ruff format .`
-5. Submit a pull request
-
-## Architecture
-
-Lucky Robots uses gRPC for communication:
-
-- **LuckyEngine**: Physics + rendering backend (Unreal Engine + MuJoCo)
-- **Python client**: Connects via gRPC (default `127.0.0.1:50051`)
-
-### gRPC Services
-
-| Service | Status | Description |
-|---------|--------|-------------|
-| MujocoService | ✅ Working | Joint state, controls |
-| AgentService | ✅ Working | Observations, reset |
-| SceneService | 🚧 Placeholder | Scene inspection |
-| TelemetryService | 🚧 Placeholder | Telemetry streaming |
-| CameraService | 🚧 Placeholder | Camera frames |
-| ViewportService | 🚧 Placeholder | Viewport pixels |
 
 ## License
 

@@ -57,6 +57,28 @@ class ObservationResponse(BaseModel):
         description="Camera frames synchronized with this observation",
     )
 
+    # Enriched step data (populated when a negotiated task session is active)
+    reward_signals: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Engine-computed reward signals keyed by term name (unweighted)",
+    )
+    terminated: bool = Field(
+        default=False,
+        description="True if a hard termination condition was triggered",
+    )
+    truncated: bool = Field(
+        default=False,
+        description="True if the episode was truncated (e.g., time limit)",
+    )
+    info: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Auxiliary info for diagnostics",
+    )
+    termination_flags: Optional[Dict[str, bool]] = Field(
+        default=None,
+        description="Per-condition termination flags",
+    )
+
     def __getitem__(self, key: str) -> float:
         """Access observation value by name.
 

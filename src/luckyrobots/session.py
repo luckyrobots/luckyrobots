@@ -46,6 +46,7 @@ class Session:
         observation_type: str = "pixels_agent_pos",
         headless: bool = False,
         timeout_s: float = 120.0,
+        task_contract: dict | None = None,
     ) -> None:
         """
         Launch LuckyEngine (if needed) and connect to gRPC.
@@ -58,6 +59,11 @@ class Session:
             observation_type: Used for validation and optional camera processing.
             headless: Launch without rendering.
             timeout_s: How long to wait for gRPC server to come up.
+            task_contract: Optional task contract dict for engine-side MDP computation.
+                When provided, the engine is configured to compute reward signals
+                and termination flags alongside observations. Pass a dict with
+                observations, rewards, terminations sections — see LuckyEnv or
+                luckylab.contracts.TaskContract.to_dict() for the expected format.
         """
         self._robot_name = robot
 
@@ -78,6 +84,17 @@ class Session:
 
         self.connect(timeout_s=timeout_s, robot=robot)
         self._wait_for_agents_ready(timeout_s=timeout_s)
+
+        # Negotiate task contract if provided (engine-side reward/termination computation).
+        self._negotiated_session = None
+        if task_contract is not None:
+            self._negotiated_session = self._engine_client.negotiate_task(task_contract)
+            logger.info(
+                "Task contract negotiated: session=%s, rewards=%s, terminations=%s",
+                self._negotiated_session.get("session_id", "?"),
+                self._negotiated_session.get("reward_terms", []),
+                self._negotiated_session.get("termination_terms", []),
+            )
 
     def _wait_for_agents_ready(self, timeout_s: float = 120.0) -> None:
         """Wait for the engine's agent pipeline to be ready (scene fully playing)."""

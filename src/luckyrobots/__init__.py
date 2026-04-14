@@ -10,4 +10,5 @@ from luckyrobots.models import BenchmarkResult as BenchmarkResult
 from luckyrobots.models import FPS as FPS
 from luckyrobots.models import CameraFrame as CameraFrame
 from luckyrobots.models import ObservationResponse as ObservationResponse
+from luckyrobots.lucky_env import LuckyEnv as LuckyEnv
 from luckyrobots.session import Session as Session

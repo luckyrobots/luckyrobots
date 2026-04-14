@@ -65,6 +65,21 @@ class AgentServiceStub(object):
                 request_serializer=agent__pb2.ProgressReport.SerializeToString,
                 response_deserializer=agent__pb2.ProgressAck.FromString,
                 _registered_method=True)
+        self.GetCapabilityManifest = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetCapabilityManifest',
+                request_serializer=agent__pb2.GetCapabilityManifestRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetCapabilityManifestResponse.FromString,
+                _registered_method=True)
+        self.ValidateTaskContract = channel.unary_unary(
+                '/hazel.rpc.AgentService/ValidateTaskContract',
+                request_serializer=agent__pb2.ValidateTaskContractRequest.SerializeToString,
+                response_deserializer=agent__pb2.ValidateTaskContractResponse.FromString,
+                _registered_method=True)
+        self.NegotiateTask = channel.unary_unary(
+                '/hazel.rpc.AgentService/NegotiateTask',
+                request_serializer=agent__pb2.NegotiateTaskRequest.SerializeToString,
+                response_deserializer=agent__pb2.NegotiateTaskResponse.FromString,
+                _registered_method=True)
 
 
 class AgentServiceServicer(object):
@@ -120,6 +135,27 @@ class AgentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetCapabilityManifest(self, request, context):
+        """Discover available MDP components for a robot/scene.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ValidateTaskContract(self, request, context):
+        """Validate a task contract against engine capabilities.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def NegotiateTask(self, request, context):
+        """Validate + configure engine for the contract. Returns session handle.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -152,6 +188,21 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     servicer.ReportProgress,
                     request_deserializer=agent__pb2.ProgressReport.FromString,
                     response_serializer=agent__pb2.ProgressAck.SerializeToString,
+            ),
+            'GetCapabilityManifest': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCapabilityManifest,
+                    request_deserializer=agent__pb2.GetCapabilityManifestRequest.FromString,
+                    response_serializer=agent__pb2.GetCapabilityManifestResponse.SerializeToString,
+            ),
+            'ValidateTaskContract': grpc.unary_unary_rpc_method_handler(
+                    servicer.ValidateTaskContract,
+                    request_deserializer=agent__pb2.ValidateTaskContractRequest.FromString,
+                    response_serializer=agent__pb2.ValidateTaskContractResponse.SerializeToString,
+            ),
+            'NegotiateTask': grpc.unary_unary_rpc_method_handler(
+                    servicer.NegotiateTask,
+                    request_deserializer=agent__pb2.NegotiateTaskRequest.FromString,
+                    response_serializer=agent__pb2.NegotiateTaskResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -317,6 +368,87 @@ class AgentService(object):
             '/hazel.rpc.AgentService/ReportProgress',
             agent__pb2.ProgressReport.SerializeToString,
             agent__pb2.ProgressAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetCapabilityManifest(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetCapabilityManifest',
+            agent__pb2.GetCapabilityManifestRequest.SerializeToString,
+            agent__pb2.GetCapabilityManifestResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ValidateTaskContract(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/ValidateTaskContract',
+            agent__pb2.ValidateTaskContractRequest.SerializeToString,
+            agent__pb2.ValidateTaskContractResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def NegotiateTask(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/NegotiateTask',
+            agent__pb2.NegotiateTaskRequest.SerializeToString,
+            agent__pb2.NegotiateTaskResponse.FromString,
             options,
             channel_credentials,
             insecure,

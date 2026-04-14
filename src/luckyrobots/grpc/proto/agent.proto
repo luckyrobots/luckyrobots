@@ -202,6 +202,20 @@ message StepResponse {
     uint64 physics_step_duration_us = 4;
     // Camera frames synchronized with the observation.
     repeated NamedImageFrame camera_frames = 5;
+
+    // === Enriched fields (populated when a negotiated task session is active) ===
+
+    // Engine-computed reward signals, keyed by reward term name.
+    // Values are raw (unweighted) scalar signals.
+    map<string, float> reward_signals = 6;
+    // True if a hard termination condition was triggered (episode failure).
+    bool terminated = 7;
+    // True if the episode was truncated (e.g., time limit).
+    bool truncated = 8;
+    // Auxiliary info for diagnostics and Python-side reward computation.
+    map<string, float> info = 9;
+    // Per-termination-term flags (which specific condition fired).
+    map<string, bool> termination_flags = 10;
 }
 
 // =============================================================================
@@ -232,6 +246,202 @@ message ProgressAck {
     bool accepted = 1;
 }
 
+// =============================================================================
+// Task Contract System
+// =============================================================================
+
+// Task contract: declarative MDP specification sent from Python to engine.
+message TaskContract {
+    string task_id = 1;
+    string robot = 2;
+    string scene = 3;
+    ObservationContract observations = 4;
+    ActionContract actions = 5;
+    RewardContract rewards = 6;
+    TerminationContract terminations = 7;
+    RandomizationContract randomization = 8;
+    repeated AuxiliaryDataRequest auxiliary_data = 9;
+}
+
+message ObservationContract {
+    repeated ObservationTermRequest required = 1;
+    repeated ObservationTermRequest optional = 2;
+}
+
+message ObservationTermRequest {
+    string name = 1;
+    map<string, string> params = 2;
+    string group = 3;
+}
+
+message ActionContract {
+    repeated ActionTermRequest terms = 1;
+}
+
+message ActionTermRequest {
+    string type = 1;
+    string joint_pattern = 2;
+    map<string, string> params = 3;
+}
+
+message RewardContract {
+    repeated RewardTermRequest engine_terms = 1;
+    repeated string python_terms = 2;
+}
+
+message RewardTermRequest {
+    string name = 1;
+    float weight = 2;
+    map<string, string> params = 3;
+}
+
+message TerminationContract {
+    repeated TerminationTermRequest terms = 1;
+}
+
+message TerminationTermRequest {
+    string name = 1;
+    bool is_timeout = 2;
+    map<string, string> params = 3;
+}
+
+message RandomizationContract {
+    bytes simulation_contract_bytes = 1;
+    repeated CustomRandomization custom_randomizations = 2;
+}
+
+message CustomRandomization {
+    string name = 1;
+    float range_min = 2;
+    float range_max = 3;
+    string target = 4;
+}
+
+message AuxiliaryDataRequest {
+    string name = 1;
+    map<string, string> params = 2;
+}
+
+// Capability manifest: describes available MDP components.
+message EngineCapabilityManifest {
+    string engine_version = 1;
+    int32 manifest_version = 2;
+    repeated MdpComponentDescriptor observations = 3;
+    repeated MdpComponentDescriptor actions = 4;
+    repeated MdpComponentDescriptor rewards = 5;
+    repeated MdpComponentDescriptor terminations = 6;
+    repeated MdpRandomizationDescriptor randomizations = 7;
+    repeated MdpComponentDescriptor auxiliary_data = 8;
+    MdpRobotInfo robot_info = 9;
+}
+
+message MdpComponentDescriptor {
+    string name = 1;
+    string description = 2;
+    string category = 3;
+    map<string, MdpParamDescriptor> params_schema = 4;
+    repeated int32 output_shape = 5;
+    repeated string requires = 6;
+    repeated string robot_types = 7;
+}
+
+message MdpParamDescriptor {
+    string type = 1;
+    string default_value = 2;
+    string description = 3;
+    float range_min = 4;
+    float range_max = 5;
+    bool has_range = 6;
+}
+
+message MdpRandomizationDescriptor {
+    MdpComponentDescriptor base = 1;
+    float default_range_min = 2;
+    float default_range_max = 3;
+    string engine_target = 4;
+}
+
+message MdpRobotInfo {
+    string name = 1;
+    repeated string joint_names = 2;
+    repeated string actuator_names = 3;
+    repeated MdpActuatorLimit actuator_limits = 4;
+    repeated string body_names = 5;
+    repeated string site_names = 6;
+    repeated string sensor_names = 7;
+    repeated string available_scenes = 8;
+}
+
+message MdpActuatorLimit {
+    float lower = 1;
+    float upper = 2;
+    float default_value = 3;
+    float scale = 4;
+}
+
+// Contract validation result.
+message ContractValidationResult {
+    bool is_valid = 1;
+    TaskContract negotiated_contract = 2;
+    repeated ContractValidationMessage errors = 3;
+    repeated ContractValidationMessage warnings = 4;
+    repeated string resolved_optionals = 5;
+    repeated string unresolved_optionals = 6;
+}
+
+message ContractValidationMessage {
+    string severity = 1;
+    string component = 2;
+    string term_name = 3;
+    string message = 4;
+    string suggestion = 5;
+}
+
+// Negotiated session handle.
+message NegotiatedTaskSession {
+    string session_id = 1;
+    TaskContract resolved_contract = 2;
+    repeated ObservationSlot observation_layout = 3;
+    repeated string reward_terms = 4;
+    repeated string termination_terms = 5;
+}
+
+message ObservationSlot {
+    string name = 1;
+    string group = 2;
+    int32 offset = 3;
+    int32 size = 4;
+}
+
+// Task contract RPC messages.
+message GetCapabilityManifestRequest {
+    string robot_name = 1;
+    string scene = 2;
+}
+
+message GetCapabilityManifestResponse {
+    EngineCapabilityManifest manifest = 1;
+}
+
+message ValidateTaskContractRequest {
+    TaskContract contract = 1;
+}
+
+message ValidateTaskContractResponse {
+    ContractValidationResult result = 1;
+}
+
+message NegotiateTaskRequest {
+    TaskContract contract = 1;
+}
+
+message NegotiateTaskResponse {
+    bool success = 1;
+    string message = 2;
+    NegotiatedTaskSession session = 3;
+    ContractValidationResult validation = 4;
+}
+
 // Per-agent RL-style observation streaming (training / inference clients consume this).
 service AgentService {
     rpc GetAgentSchema(GetAgentSchemaRequest) returns (GetAgentSchemaResponse);
@@ -253,4 +463,10 @@ service AgentService {
     // Report evaluation/training progress from an external client.
     // Fire-and-forget: the server stores the latest report for UI display.
     rpc ReportProgress(ProgressReport) returns (ProgressAck);
+    // Discover available MDP components for a robot/scene.
+    rpc GetCapabilityManifest(GetCapabilityManifestRequest) returns (GetCapabilityManifestResponse);
+    // Validate a task contract against engine capabilities.
+    rpc ValidateTaskContract(ValidateTaskContractRequest) returns (ValidateTaskContractResponse);
+    // Validate + configure engine for the contract. Returns session handle.
+    rpc NegotiateTask(NegotiateTaskRequest) returns (NegotiateTaskResponse);
 }
