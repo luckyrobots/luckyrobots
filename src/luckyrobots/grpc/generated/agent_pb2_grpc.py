@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import agent_pb2 as agent__pb2
+import agent_pb2 as agent__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -59,6 +59,11 @@ class AgentServiceStub(object):
                 '/hazel.rpc.AgentService/Step',
                 request_serializer=agent__pb2.StepRequest.SerializeToString,
                 response_deserializer=agent__pb2.StepResponse.FromString,
+                _registered_method=True)
+        self.SetActionGroup = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetActionGroup',
+                request_serializer=agent__pb2.SetActionGroupRequest.SerializeToString,
+                response_deserializer=agent__pb2.SetActionGroupResponse.FromString,
                 _registered_method=True)
         self.ReportProgress = channel.unary_unary(
                 '/hazel.rpc.AgentService/ReportProgress',
@@ -127,6 +132,14 @@ class AgentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SetActionGroup(self, request, context):
+        """Preload actions for a named group without triggering physics.
+        Use with Step() for multi-policy control (e.g., separate locomotion + manipulation policies).
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ReportProgress(self, request, context):
         """Report evaluation/training progress from an external client.
         Fire-and-forget: the server stores the latest report for UI display.
@@ -183,6 +196,11 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     servicer.Step,
                     request_deserializer=agent__pb2.StepRequest.FromString,
                     response_serializer=agent__pb2.StepResponse.SerializeToString,
+            ),
+            'SetActionGroup': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetActionGroup,
+                    request_deserializer=agent__pb2.SetActionGroupRequest.FromString,
+                    response_serializer=agent__pb2.SetActionGroupResponse.SerializeToString,
             ),
             'ReportProgress': grpc.unary_unary_rpc_method_handler(
                     servicer.ReportProgress,
@@ -341,6 +359,33 @@ class AgentService(object):
             '/hazel.rpc.AgentService/Step',
             agent__pb2.StepRequest.SerializeToString,
             agent__pb2.StepResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetActionGroup(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetActionGroup',
+            agent__pb2.SetActionGroupRequest.SerializeToString,
+            agent__pb2.SetActionGroupResponse.FromString,
             options,
             channel_credentials,
             insecure,

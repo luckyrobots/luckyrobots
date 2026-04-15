@@ -179,10 +179,49 @@ class Session:
         client = self._require_client()
         client.configure_cameras(cameras)
 
+    def list_cameras(self) -> list[dict]:
+        """List available cameras in the scene.
+
+        Returns:
+            List of dicts with 'name' and 'id' keys for each camera.
+        """
+        client = self._require_client()
+        return client.list_cameras()
+
+    def set_action_group(
+        self,
+        group_name: str,
+        actions: Sequence[float],
+        action_indices: Sequence[int],
+        agent_name: str = "",
+    ) -> bool:
+        """Preload actions for a named group without triggering a physics step.
+
+        Call this for each policy/controller, then call step() to fire them
+        all atomically in one physics tick.
+
+        Args:
+            group_name: Name for this action group (e.g., "lower_body", "right_arm").
+            actions: Action values for this group.
+            action_indices: Which indices in the action vector these map to.
+            agent_name: Agent name (empty = default agent).
+
+        Returns:
+            True if the group was preloaded successfully.
+        """
+        client = self._require_client()
+        return client.set_action_group(
+            group_name=group_name,
+            actions=list(actions),
+            action_indices=list(action_indices),
+            agent_name=agent_name,
+        )
+
     def step(
         self,
-        actions: Sequence[float],
+        actions: Sequence[float] | None = None,
         agent_name: str = "",
+        action_groups: list[dict] | None = None,
     ) -> ObservationResponse:
         """
         Synchronous RL step: apply action, wait for physics, return observation.
@@ -192,14 +231,20 @@ class Session:
         observation in a single call.
 
         Args:
-            actions: Action vector to apply for this step.
+            actions: Action vector to apply for this step (optional when using action_groups).
             agent_name: Agent name (empty = default agent).
+            action_groups: Optional list of action group dicts for multi-policy control.
+                Each dict has keys: group_name, actions, action_indices.
 
         Returns:
             ObservationResponse with observation after physics step.
         """
         client = self._require_client()
-        return client.step(actions=list(actions), agent_name=agent_name)
+        return client.step(
+            actions=list(actions) if actions is not None else None,
+            agent_name=agent_name,
+            action_groups=action_groups,
+        )
 
     def set_simulation_mode(self, mode: str = "fast"):
         """

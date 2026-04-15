@@ -179,6 +179,27 @@ message GetObservationResponse {
 // Step RPC (synchronous RL step)
 // =============================================================================
 
+// A named group of actions targeting specific indices in the action vector.
+// Used for multi-policy setups where different policies control different
+// subsets of the robot's actuators (e.g., locomotion + manipulation).
+message ActionGroupEntry {
+    string group_name = 1;              // e.g., "lower_body", "right_arm"
+    repeated float actions = 2;         // Action values for this group
+    repeated int32 action_indices = 3;  // Which indices in the action vector these map to
+}
+
+// Preload actions for a named group without triggering a physics step.
+// Call this for each policy/controller, then call Step() to fire them all atomically.
+message SetActionGroupRequest {
+    string agent_name = 1;
+    ActionGroupEntry group = 2;
+}
+
+message SetActionGroupResponse {
+    bool success = 1;
+    string message = 2;
+}
+
 // Request to step the simulation with the provided action.
 // This is the recommended interface for RL training - it combines
 // SendControl + physics step + GetObservation into a single RPC.
@@ -186,11 +207,16 @@ message StepRequest {
     // Agent logical name. Empty means default agent.
     string agent_name = 1;
     // Action vector to apply for this step.
+    // When using action_groups, this serves as the base vector (optional).
     repeated float actions = 2;
-    // Optional timeout in seconds for the physics step. 0 means use server default.
+    // Optional timeout in seconds for the physics step. 0 means use server default (5.0s).
     float timeout_s = 3;
     // Optional camera snapshots to capture after the physics step.
     repeated GetCameraFrameRequest camera_requests = 4;
+    // Optional: inline action groups to apply atomically with this step.
+    // Each group writes to specific indices in the action vector.
+    // Applied on top of `actions` (if provided) or default joint positions.
+    repeated ActionGroupEntry action_groups = 5;
 }
 
 message StepResponse {
@@ -282,6 +308,7 @@ message ActionTermRequest {
     string type = 1;
     string joint_pattern = 2;
     map<string, string> params = 3;
+    string group = 4;                            // Action group name for multi-policy
 }
 
 message RewardContract {
@@ -404,6 +431,7 @@ message NegotiatedTaskSession {
     repeated ObservationSlot observation_layout = 3;
     repeated string reward_terms = 4;
     repeated string termination_terms = 5;
+    repeated ActionGroupSlot action_layout = 6;  // Resolved action group → index mapping
 }
 
 message ObservationSlot {
@@ -411,6 +439,14 @@ message ObservationSlot {
     string group = 2;
     int32 offset = 3;
     int32 size = 4;
+}
+
+// Describes which action indices belong to a named group.
+// Returned by NegotiateTask so clients know how to split actions by policy.
+message ActionGroupSlot {
+    string group_name = 1;                       // e.g., "lower_body", "right_arm"
+    repeated string action_names = 2;            // Joint/actuator names in this group
+    repeated int32 action_indices = 3;           // Indices into the flat action vector
 }
 
 // Task contract RPC messages.
@@ -460,6 +496,9 @@ service AgentService {
     // This is the recommended interface for RL training as it eliminates
     // one network round-trip compared to separate SendControl + GetObservation.
     rpc Step(StepRequest) returns (StepResponse);
+    // Preload actions for a named group without triggering physics.
+    // Use with Step() for multi-policy control (e.g., separate locomotion + manipulation policies).
+    rpc SetActionGroup(SetActionGroupRequest) returns (SetActionGroupResponse);
     // Report evaluation/training progress from an external client.
     // Fire-and-forget: the server stores the latest report for UI display.
     rpc ReportProgress(ProgressReport) returns (ProgressAck);

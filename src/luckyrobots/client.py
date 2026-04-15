@@ -21,6 +21,8 @@ logger = logging.getLogger("luckyrobots.client")
 try:
     from .grpc.generated import agent_pb2  # type: ignore
     from .grpc.generated import agent_pb2_grpc  # type: ignore
+    from .grpc.generated import camera_pb2  # type: ignore
+    from .grpc.generated import camera_pb2_grpc  # type: ignore
     from .grpc.generated import common_pb2  # type: ignore
     from .grpc.generated import debug_pb2  # type: ignore
     from .grpc.generated import debug_pb2_grpc  # type: ignore
@@ -96,6 +98,7 @@ class LuckyEngineClient:
         self._scene = None
         self._mujoco = None
         self._agent = None
+        self._camera = None
         self._debug = None
 
         # Cached agent schemas: agent_name -> (observation_names, action_names)
@@ -129,6 +132,7 @@ class LuckyEngineClient:
         self._scene = scene_pb2_grpc.SceneServiceStub(self._channel)
         self._mujoco = mujoco_pb2_grpc.MujocoServiceStub(self._channel)
         self._agent = agent_pb2_grpc.AgentServiceStub(self._channel)
+        self._camera = camera_pb2_grpc.CameraServiceStub(self._channel)
         self._debug = debug_pb2_grpc.DebugServiceStub(self._channel)
 
         logger.info(f"Channel opened to {target} (server not verified yet)")
@@ -144,6 +148,7 @@ class LuckyEngineClient:
             self._scene = None
             self._mujoco = None
             self._agent = None
+            self._camera = None
             self._debug = None
             logger.info("gRPC channel closed")
 
@@ -247,6 +252,13 @@ class LuckyEngineClient:
             raise GrpcConnectionError("Not connected. Call connect() first.")
         return self._debug
 
+    @property
+    def camera(self) -> Any:
+        """CameraService stub."""
+        if self._camera is None:
+            raise GrpcConnectionError("Not connected. Call connect() first.")
+        return self._camera
+
     # ── Camera configuration ──
 
     def configure_cameras(self, cameras: list[dict]) -> None:
@@ -266,6 +278,63 @@ class LuckyEngineClient:
             )
             for c in cameras
         ]
+
+    def list_cameras(self, timeout: float | None = None) -> list[dict]:
+        """List available cameras in the scene.
+
+        Returns:
+            List of dicts with 'name' and 'id' keys for each camera.
+        """
+        timeout = timeout or self.timeout
+        resp = self.camera.ListCameras(
+            camera_pb2.ListCamerasRequest(),
+            timeout=timeout,
+        )
+        return [
+            {"name": c.name, "id": c.id.id}
+            for c in resp.cameras
+        ]
+
+    # ── Multi-policy action groups ──
+
+    def set_action_group(
+        self,
+        group_name: str,
+        actions: list[float],
+        action_indices: list[int],
+        agent_name: str = "",
+        timeout: float | None = None,
+    ) -> bool:
+        """Preload actions for a named group without triggering a physics step.
+
+        Call this for each policy/controller, then call step() to fire them
+        all atomically in one physics tick.
+
+        Args:
+            group_name: Name for this action group (e.g., "lower_body", "right_arm").
+            actions: Action values for this group.
+            action_indices: Which indices in the action vector these map to.
+            agent_name: Agent name (empty = default agent).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            True if the group was preloaded successfully.
+        """
+        timeout = timeout or self.timeout
+        resp = self.agent.SetActionGroup(
+            self.pb.agent.SetActionGroupRequest(
+                agent_name=agent_name,
+                group=self.pb.agent.ActionGroupEntry(
+                    group_name=group_name,
+                    actions=actions,
+                    action_indices=action_indices,
+                ),
+            ),
+            timeout=timeout,
+        )
+        if not resp.success:
+            logger.warning("SetActionGroup failed: %s", resp.message)
+        return resp.success
 
     # ── MujocoService RPCs ──
 
@@ -370,33 +439,59 @@ class LuckyEngineClient:
 
     def step(
         self,
-        actions: list[float],
+        actions: list[float] | None = None,
         agent_name: str = "",
         step_timeout_s: float = 0.0,
         timeout: Optional[float] = None,
+        action_groups: list[dict] | None = None,
     ) -> ObservationResponse:
         """
         Synchronous RL step: apply action, wait for physics, return observation.
 
         Args:
-            actions: Action vector to apply for this step.
+            actions: Action vector to apply for this step (optional when using action_groups).
             agent_name: Agent name (empty = default agent).
             step_timeout_s: Server-side timeout for waiting for the physics step (seconds).
                 0 means use server default.
             timeout: RPC timeout in seconds.
+            action_groups: Optional list of action group dicts, each with keys:
+                group_name: str, actions: list[float], action_indices: list[int].
+                Groups are applied on top of actions (if provided) or default positions.
 
         Returns:
             ObservationResponse with observation after physics step.
         """
         timeout = timeout or self.timeout
 
+        # Build inline action groups if provided
+        proto_groups = []
+        if action_groups:
+            for g in action_groups:
+                gname = g.get("group_name", "")
+                gactions = g.get("actions", [])
+                gindices = g.get("action_indices", [])
+                if not gname or not gactions or not gindices:
+                    logger.warning(
+                        "Skipping invalid action group (missing group_name, actions, or action_indices): %s",
+                        g,
+                    )
+                    continue
+                proto_groups.append(
+                    self.pb.agent.ActionGroupEntry(
+                        group_name=gname,
+                        actions=gactions,
+                        action_indices=gindices,
+                    )
+                )
+
         try:
             resp = self.agent.Step(
                 self.pb.agent.StepRequest(
                     agent_name=agent_name,
-                    actions=actions,
+                    actions=actions or [],
                     timeout_s=step_timeout_s,
                     camera_requests=self._camera_requests,
+                    action_groups=proto_groups,
                 ),
                 timeout=timeout,
             )
@@ -667,6 +762,7 @@ class LuckyEngineClient:
                     type=t["type"],
                     joint_pattern=t.get("joint_pattern", "*"),
                     params=t.get("params", {}),
+                    group=t.get("group", ""),
                 )
                 for t in act.get("terms", [])
             ]
