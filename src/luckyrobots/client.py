@@ -28,6 +28,8 @@ try:
     from .grpc.generated import debug_pb2_grpc  # type: ignore
     from .grpc.generated import mujoco_pb2  # type: ignore
     from .grpc.generated import mujoco_pb2_grpc  # type: ignore
+    from .grpc.generated import mujoco_scene_pb2  # type: ignore
+    from .grpc.generated import mujoco_scene_pb2_grpc  # type: ignore
     from .grpc.generated import scene_pb2  # type: ignore
     from .grpc.generated import scene_pb2_grpc  # type: ignore
 except Exception as e:  # pragma: no cover
@@ -94,12 +96,16 @@ class LuckyEngineClient:
 
         self._channel = None
 
-        # Service stubs (populated after connect)
+        # Service stubs (created lazily on first property access)
         self._scene = None
         self._mujoco = None
+        self._mujoco_scene = None
         self._agent = None
         self._camera = None
         self._debug = None
+
+        # Additional user-registered stubs (see register_stub).
+        self._extra_stubs: dict[str, Any] = {}
 
         # Cached agent schemas: agent_name -> (observation_names, action_names)
         self._schema_cache: dict[str, tuple[list[str], list[str]]] = {}
@@ -112,6 +118,7 @@ class LuckyEngineClient:
             common=common_pb2,
             scene=scene_pb2,
             mujoco=mujoco_pb2,
+            mujoco_scene=mujoco_scene_pb2,
             agent=agent_pb2,
             debug=debug_pb2,
         )
@@ -119,6 +126,9 @@ class LuckyEngineClient:
     def connect(self) -> None:
         """
         Connect to the LuckyEngine gRPC server.
+
+        Opens the gRPC channel. Service stubs are created lazily on first
+        access so importers can skip unused services without cost.
 
         Raises:
             GrpcConnectionError: If connection fails.
@@ -128,12 +138,14 @@ class LuckyEngineClient:
 
         self._channel = grpc.insecure_channel(target)
 
-        # Create service stubs
-        self._scene = scene_pb2_grpc.SceneServiceStub(self._channel)
-        self._mujoco = mujoco_pb2_grpc.MujocoServiceStub(self._channel)
-        self._agent = agent_pb2_grpc.AgentServiceStub(self._channel)
-        self._camera = camera_pb2_grpc.CameraServiceStub(self._channel)
-        self._debug = debug_pb2_grpc.DebugServiceStub(self._channel)
+        # Drop any cached stubs so a reconnect re-binds them to the new channel.
+        self._scene = None
+        self._mujoco = None
+        self._mujoco_scene = None
+        self._agent = None
+        self._camera = None
+        self._debug = None
+        self._extra_stubs: dict[str, Any] = {}
 
         logger.info(f"Channel opened to {target} (server not verified yet)")
 
@@ -147,9 +159,11 @@ class LuckyEngineClient:
             self._channel = None
             self._scene = None
             self._mujoco = None
+            self._mujoco_scene = None
             self._agent = None
             self._camera = None
             self._debug = None
+            self._extra_stubs = {}
             logger.info("gRPC channel closed")
 
     def is_connected(self) -> bool:
@@ -225,39 +239,118 @@ class LuckyEngineClient:
         self._robot_name = robot_name
 
     @property
-    def scene(self) -> Any:
-        """SceneService stub."""
-        if self._scene is None:
+    def channel(self) -> grpc.Channel:
+        """The underlying gRPC channel.
+
+        Exposed so users can attach their own service stubs using the same
+        connection (shared keep-alive, auth, etc.):
+
+            client.connect()
+            my_stub = my_pb2_grpc.MyServiceStub(client.channel)
+        """
+        if self._channel is None:
             raise GrpcConnectionError("Not connected. Call connect() first.")
+        return self._channel
+
+    @property
+    def scene(self) -> Any:
+        """SceneService stub (lazy)."""
+        if self._scene is None:
+            self._scene = scene_pb2_grpc.SceneServiceStub(self.channel)
         return self._scene
 
     @property
     def mujoco(self) -> Any:
-        """MujocoService stub."""
+        """MujocoService stub (lazy) — agent-scoped joint state.
+
+        For the full, engine-wide MuJoCo model (every joint, every actuator),
+        use :attr:`mujoco_scene` instead.
+        """
         if self._mujoco is None:
-            raise GrpcConnectionError("Not connected. Call connect() first.")
+            self._mujoco = mujoco_pb2_grpc.MujocoServiceStub(self.channel)
         return self._mujoco
 
     @property
+    def mujoco_scene(self) -> Any:
+        """MujocoSceneService stub (lazy) — engine-wide MuJoCo access.
+
+        Exposes every joint, actuator, and the full qpos/qvel/ctrl vectors
+        in the loaded model. Use the higher-level helpers
+        :meth:`get_model_info`, :meth:`get_full_state`, and :meth:`set_ctrl`
+        for common operations.
+        """
+        if self._mujoco_scene is None:
+            self._mujoco_scene = mujoco_scene_pb2_grpc.MujocoSceneServiceStub(self.channel)
+        return self._mujoco_scene
+
+    @property
     def agent(self) -> Any:
-        """AgentService stub."""
+        """AgentService stub (lazy)."""
         if self._agent is None:
-            raise GrpcConnectionError("Not connected. Call connect() first.")
+            self._agent = agent_pb2_grpc.AgentServiceStub(self.channel)
         return self._agent
 
     @property
     def debug(self) -> Any:
-        """DebugService stub."""
+        """DebugService stub (lazy)."""
         if self._debug is None:
-            raise GrpcConnectionError("Not connected. Call connect() first.")
+            self._debug = debug_pb2_grpc.DebugServiceStub(self.channel)
         return self._debug
 
     @property
     def camera(self) -> Any:
-        """CameraService stub."""
+        """CameraService stub (lazy)."""
         if self._camera is None:
-            raise GrpcConnectionError("Not connected. Call connect() first.")
+            self._camera = camera_pb2_grpc.CameraServiceStub(self.channel)
         return self._camera
+
+    # ── Extension seam for user-provided services ──
+
+    def register_stub(self, name: str, stub_class: Any) -> Any:
+        """Attach a third-party stub class to this client's channel.
+
+        Useful when an engine build exposes a service that the shipped SDK
+        doesn't know about:
+
+            client.register_stub("my_svc", my_pb2_grpc.MyServiceStub)
+            client.my_svc.DoThing(...)
+
+        Args:
+            name: Attribute name under which the stub is exposed.
+            stub_class: Generated ``*Stub`` class from a ``_pb2_grpc`` module.
+
+        Returns:
+            The instantiated stub (also available as ``client.<name>``).
+        """
+        if not name or name.startswith("_"):
+            raise ValueError("Stub name must be non-empty and not start with '_'.")
+        if hasattr(type(self), name):
+            raise ValueError(
+                f"Cannot register stub '{name}': attribute reserved on LuckyEngineClient."
+            )
+        stub = stub_class(self.channel)
+        self._extra_stubs[name] = stub
+        return stub
+
+    def __getattr__(self, name: str) -> Any:
+        # Only reached for attributes not found on self or the class.
+        # Resolves user-registered stubs as ``client.<name>``.
+        extras = self.__dict__.get("_extra_stubs")
+        if extras and name in extras:
+            return extras[name]
+        raise AttributeError(name)
+
+    def discover_services(self) -> list[str]:
+        """Ask the server which gRPC services it advertises.
+
+        Uses ``grpc.reflection.v1alpha.ServerReflection``. Requires the engine
+        to be built with reflection enabled (default in the v0.2.0+ LuckyEngine
+        server). The standard reflection service itself is filtered out of the
+        result.
+        """
+        from . import reflection as _reflection
+
+        return _reflection.list_services(self.channel)
 
     # ── Camera configuration ──
 
@@ -368,6 +461,152 @@ class LuckyEngineClient:
             self.pb.mujoco.GetMujocoInfoRequest(robot_name=robot_name),
             timeout=timeout,
         )
+
+    # ── MujocoSceneService RPCs (engine-wide, not agent-scoped) ──
+
+    def get_model_info(self, timeout: Optional[float] = None):
+        """Introspect the full loaded MuJoCo model.
+
+        Returns a ``GetModelInfoResponse`` whose ``joints`` and ``actuators``
+        lists cover every entry in ``mjModel`` — not just those declared by
+        the registered RL agent. Use this to discover fingers, non-agent
+        joints, and actuator names the agent API doesn't expose.
+        """
+        timeout = timeout or self.timeout
+        return self.mujoco_scene.GetModelInfo(
+            self.pb.mujoco_scene.GetModelInfoRequest(),
+            timeout=timeout,
+        )
+
+    def get_full_state(
+        self,
+        *,
+        include_qpos: bool = True,
+        include_qvel: bool = True,
+        include_ctrl: bool = True,
+        timeout: Optional[float] = None,
+    ):
+        """Snapshot the complete mjData state (qpos, qvel, ctrl, time)."""
+        timeout = timeout or self.timeout
+        return self.mujoco_scene.GetFullState(
+            self.pb.mujoco_scene.GetFullStateRequest(
+                include_qpos=include_qpos,
+                include_qvel=include_qvel,
+                include_ctrl=include_ctrl,
+            ),
+            timeout=timeout,
+        )
+
+    def stream_full_state(
+        self,
+        *,
+        target_fps: int = 30,
+        include_qpos: bool = True,
+        include_qvel: bool = True,
+        include_ctrl: bool = True,
+    ):
+        """Iterate ``GetFullStateResponse`` messages at approximately ``target_fps``.
+
+        Example:
+            for resp in client.stream_full_state(target_fps=60):
+                qpos = list(resp.state.qpos)
+        """
+        return self.mujoco_scene.StreamFullState(
+            self.pb.mujoco_scene.StreamFullStateRequest(
+                target_fps=target_fps,
+                include_qpos=include_qpos,
+                include_qvel=include_qvel,
+                include_ctrl=include_ctrl,
+            )
+        )
+
+    def set_ctrl(
+        self,
+        values: Any,
+        *,
+        skip_range_clamp: bool = False,
+        wait_for_next_step: bool = False,
+        timeout: Optional[float] = None,
+    ):
+        """Write actuator control values.
+
+        Accepts three input shapes:
+            - A flat sequence of floats: bulk write starting at index 0.
+            - A dict[str, float]: write by actuator name.
+            - A dict[int, float]: write by actuator index.
+
+        Actuators currently owned by an active RL agent are refused and
+        returned in ``SetControlResponse.rejected_actuators``.
+        """
+        timeout = timeout or self.timeout
+
+        req_kwargs: dict[str, Any] = {
+            "skip_range_clamp": skip_range_clamp,
+            "wait_for_next_step": wait_for_next_step,
+        }
+
+        if isinstance(values, dict):
+            named: list = []
+            indexed: list = []
+            for k, v in values.items():
+                if isinstance(k, str):
+                    named.append(
+                        self.pb.mujoco_scene.NamedControlEntry(actuator_name=k, value=float(v))
+                    )
+                elif isinstance(k, int):
+                    indexed.append(
+                        self.pb.mujoco_scene.IndexedControlEntry(actuator_index=int(k), value=float(v))
+                    )
+                else:
+                    raise TypeError(
+                        f"set_ctrl dict keys must be str or int; got {type(k).__name__}"
+                    )
+            if named:
+                req_kwargs["named"] = named
+            if indexed:
+                req_kwargs["indexed"] = indexed
+        else:
+            req_kwargs["bulk"] = [float(v) for v in values]
+
+        return self.mujoco_scene.SetControl(
+            self.pb.mujoco_scene.SetControlRequest(**req_kwargs),
+            timeout=timeout,
+        )
+
+    def list_all_joints(self, timeout: Optional[float] = None) -> list[dict]:
+        """Return lightweight dicts for every joint in the loaded MuJoCo model.
+
+        Convenience wrapper around :meth:`get_model_info`. Each entry:
+            {"index": int, "name": str, "type": int, "qpos_adr": int,
+             "qvel_adr": int, "limited": bool, "range": (lo, hi)}
+        """
+        info = self.get_model_info(timeout=timeout)
+        return [
+            {
+                "index": j.index,
+                "name": j.name,
+                "type": int(j.type),
+                "qpos_adr": j.qpos_adr,
+                "qvel_adr": j.qvel_adr,
+                "limited": j.limited,
+                "range": (j.range_lo, j.range_hi),
+            }
+            for j in info.joints
+        ]
+
+    def list_all_actuators(self, timeout: Optional[float] = None) -> list[dict]:
+        """Return lightweight dicts for every actuator in the loaded MuJoCo model."""
+        info = self.get_model_info(timeout=timeout)
+        return [
+            {
+                "index": a.index,
+                "name": a.name,
+                "ctrl_limited": a.ctrl_limited,
+                "ctrl_range": (a.ctrl_range_lo, a.ctrl_range_hi),
+                "target_joint_index": a.target_joint_index,
+            }
+            for a in info.actuators
+        ]
 
     # ── AgentService RPCs ──
 

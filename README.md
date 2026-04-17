@@ -158,6 +158,66 @@ client.reset_agent(randomization_cfg={"vel_command_x_range": [-1.0, 1.0]})
 client.close()
 ```
 
+### 4. Engine-wide MuJoCo access (MujocoSceneService)
+
+The default `MujocoService` is **agent-scoped** — `get_joint_state()` returns
+only the joints the registered `RobotAgent` has declared. On a humanoid with a
+7-joint command abstraction that's 7 values, not the ~41 physical joints.
+
+For full-model access (every joint, every actuator, `qpos`/`qvel`/`ctrl`),
+use the `MujocoSceneService` helpers on `LuckyEngineClient`:
+
+```python
+# Introspect the full mjModel
+info = client.get_model_info()
+print(f"nq={info.nq} nv={info.nv} nu={info.nu} njnt={info.njnt}")
+
+# Find a specific subsystem (e.g. the fingers)
+fingers = [j for j in info.joints if "finger" in j.name.lower()]
+
+# Read the complete state
+state = client.get_full_state().state
+print(state.qpos[:5], state.time)
+
+# Drive arbitrary actuators — by name, index, or bulk
+client.set_ctrl({"R_thumb_distal": 0.3, "L_index_proximal": -0.1})
+client.set_ctrl({0: 0.1, 3: -0.2})
+client.set_ctrl([0.0] * info.nu)
+
+# Stream at target FPS
+for frame in client.stream_full_state(target_fps=60):
+    ...
+```
+
+`set_ctrl` is **safety-gated**: writes to actuators owned by a live RL agent
+are rejected and reported in `response.rejected_actuators` rather than racing
+the policy silently. Values are clamped to each actuator's ctrl range by
+default (pass `skip_range_clamp=True` to disable).
+
+### 5. Runtime discovery + extension
+
+The engine registers `grpc.reflection.v1alpha.ServerReflection` (default on),
+so the client never needs hard-coded service knowledge:
+
+```python
+client.discover_services()
+# → ['hazel.rpc.AgentService', 'hazel.rpc.MujocoSceneService', ...]
+
+from luckyrobots.reflection import describe_service
+svc = describe_service(client.channel, "hazel.rpc.MujocoSceneService")
+print([m.name for m in svc.methods])
+
+# Attach a third-party stub to the same channel
+from mypkg.grpc import my_pb2_grpc
+client.register_stub("my_service", my_pb2_grpc.MyServiceStub)
+client.my_service.DoThing(request, timeout=5.0)
+```
+
+Service stubs are **lazy** — each of `client.scene`, `client.mujoco`,
+`client.mujoco_scene`, `client.agent`, `client.camera`, `client.debug` is only
+instantiated on first access, so pulling in unused ones costs nothing.
+`client.channel` is public if you want to bypass the wrappers entirely.
+
 ## API Reference
 
 ### LuckyEnv
@@ -180,17 +240,30 @@ client.close()
 
 | Method | Description |
 |--------|-------------|
-| `connect()` | Open gRPC channel |
+| `connect()` | Open gRPC channel (stubs created lazily) |
 | `wait_for_server(timeout)` | Wait for engine to be ready |
-| `step(actions)` | Send actions + physics step + get observation |
+| `step(actions, action_groups=...)` | Send actions + physics step + get observation |
 | `reset_agent(agent_name, randomization_cfg)` | Reset agent with optional domain randomization |
 | `get_agent_schema()` | Get observation/action names and sizes |
 | `get_capability_manifest(robot_name)` | Discover available MDP components |
 | `negotiate_task(contract)` | Validate and configure engine for task contract |
 | `set_simulation_mode(mode)` | Set timing: `"fast"`, `"realtime"`, `"deterministic"` |
 | `configure_cameras(cameras)` | Set up camera capture per step |
+| `list_cameras()` | Discover cameras in the scene |
+| `set_action_group(group_name, actions, indices)` | Preload actions for multi-policy control |
+| **`get_model_info()`** | Full mjModel (every joint + actuator) |
+| **`get_full_state(include_qpos=, include_qvel=, include_ctrl=)`** | Snapshot full `qpos`/`qvel`/`ctrl` |
+| **`stream_full_state(target_fps=30, ...)`** | Server-streamed full state |
+| **`set_ctrl(values_or_dict)`** | Write actuator control (safety-gated) |
+| **`list_all_joints()` / `list_all_actuators()`** | Lightweight dict view over the model |
+| **`discover_services()`** | List services the server advertises via reflection |
+| **`register_stub(name, stub_cls)`** | Attach a third-party stub to the same channel |
+| `channel` (property) | The underlying `grpc.Channel` — use for custom stubs |
 | `benchmark(duration, method)` | Measure step RPC latency |
 | `close()` | Disconnect |
+
+**Stub attributes** (lazy): `client.agent`, `client.scene`, `client.mujoco`,
+`client.mujoco_scene`, `client.camera`, `client.debug`.
 
 ### Session
 
@@ -232,6 +305,24 @@ obs.to_dict()            # Convert to name->value dict
 **Domain randomization:** `friction`, `mass_scale`, `motor_strength`, `motor_offset`, `push_disturbance`, `joint_position_noise`, `joint_velocity_noise`, `pose_position_noise`, `pose_orientation_noise`
 
 Use `client.get_capability_manifest()` to discover all available components at runtime.
+
+### Runtime gRPC discovery
+
+Independently of the MDP capability manifest, the engine advertises its gRPC
+service surface via `grpc.reflection.v1alpha.ServerReflection`:
+
+```python
+client.discover_services()
+# → ['hazel.rpc.AgentService', 'hazel.rpc.CameraService',
+#    'hazel.rpc.MujocoSceneService', 'hazel.rpc.MujocoService', ...]
+
+from luckyrobots.reflection import describe_service
+svc = describe_service(client.channel, "hazel.rpc.MujocoSceneService")
+for m in svc.methods:
+    print(m.name, m.input_type.full_name, "->", m.output_type.full_name)
+```
+
+Useful when the installed SDK predates a server-side service you want to poke at.
 
 ## Available Robots & Scenes
 

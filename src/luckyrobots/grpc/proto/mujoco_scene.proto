@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+// MujocoSceneService — engine-wide, low-level MuJoCo access.
+//
+// Unlike `MujocoService` (in mujoco.proto), which is scoped to the joints
+// and actuators that a registered `RobotAgent` has declared, this service
+// exposes the *entire* loaded mjModel/mjData. Use it to:
+//   - Enumerate every joint, actuator, and their limits/types
+//   - Read the complete qpos / qvel / ctrl vectors
+//   - Drive arbitrary actuators by index or by name
+//
+// Safety: write RPCs refuse to clobber actuators that are currently owned by
+// an active external RL agent (SetControl returns FAILED_PRECONDITION).
+// Reads are always safe.
+
+package hazel.rpc;
+
+option cc_enable_arenas = true;
+
+// =============================================================================
+// Model introspection
+// =============================================================================
+
+enum MjJointType {
+    MJ_JNT_FREE   = 0;
+    MJ_JNT_BALL   = 1;
+    MJ_JNT_SLIDE  = 2;
+    MJ_JNT_HINGE  = 3;
+    MJ_JNT_UNKNOWN = 99;
+}
+
+message JointDescriptor {
+    uint32 index = 1;
+    string name = 2;
+    MjJointType type = 3;
+    uint32 qpos_adr = 4;
+    uint32 qvel_adr = 5;
+    bool limited = 6;
+    float range_lo = 7;
+    float range_hi = 8;
+}
+
+message ActuatorDescriptor {
+    uint32 index = 1;
+    string name = 2;
+    bool ctrl_limited = 3;
+    float ctrl_range_lo = 4;
+    float ctrl_range_hi = 5;
+    int32 target_joint_index = 6;
+}
+
+message GetModelInfoRequest {
+}
+
+message GetModelInfoResponse {
+    bool success = 1;
+    string message = 2;
+    uint32 nq = 3;
+    uint32 nv = 4;
+    uint32 nu = 5;
+    uint32 njnt = 6;
+    repeated JointDescriptor joints = 7;
+    repeated ActuatorDescriptor actuators = 8;
+}
+
+// =============================================================================
+// Full state
+// =============================================================================
+
+message FullState {
+    repeated float qpos = 1 [packed = true];
+    repeated float qvel = 2 [packed = true];
+    repeated float ctrl = 3 [packed = true];
+    double time = 4;
+    uint64 frame_number = 5;
+}
+
+message GetFullStateRequest {
+    bool include_qpos = 1;
+    bool include_qvel = 2;
+    bool include_ctrl = 3;
+}
+
+message GetFullStateResponse {
+    bool success = 1;
+    string message = 2;
+    FullState state = 3;
+}
+
+message StreamFullStateRequest {
+    uint32 target_fps = 1;
+    bool include_qpos = 2;
+    bool include_qvel = 3;
+    bool include_ctrl = 4;
+}
+
+// =============================================================================
+// Control
+// =============================================================================
+
+message NamedControlEntry {
+    string actuator_name = 1;
+    float value = 2;
+}
+
+message IndexedControlEntry {
+    uint32 actuator_index = 1;
+    float value = 2;
+}
+
+message SetControlRequest {
+    repeated float bulk = 1 [packed = true];
+    repeated IndexedControlEntry indexed = 2;
+    repeated NamedControlEntry named = 3;
+    bool wait_for_next_step = 4;
+    bool skip_range_clamp = 5;
+}
+
+message SetControlResponse {
+    bool success = 1;
+    string message = 2;
+    uint32 actuators_written = 3;
+    repeated string rejected_actuators = 4;
+}
+
+// =============================================================================
+// qpos teleport
+// =============================================================================
+
+message IndexedQposEntry {
+    uint32 qpos_index = 1;
+    float value = 2;
+}
+
+message SetQposRequest {
+    repeated float bulk = 1 [packed = true];
+    repeated IndexedQposEntry indexed = 2;
+    bool force = 3;
+}
+
+message SetQposResponse {
+    bool success = 1;
+    string message = 2;
+    uint32 values_written = 3;
+}
+
+// =============================================================================
+// Service
+// =============================================================================
+
+service MujocoSceneService {
+    rpc GetModelInfo(GetModelInfoRequest) returns (GetModelInfoResponse);
+
+    rpc GetFullState(GetFullStateRequest) returns (GetFullStateResponse);
+    rpc StreamFullState(StreamFullStateRequest) returns (stream GetFullStateResponse);
+
+    rpc SetControl(SetControlRequest) returns (SetControlResponse);
+    rpc SetQpos(SetQposRequest) returns (SetQposResponse);
+}
