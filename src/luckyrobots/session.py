@@ -259,6 +259,68 @@ class Session:
         client = self._require_client()
         return client.set_simulation_mode(mode=mode)
 
+    def get_simulation_mode(self) -> str:
+        """Query the engine's current simulation timing mode."""
+        return self._require_client().get_simulation_mode()
+
+    def get_scene_info(self) -> dict:
+        """Return the active scene's name, path, and entity count."""
+        return self._require_client().get_scene_info()
+
+    def list_entities(self, include_transforms: bool = False, include_components: bool = False) -> list:
+        """Enumerate entities in the active scene."""
+        return self._require_client().list_entities(
+            include_transforms=include_transforms,
+            include_components=include_components,
+        )
+
+    def get_entity(self, name: Optional[str] = None, entity_id: Optional[int] = None):
+        """Look up one entity by name or numeric id."""
+        return self._require_client().get_entity(name=name, entity_id=entity_id)
+
+    def set_entity_transform(self, entity_id: int, position=None, rotation=None, scale=None) -> bool:
+        """Set an entity's transform (position / rotation / scale)."""
+        return self._require_client().set_entity_transform(
+            entity_id=entity_id, position=position, rotation=rotation, scale=scale,
+        )
+
+    def validate_task_contract(self, contract: dict) -> dict:
+        """Dry-run a task contract against the engine's capability registry."""
+        return self._require_client().validate_task_contract(contract)
+
+    def get_telemetry_schema(self) -> dict:
+        """Return the telemetry vector schema (observation/action names + nq/nu)."""
+        return self._require_client().get_telemetry_schema()
+
+    def stream_telemetry(self, target_fps: int = 30):
+        """Iterate over server-streamed TelemetryFrame protos."""
+        return self._require_client().stream_telemetry(target_fps=target_fps)
+
+    def get_viewport_info(self) -> dict:
+        """List available viewports plus the current stream config."""
+        return self._require_client().get_viewport_info()
+
+    def stream_viewport(self, viewport_name: str = "Main", target_fps: int = 30,
+                        width: int = 0, height: int = 0, format: str = "raw"):
+        """Iterate over server-streamed ImageFrame protos for a viewport."""
+        return self._require_client().stream_viewport(
+            viewport_name=viewport_name, target_fps=target_fps,
+            width=width, height=height, format=format,
+        )
+
+    def stream_camera(self, name: Optional[str] = None, entity_id: Optional[int] = None,
+                      target_fps: int = 30, width: int = 0, height: int = 0,
+                      format: str = "raw"):
+        """Iterate over server-streamed ImageFrame protos for a camera."""
+        return self._require_client().stream_camera(
+            name=name, entity_id=entity_id, target_fps=target_fps,
+            width=width, height=height, format=format,
+        )
+
+    def stream_joint_state(self, robot_name: Optional[str] = None):
+        """Iterate over server-streamed agent-scoped joint state."""
+        return self._require_client().stream_joint_state(robot_name=robot_name)
+
     def reset(
         self,
         agent_name: str = "",

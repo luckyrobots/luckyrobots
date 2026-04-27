@@ -32,6 +32,11 @@ try:
     from .grpc.generated import mujoco_scene_pb2_grpc  # type: ignore
     from .grpc.generated import scene_pb2  # type: ignore
     from .grpc.generated import scene_pb2_grpc  # type: ignore
+    from .grpc.generated import telemetry_pb2  # type: ignore
+    from .grpc.generated import telemetry_pb2_grpc  # type: ignore
+    from .grpc.generated import viewport_pb2  # type: ignore
+    from .grpc.generated import viewport_pb2_grpc  # type: ignore
+    from .grpc.generated import media_pb2  # type: ignore
 except Exception as e:  # pragma: no cover
     raise ImportError(
         "Missing generated gRPC stubs. Regenerate them from the protos in "
@@ -103,6 +108,8 @@ class LuckyEngineClient:
         self._agent = None
         self._camera = None
         self._debug = None
+        self._telemetry = None
+        self._viewport = None
 
         # Additional user-registered stubs (see register_stub).
         self._extra_stubs: dict[str, Any] = {}
@@ -121,6 +128,10 @@ class LuckyEngineClient:
             mujoco_scene=mujoco_scene_pb2,
             agent=agent_pb2,
             debug=debug_pb2,
+            camera=camera_pb2,
+            telemetry=telemetry_pb2,
+            viewport=viewport_pb2,
+            media=media_pb2,
         )
 
     def connect(self) -> None:
@@ -145,6 +156,8 @@ class LuckyEngineClient:
         self._agent = None
         self._camera = None
         self._debug = None
+        self._telemetry = None
+        self._viewport = None
         self._extra_stubs: dict[str, Any] = {}
 
         logger.info(f"Channel opened to {target} (server not verified yet)")
@@ -303,6 +316,20 @@ class LuckyEngineClient:
         if self._camera is None:
             self._camera = camera_pb2_grpc.CameraServiceStub(self.channel)
         return self._camera
+
+    @property
+    def telemetry(self) -> Any:
+        """TelemetryService stub (lazy) — lightweight qpos + ctrl streaming."""
+        if self._telemetry is None:
+            self._telemetry = telemetry_pb2_grpc.TelemetryServiceStub(self.channel)
+        return self._telemetry
+
+    @property
+    def viewport(self) -> Any:
+        """ViewportService stub (lazy) — editor viewport pixel streaming."""
+        if self._viewport is None:
+            self._viewport = viewport_pb2_grpc.ViewportServiceStub(self.channel)
+        return self._viewport
 
     # ── Extension seam for user-provided services ──
 
@@ -886,6 +913,59 @@ class LuckyEngineClient:
             ],
         }
 
+    def validate_task_contract(
+        self,
+        contract: dict,
+        timeout: Optional[float] = None,
+    ) -> dict:
+        """Dry-run a task contract against the engine's capability registry.
+
+        Validates without configuring anything — useful for CLI tooling and
+        pre-flight checks. Errors include actionable suggestions ("did you
+        mean `track_angular_velocity`?").
+
+        Args:
+            contract: Task contract dict (same shape as ``negotiate_task``).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            Dict with keys: ``is_valid`` (bool), ``errors`` (list of dicts),
+            ``warnings`` (list of dicts), ``resolved_optionals`` (list of
+            term names that were resolved), ``unresolved_optionals``.
+        """
+        timeout = timeout or self.timeout
+        proto_contract = self._build_task_contract(contract)
+        resp = self.agent.ValidateTaskContract(
+            self.pb.agent.ValidateTaskContractRequest(contract=proto_contract),
+            timeout=timeout,
+        )
+        result = resp.result
+        return {
+            "is_valid": result.is_valid,
+            "errors": [
+                {
+                    "severity": m.severity,
+                    "component": m.component,
+                    "term_name": m.term_name,
+                    "message": m.message,
+                    "suggestion": m.suggestion,
+                }
+                for m in result.errors
+            ],
+            "warnings": [
+                {
+                    "severity": m.severity,
+                    "component": m.component,
+                    "term_name": m.term_name,
+                    "message": m.message,
+                    "suggestion": m.suggestion,
+                }
+                for m in result.warnings
+            ],
+            "resolved_optionals": list(result.resolved_optionals),
+            "unresolved_optionals": list(result.unresolved_optionals),
+        }
+
     def negotiate_task(
         self,
         contract: dict,
@@ -1079,6 +1159,286 @@ class LuckyEngineClient:
         return self.scene.SetSimulationMode(
             self.pb.scene.SetSimulationModeRequest(mode=mode_value),
             timeout=timeout,
+        )
+
+    def get_simulation_mode(self, timeout: Optional[float] = None) -> str:
+        """Query the engine's current simulation timing mode.
+
+        Returns:
+            One of ``"realtime"``, ``"deterministic"``, ``"fast"``, or
+            ``"unknown"`` if the engine returned an unrecognized enum value.
+        """
+        timeout = timeout or self.timeout
+        resp = self.scene.GetSimulationMode(
+            self.pb.scene.GetSimulationModeRequest(),
+            timeout=timeout,
+        )
+        return {0: "realtime", 1: "deterministic", 2: "fast"}.get(resp.mode, "unknown")
+
+    def get_scene_info(self, timeout: Optional[float] = None) -> dict:
+        """Return the active scene's name, path, and entity count."""
+        timeout = timeout or self.timeout
+        resp = self.scene.GetSceneInfo(
+            self.pb.scene.GetSceneInfoRequest(),
+            timeout=timeout,
+        )
+        return {
+            "scene_name": resp.scene_name,
+            "scene_path": resp.scene_path,
+            "entity_count": resp.entity_count,
+        }
+
+    def list_entities(
+        self,
+        include_transforms: bool = False,
+        include_components: bool = False,
+        timeout: Optional[float] = None,
+    ) -> list[dict]:
+        """Enumerate entities in the active scene.
+
+        Args:
+            include_transforms: Populate per-entity ``transform``.
+            include_components: Populate per-entity ``components`` (type names).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            List of dicts with keys ``id``, ``name``, optionally ``transform``,
+            ``components``.
+        """
+        timeout = timeout or self.timeout
+        resp = self.scene.ListEntities(
+            self.pb.scene.ListEntitiesRequest(
+                include_transforms=include_transforms,
+                include_components=include_components,
+            ),
+            timeout=timeout,
+        )
+        out = []
+        for e in resp.entities:
+            entry: dict[str, Any] = {"id": e.id.id, "name": e.name}
+            if include_transforms and e.HasField("transform"):
+                t = e.transform
+                entry["transform"] = {
+                    "position": (t.position.x, t.position.y, t.position.z),
+                    "rotation": (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w),
+                    "scale": (t.scale.x, t.scale.y, t.scale.z),
+                }
+            if include_components and len(e.components) > 0:
+                entry["components"] = list(e.components)
+            out.append(entry)
+        return out
+
+    def get_entity(
+        self,
+        name: Optional[str] = None,
+        entity_id: Optional[int] = None,
+        timeout: Optional[float] = None,
+    ) -> Optional[dict]:
+        """Look up one entity by name or numeric id.
+
+        Returns the same dict shape as :meth:`list_entities` (always with
+        ``transform`` and ``components`` populated), or ``None`` if not found.
+        """
+        if (name is None) == (entity_id is None):
+            raise ValueError("Pass exactly one of `name` or `entity_id`.")
+        timeout = timeout or self.timeout
+        if entity_id is not None:
+            req = self.pb.scene.GetEntityRequest(id=self.pb.common.EntityId(id=entity_id))
+        else:
+            req = self.pb.scene.GetEntityRequest(name=name)
+        resp = self.scene.GetEntity(req, timeout=timeout)
+        if not resp.found:
+            return None
+        e = resp.entity
+        t = e.transform
+        return {
+            "id": e.id.id,
+            "name": e.name,
+            "transform": {
+                "position": (t.position.x, t.position.y, t.position.z),
+                "rotation": (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w),
+                "scale": (t.scale.x, t.scale.y, t.scale.z),
+            },
+            "components": list(e.components),
+        }
+
+    def set_entity_transform(
+        self,
+        entity_id: int,
+        position: Optional[tuple[float, float, float]] = None,
+        rotation: Optional[tuple[float, float, float, float]] = None,
+        scale: Optional[tuple[float, float, float]] = None,
+        timeout: Optional[float] = None,
+    ) -> bool:
+        """Set an entity's transform. Unspecified fields default to identity.
+
+        Args:
+            entity_id: The entity's numeric id (from ``list_entities`` /
+                ``get_entity``).
+            position: ``(x, y, z)`` world-space position.
+            rotation: ``(x, y, z, w)`` quaternion.
+            scale: ``(x, y, z)`` scale.
+
+        Returns:
+            ``True`` on success.
+        """
+        timeout = timeout or self.timeout
+        pos = position or (0.0, 0.0, 0.0)
+        rot = rotation or (0.0, 0.0, 0.0, 1.0)
+        scl = scale or (1.0, 1.0, 1.0)
+        transform = self.pb.common.Transform(
+            position=self.pb.common.Vec3(x=pos[0], y=pos[1], z=pos[2]),
+            rotation=self.pb.common.Quat(x=rot[0], y=rot[1], z=rot[2], w=rot[3]),
+            scale=self.pb.common.Vec3(x=scl[0], y=scl[1], z=scl[2]),
+        )
+        resp = self.scene.SetEntityTransform(
+            self.pb.scene.SetEntityTransformRequest(
+                id=self.pb.common.EntityId(id=entity_id),
+                transform=transform,
+            ),
+            timeout=timeout,
+        )
+        if not resp.success:
+            logger.warning("set_entity_transform failed: %s", resp.message)
+        return resp.success
+
+    # ── TelemetryService RPCs ──
+
+    def get_telemetry_schema(self, timeout: Optional[float] = None) -> dict:
+        """Return the telemetry vector schema (observation names, action names, nq, nu).
+
+        Telemetry is the lightweight streaming surface — qpos + last-applied
+        ctrl per frame. For full mjData (qpos/qvel/ctrl with filters), use
+        :meth:`stream_full_state` on the MujocoScene wrapper instead.
+        """
+        timeout = timeout or self.timeout
+        resp = self.telemetry.GetTelemetrySchema(
+            self.pb.telemetry.GetTelemetrySchemaRequest(),
+            timeout=timeout,
+        )
+        s = resp.schema
+        return {
+            "observation_names": list(s.observation_names),
+            "action_names": list(s.action_names),
+            "nq": s.nq,
+            "nu": s.nu,
+        }
+
+    def stream_telemetry(self, target_fps: int = 30):
+        """Iterate over server-streamed :class:`TelemetryFrame` protos.
+
+        Each frame carries ``timestamp_ms``, ``frame_number``,
+        ``observation_qpos`` (full mjData qpos), and ``action_ctrl``
+        (last-applied ctrl). Cancellation-safe — break out of the loop to
+        terminate the stream.
+        """
+        return self.telemetry.StreamTelemetry(
+            self.pb.telemetry.StreamTelemetryRequest(target_fps=target_fps),
+        )
+
+    # ── ViewportService RPCs ──
+
+    def get_viewport_info(self, timeout: Optional[float] = None) -> dict:
+        """List the viewports the engine exposes plus the current stream config.
+
+        On this engine branch the server reports a single ``"Main"`` viewport.
+        """
+        timeout = timeout or self.timeout
+        resp = self.viewport.GetViewportInfo(
+            self.pb.viewport.GetViewportInfoRequest(),
+            timeout=timeout,
+        )
+        cfg = resp.current_config
+        return {
+            "available_viewports": list(resp.available_viewports),
+            "current_config": {
+                "streaming": cfg.streaming,
+                "viewport_name": cfg.viewport_name,
+                "fps": cfg.fps,
+                "width": cfg.width,
+                "height": cfg.height,
+            },
+        }
+
+    def stream_viewport(
+        self,
+        viewport_name: str = "Main",
+        target_fps: int = 30,
+        width: int = 0,
+        height: int = 0,
+        format: str = "raw",
+    ):
+        """Iterate over server-streamed :class:`ImageFrame` protos for a viewport.
+
+        Args:
+            viewport_name: Viewport id (``"Main"`` is the only one on this
+                engine branch).
+            target_fps: Desired frame rate; server may clamp.
+            width / height: Desired resolution. ``0`` = native.
+            format: ``"raw"`` (RGBA bytes) or ``"jpeg"``.
+        """
+        return self.viewport.StreamViewport(
+            self.pb.viewport.StartViewportStreamRequest(
+                viewport_name=viewport_name,
+                target_fps=target_fps,
+                width=width,
+                height=height,
+                format=format,
+            ),
+        )
+
+    # ── CameraService streaming ──
+
+    def stream_camera(
+        self,
+        name: Optional[str] = None,
+        entity_id: Optional[int] = None,
+        target_fps: int = 30,
+        width: int = 0,
+        height: int = 0,
+        format: str = "raw",
+    ):
+        """Iterate over server-streamed :class:`ImageFrame` protos for a camera.
+
+        Identify by name (camera entity tag) or by numeric entity id. For
+        synchronous in-step capture use :meth:`configure_cameras` plus
+        :meth:`step` instead.
+        """
+        if (name is None) == (entity_id is None):
+            raise ValueError("Pass exactly one of `name` or `entity_id`.")
+        if entity_id is not None:
+            req = self.pb.camera.StreamCameraRequest(
+                id=self.pb.common.EntityId(id=entity_id),
+                target_fps=target_fps,
+                width=width,
+                height=height,
+                format=format,
+            )
+        else:
+            req = self.pb.camera.StreamCameraRequest(
+                name=name,
+                target_fps=target_fps,
+                width=width,
+                height=height,
+                format=format,
+            )
+        return self.camera.StreamCamera(req)
+
+    # ── MujocoService streaming ──
+
+    def stream_joint_state(
+        self,
+        robot_name: Optional[str] = None,
+    ):
+        """Iterate over server-streamed agent-scoped joint state.
+
+        Returns positions/velocities only for the joints declared by the
+        registered ``RobotAgent`` — *not* the full mjModel. For full-model
+        streaming use :meth:`stream_full_state` on the MujocoScene wrapper.
+        """
+        robot = robot_name if robot_name is not None else (self._robot_name or "")
+        return self.mujoco.StreamJointState(
+            self.pb.mujoco.GetJointStateRequest(robot_name=robot),
         )
 
     # ── Benchmarking ──

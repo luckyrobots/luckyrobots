@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import agent_pb2 as agent__pb2
+from . import agent_pb2 as agent__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -26,7 +26,7 @@ if _version_not_supported:
 
 
 class AgentServiceStub(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """RL training, policy / RobotController control, contract negotiation.
     """
 
     def __init__(self, channel):
@@ -39,16 +39,6 @@ class AgentServiceStub(object):
                 '/hazel.rpc.AgentService/GetAgentSchema',
                 request_serializer=agent__pb2.GetAgentSchemaRequest.SerializeToString,
                 response_deserializer=agent__pb2.GetAgentSchemaResponse.FromString,
-                _registered_method=True)
-        self.GetObservation = channel.unary_unary(
-                '/hazel.rpc.AgentService/GetObservation',
-                request_serializer=agent__pb2.GetObservationRequest.SerializeToString,
-                response_deserializer=agent__pb2.GetObservationResponse.FromString,
-                _registered_method=True)
-        self.StreamAgent = channel.unary_stream(
-                '/hazel.rpc.AgentService/StreamAgent',
-                request_serializer=agent__pb2.StreamAgentRequest.SerializeToString,
-                response_deserializer=agent__pb2.AgentFrame.FromString,
                 _registered_method=True)
         self.ResetAgent = channel.unary_unary(
                 '/hazel.rpc.AgentService/ResetAgent',
@@ -193,29 +183,11 @@ class AgentServiceStub(object):
 
 
 class AgentServiceServicer(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """RL training, policy / RobotController control, contract negotiation.
     """
 
     def GetAgentSchema(self, request, context):
         """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetObservation(self, request, context):
-        """Single-shot observation snapshot (unified observation surface).
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def StreamAgent(self, request, context):
-        """Server-streaming observations (and optional action echo) for a single agent.
-
-        The client specifies which agent to stream via StreamAgentRequest and may
-        provide a target FPS hint. Actions are currently sent via MujocoService
-        (SendControl); AgentFrame.actions is primarily used for telemetry.
-        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -230,8 +202,9 @@ class AgentServiceServicer(object):
 
     def Step(self, request, context):
         """Synchronous RL step: apply action, wait for physics, return observation.
-        This is the recommended interface for RL training as it eliminates
-        one network round-trip compared to separate SendControl + GetObservation.
+        Primary RL interface — one round trip delivers actions, ticks physics, and
+        returns the next observation (plus reward signals + termination flags when
+        a task contract has been negotiated).
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -413,16 +386,6 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     request_deserializer=agent__pb2.GetAgentSchemaRequest.FromString,
                     response_serializer=agent__pb2.GetAgentSchemaResponse.SerializeToString,
             ),
-            'GetObservation': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetObservation,
-                    request_deserializer=agent__pb2.GetObservationRequest.FromString,
-                    response_serializer=agent__pb2.GetObservationResponse.SerializeToString,
-            ),
-            'StreamAgent': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamAgent,
-                    request_deserializer=agent__pb2.StreamAgentRequest.FromString,
-                    response_serializer=agent__pb2.AgentFrame.SerializeToString,
-            ),
             'ResetAgent': grpc.unary_unary_rpc_method_handler(
                     servicer.ResetAgent,
                     request_deserializer=agent__pb2.ResetAgentRequest.FromString,
@@ -572,7 +535,7 @@ def add_AgentServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class AgentService(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """RL training, policy / RobotController control, contract negotiation.
     """
 
     @staticmethod
@@ -592,60 +555,6 @@ class AgentService(object):
             '/hazel.rpc.AgentService/GetAgentSchema',
             agent__pb2.GetAgentSchemaRequest.SerializeToString,
             agent__pb2.GetAgentSchemaResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetObservation(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/hazel.rpc.AgentService/GetObservation',
-            agent__pb2.GetObservationRequest.SerializeToString,
-            agent__pb2.GetObservationResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def StreamAgent(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            '/hazel.rpc.AgentService/StreamAgent',
-            agent__pb2.StreamAgentRequest.SerializeToString,
-            agent__pb2.AgentFrame.FromString,
             options,
             channel_credentials,
             insecure,

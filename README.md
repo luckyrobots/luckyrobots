@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-   Infinite synthetic data generation for embodied AI
+   Python SDK for LuckyEngine — robot, policy, joint and contract-driven RL control over gRPC.
 </p>
 
 <div align="center">
@@ -17,60 +17,203 @@
 
 </div>
 
-https://github.com/user-attachments/assets/0ab2953d-b188-4af7-a225-71decdd2378c
-
 # Lucky Robots
 
-Python SDK for LuckyEngine — a hyperrealistic robotics simulation with MuJoCo physics. Train RL policies with a standard Gymnasium interface, or use the low-level gRPC client for full control.
+`luckyrobots` is the Python client for [LuckyEngine](https://github.com/luckyrobots/luckyrobots), a hyperrealistic MuJoCo-based simulator. It mirrors every gRPC surface the engine exposes — robots and policies, joints and actuators, motion graphs and IK, RL contracts, telemetry, cameras, viewports — with discovery built in. List robots, list policies, list joints with their ownership, drive policy commands, pump arbitrary actuators, train a Gymnasium env on top, record + replay sessions.
 
-<p align="center">
-  <img width="49%" alt="Bedroom environment in LuckyEngine" src="https://github.com/user-attachments/assets/279a7864-9a8b-453e-8567-3a174f5db8ab" />
-  <img width="49%" alt="Open floor plan in LuckyEngine" src="https://github.com/user-attachments/assets/68c72b97-98ab-42b0-a065-8a4247b014c7" />
-</p>
+## Install + connect
 
-## Quick Start
+```bash
+pip install luckyrobots
+export LUCKYENGINE_PATH=/path/to/LuckyEngine          # Linux/Mac
+# set   LUCKYENGINE_PATH=C:\path\to\LuckyEngine.exe   # Windows
+```
 
-1. **Download LuckyEngine** from our [releases page](https://github.com/luckyrobots/luckyrobots/releases/latest) and set the path:
-   ```bash
-   export LUCKYENGINE_PATH=/path/to/LuckyEngine      # Linux/Mac
-   export LUCKYENGINE_PATH=/path/to/LuckyEngine.exe   # Windows
-   ```
+```python
+from luckyrobots import Session
 
-2. **Install**
-   ```bash
-   pip install luckyrobots
-   ```
+with Session() as sess:
+    sess.connect(timeout_s=30.0)
+    info = sess.get_model_info()
+    print(f"nq={info.nq} nu={info.nu}  joints={len(info.joints)}")
+```
 
-3. **Train a robot in 20 lines**
-   ```python
-   from luckyrobots import LuckyEnv
+`connect()` assumes the gRPC server is already running inside the editor (gRPC Server panel → **Start Server**, then **Play** the scene). Use `sess.start(scene=..., robot=..., task=...)` to launch the engine programmatically instead.
 
-   def my_reward(signals):
-       return (2.0 * signals.get("track_linear_velocity", 0)
-               + 1.5 * signals.get("track_angular_velocity", 0)
-               - 0.01 * signals.get("action_rate", 0))
+## Train a robot in 20 lines
 
-   env = LuckyEnv(
-       robot="unitreego2",
-       scene="velocity",
-       reward_fn=my_reward,
-       reward_terms=["track_linear_velocity", "track_angular_velocity", "action_rate"],
-       termination_terms=["fell_over", "time_out"],
-   )
+```python
+from luckyrobots import LuckyEnv
 
-   obs, info = env.reset()
-   for _ in range(100_000):
-       action = policy(obs)
-       obs, reward, terminated, truncated, info = env.step(action)
-       if terminated or truncated:
-           obs, info = env.reset()
-   ```
+def my_reward(signals):
+    return (2.0 * signals.get("track_linear_velocity", 0)
+            + 1.5 * signals.get("track_angular_velocity", 0)
+            - 0.01 * signals.get("action_rate", 0))
 
-## Three Ways to Use It
+env = LuckyEnv(
+    robot="unitreego2",
+    scene="velocity",
+    reward_fn=my_reward,
+    reward_terms=["track_linear_velocity", "track_angular_velocity", "action_rate"],
+    termination_terms=["fell_over", "time_out"],
+)
 
-### 1. LuckyEnv (Gymnasium interface)
+obs, info = env.reset()
+for _ in range(100_000):
+    action = policy(obs)
+    obs, reward, terminated, truncated, info = env.step(action)
+    if terminated or truncated:
+        obs, info = env.reset()
+```
 
-The recommended way to train RL policies. Standard Gymnasium API — works with SB3, skrl, CleanRL, or any Gym-compatible library.
+Engine computes the named reward signals + termination flags inline with each `step()` (server-side, no Python round trips). `reward_fn` combines them into a scalar. Negotiation validates your term list against engine capabilities at startup, so typos surface immediately with actionable suggestions ("did you mean `track_angular_velocity`?").
+
+## The API at a glance
+
+| Surface | Use it for | Backed by |
+|---|---|---|
+| `LuckyEnv` | Standard Gymnasium training (SB3, skrl, CleanRL) | `AgentService.NegotiateTask` + `Step` |
+| `RobotController` | Drive in-engine policy slots + motion graphs | `AgentService` policy bridge |
+| `MujocoScene` | Full mjModel introspection + arbitrary actuator writes | `MujocoSceneService` |
+| `PolicyEnv` | Gym env where actions are *commands* into a fixed policy | `AgentService.SetPolicyCommandFloat` + `Step` |
+| `Session` / `LuckyEngineClient` | Direct gRPC with lazy stubs, custom user services, reflection | All services |
+| `PolicyMonitor` | Event-driven callbacks when slot state changes | `StreamRobotController` |
+| `SessionRecording` / `record_session` | Capture + replay every Set\*/Get\* RPC | All `Set*`/`Get*` RPCs |
+| `StreamMultiplexer` | Time-aligned merge of N concurrent server-streams | Any streaming RPC |
+| `AsyncSession` / `AsyncRobotController` | Asyncio-native mirror of the sync surface | Same RPCs, aio channel |
+| `set_robot_pose` | Teleport via human-friendly inputs | `MujocoSceneService.SetQpos` |
+| `validate_session`, `has_rpc` | Startup feature-detection + warnings | gRPC reflection |
+
+Discovery is the through-line — every API prefers `list_*` / `get_*` / `discover_*` over hardcoded names.
+
+## `RobotController` — drive in-engine policies
+
+```python
+from luckyrobots import Session, RobotController, list_robot_controllers
+
+with Session() as sess:
+    sess.connect(timeout_s=30.0)
+
+    for state in list_robot_controllers(sess):
+        print(state.entity_name, "motion_graph_active=", state.motion_graph_active)
+        for slot in state.slots:
+            print(f"  slot {slot.slot_id}: {slot.name} prio={slot.priority} active={slot.active}")
+            print(f"    joints={list(slot.policy_joint_names)[:4]}…")
+            print(f"    commands={[(c.name, c.type) for c in slot.command_id_map]}")
+
+    robot = sess.robot("G1")                                # by entity tag (str) or numeric id (int)
+
+    # Activate a slot for the duration of a `with` block — the slot's prior
+    # active state is restored on exit.
+    with robot.policy_slot("Walker"):
+        robot.commands("Walker")["SetVx"] = 0.5             # → SetPolicyCommandFloat
+        robot.set_driven_joints("Walker", ["pelvis", "left_hip_pitch_joint", ...])
+        robot.set_policy_clamp_observation("Walker", True)
+        robot.set_policy_priority("Walker", 0)
+
+    # Hot-swap a slot's descriptor without restarting the sim.
+    robot.set_policy_descriptor("Walker", "Assets/Policies/Walker_v2/policy_descriptor.walker.json")
+
+    # Disable the motion graph for the duration of a block.
+    with robot.motion_graph_disabled():
+        ...
+
+    # Diagnostics for tuning / debug.
+    base = robot.get_base_pose("Walker")          # (x, y, yaw) in MuJoCo + Hazel frames
+    action, joint_names = robot.get_last_action("Walker")  # raw ONNX output
+```
+
+The `commands(slot)` mapping view (`CommandStoreView`) is dict-like:
+
+```python
+cmds = robot.commands("Walker")
+cmds["SetVx"] = 0.5             # auto-detects float vs bool from the value's Python type
+cmds["UseSprint"] = True
+print("SetVx" in cmds, list(cmds.keys()), cmds.items())
+print(cmds["SetVx"], cmds.get_bool("UseSprint"))
+```
+
+Live state streams:
+
+```python
+for state in robot.stream_state(target_fps=30):           # → AgentService.StreamRobotController
+    print(state.motion_graph_active, [s.name for s in state.slots])
+
+for slot_state in robot.stream_slot_state("Walker", 60):   # → AgentService.StreamPolicySlotState
+    print(slot_state.active, slot_state.driven_joints[:3])
+```
+
+Top-level helpers:
+
+```python
+from luckyrobots import list_robot_controllers, list_policy_descriptors
+
+for controller in list_robot_controllers(sess):
+    ...
+
+for desc in list_policy_descriptors(sess):                 # PolicyRegistry.yaml entries
+    print(desc.policy_id, desc.descriptor_path, list(desc.joints), desc.command_aliases)
+```
+
+## `MujocoScene` — full mjModel access
+
+```python
+from luckyrobots import Session
+
+with Session() as sess:
+    sess.connect(timeout_s=30.0)
+    scene = sess.scene                                     # cached MujocoScene
+
+    info = scene.model_info()                              # full mjModel
+    print(f"nq={info.nq}  nv={info.nv}  nu={info.nu}  njnt={info.njnt}")
+
+    # Joint + actuator ownership flags surface which slot / RL agent owns each DOF.
+    for j in info.joints:
+        print(f"{j.name:30s}  range=[{j.range_lo:+.2f},{j.range_hi:+.2f}]  "
+              f"slot={j.claimed_by_policy_slot_id}  rl={j.claimed_by_rl_agent}")
+
+    # Look up by name or index (raises KeyError on miss).
+    pelvis = info.joint("pelvis_joint")
+    motor0 = info.actuator(0)
+
+    # Drive any actuator. Writes targeting RL/policy-owned actuators come back in `rejected_actuators`.
+    resp = scene.set_control(named={"R_thumb_distal": 0.3, "L_index_proximal": -0.1})
+    print(resp.actuators_written, list(resp.rejected_actuators))
+
+    # State filters — the same shape works on `state(filter=...)` and `stream_state(filter=...)`:
+    state_full      = scene.state()
+    state_slot1     = scene.state(filter={"filter_by_slot_id": 1})
+    state_unclaimed = scene.state(filter={"include_only_unclaimed_joints": True})
+    state_owned     = scene.state(filter={"include_only_policy_claimed_joints": True})
+
+    # Stream at target FPS — break to stop. Each FullStateSnapshot is np.float32-backed.
+    for snap in scene.stream_state(target_fps=60, filter={"filter_by_slot_id": 1}):
+        print(snap.time, snap.qpos.shape, snap.frame_number)
+
+    # Inspect actuator gains (verifies NeutralizeActuatorsForTorquePolicy zeroing per slot).
+    for g in scene.actuator_gains():
+        print(g.actuator_name, g.gain_prm_0, g.bias_prm_0, g.neutralized)
+
+    # Teleport joint positions. Owned joints require force=True; reseed control unless skip_policy_reseed.
+    scene.set_qpos(indexed={pelvis.qpos_adr: 1.0})
+```
+
+For human-friendly teleporting use the `set_robot_pose` helper:
+
+```python
+from luckyrobots import set_robot_pose
+
+set_robot_pose(
+    sess.scene,
+    base_xyz=(0.0, 0.0, 0.5),
+    base_quat=(1.0, 0.0, 0.0, 0.0),                # MuJoCo (w, x, y, z) order
+    joint_angles={"left_hip_pitch_joint": 0.3, "right_hip_pitch_joint": 0.3},
+    skip_policy_reseed=False,
+    force=False,
+)
+```
+
+## `LuckyEnv` — Gymnasium training
 
 ```python
 from luckyrobots import LuckyEnv
@@ -83,295 +226,323 @@ env = LuckyEnv(
     reward_terms=["track_linear_velocity", "feet_air_time", "orientation_error"],
     termination_terms=["fell_over", "time_out"],
     observation_terms=["base_lin_vel", "base_ang_vel", "joint_pos", "joint_vel"],
+    randomization_cfg={"vel_command_x_range": [-1.0, 1.0]},
+    max_episode_length_s=20.0,
+    auto_start=False,                              # True to launch the engine executable
 )
-
-obs, info = env.reset()
-obs, reward, terminated, truncated, info = env.step(action)
-# info["reward_signals"] contains per-term engine-computed signals
 ```
 
-**Key features:**
-- Engine computes reward signals and termination flags from MuJoCo state
-- You write a `reward_fn` to combine signals into a scalar reward
-- `terminated`/`truncated` distinction for proper value function bootstrapping
-- Contract negotiation validates your config against engine capabilities at startup
+Engine-side per step:
+- `reward_signals[name]` is computed for each name in `reward_terms`.
+- `terminated` is set if any non-timeout termination fires; `truncated` for timeouts.
+- `info` and `termination_flags` carry per-term diagnostics.
 
-### 2. Session (managed engine lifecycle)
+`observation_space` and `action_space` are `gymnasium.spaces.Box` — works with SB3, skrl, CleanRL, etc.
 
-Higher-level wrapper that launches the engine process and manages the connection.
+## `PolicyEnv` — Gym env over policy *commands*
+
+For training a high-level controller on top of a frozen low-level policy. Each `action[i]` is fed in as a `SetPolicyCommandFloat(slot, command_names[i], action[i])` on every step.
 
 ```python
-from luckyrobots import Session
+from luckyrobots import Session, PolicyEnv
 
-with Session() as session:
-    session.start(
-        scene="velocity",
-        robot="unitreego2",
-        task="locomotion",
-        task_contract={  # Optional: enable engine-side MDP computation
-            "rewards": {
-                "engine_terms": [{"name": "track_linear_velocity"}],
-            },
-            "terminations": {
-                "terms": [{"name": "fell_over"}, {"name": "time_out", "is_timeout": True}],
-            },
-        },
+with Session() as sess:
+    sess.connect(timeout_s=30.0)
+    env = PolicyEnv(
+        sess,
+        robot_entity_id=42,                        # entity id of the RobotController
+        slot="Walker",                             # name or numeric slot id
+        command_names=["SetVx", "SetVy", "SetYawRate"],
+        reward_fn=lambda step_resp: -((step_resp.observation.observations[6])**2),
+        termination_fn=lambda step_resp: False,
+        observation_mode="full_state_filtered",    # or "last_action"
+        action_low=-1.0, action_high=1.0,
+        max_steps=500,
     )
-    obs = session.step(actions=[0.0] * 12)
-    print(obs.reward_signals)  # Engine-computed reward signals
-    obs = session.reset()
+    obs, info = env.reset()
+    obs, reward, terminated, truncated, info = env.step([0.5, 0.0, 0.0])
 ```
 
-### 3. LuckyEngineClient (low-level gRPC)
+`observation_mode`:
+- `"last_action"` — the policy's last raw ONNX inference output (cheap; size = policy action dim)
+- `"full_state_filtered"` — `[qpos | qvel]` filtered to the slot's claimed joints (richer; size = nq + nv for that slot)
 
-Direct gRPC client for full control. Connect to an already-running engine.
+## `LuckyEngineClient` — direct gRPC
 
 ```python
 from luckyrobots import LuckyEngineClient
 
 client = LuckyEngineClient(host="127.0.0.1", port=50051)
 client.connect()
-client.wait_for_server()
+client.wait_for_server(timeout=30.0)
 
-# Fetch agent schema
-schema = client.get_agent_schema()
+# Discover services dynamically (gRPC reflection enabled by default).
+print(client.discover_services())
 
-# RL step
-obs = client.step(actions=[0.0] * 12)
-print(obs.observation)        # Flat observation vector
-print(obs.reward_signals)     # Engine reward signals (if contract negotiated)
-print(obs.terminated)         # Episode termination flag
+# Lazy stubs — only instantiated on first access:
+client.agent.GetAgentSchema(...)
+client.scene.SetSimulationMode(...)
+client.mujoco.GetMujocoInfo(...)            # agent-scoped joint state
+client.mujoco_scene.GetModelInfo(...)        # full mjModel
+client.camera.ListCameras(...)
+client.telemetry.StreamTelemetry(...)
+client.viewport.GetViewportInfo(...)
+client.debug.Draw(...)
 
-# Discover engine capabilities
-manifest = client.get_capability_manifest(robot_name="unitreego2")
-
-# Negotiate task contract
-session = client.negotiate_task({
-    "task_id": "go2_velocity",
-    "robot": "unitreego2",
-    "rewards": {"engine_terms": [{"name": "track_linear_velocity"}]},
-})
-
-# Reset with domain randomization
-client.reset_agent(randomization_cfg={"vel_command_x_range": [-1.0, 1.0]})
-
-client.close()
-```
-
-### 4. Engine-wide MuJoCo access (MujocoSceneService)
-
-The default `MujocoService` is **agent-scoped** — `get_joint_state()` returns
-only the joints the registered `RobotAgent` has declared. On a humanoid with a
-7-joint command abstraction that's 7 values, not the ~41 physical joints.
-
-For full-model access (every joint, every actuator, `qpos`/`qvel`/`ctrl`),
-use the `MujocoSceneService` helpers on `LuckyEngineClient`:
-
-```python
-# Introspect the full mjModel
-info = client.get_model_info()
-print(f"nq={info.nq} nv={info.nv} nu={info.nu} njnt={info.njnt}")
-
-# Find a specific subsystem (e.g. the fingers)
-fingers = [j for j in info.joints if "finger" in j.name.lower()]
-
-# Read the complete state
-state = client.get_full_state().state
-print(state.qpos[:5], state.time)
-
-# Drive arbitrary actuators — by name, index, or bulk
-client.set_ctrl({"R_thumb_distal": 0.3, "L_index_proximal": -0.1})
-client.set_ctrl({0: 0.1, 3: -0.2})
-client.set_ctrl([0.0] * info.nu)
-
-# Stream at target FPS
-for frame in client.stream_full_state(target_fps=60):
-    ...
-```
-
-`set_ctrl` is **safety-gated**: writes to actuators owned by a live RL agent
-are rejected and reported in `response.rejected_actuators` rather than racing
-the policy silently. Values are clamped to each actuator's ctrl range by
-default (pass `skip_range_clamp=True` to disable).
-
-### 5. Runtime discovery + extension
-
-The engine registers `grpc.reflection.v1alpha.ServerReflection` (default on),
-so the client never needs hard-coded service knowledge:
-
-```python
-client.discover_services()
-# → ['hazel.rpc.AgentService', 'hazel.rpc.MujocoSceneService', ...]
-
-from luckyrobots.reflection import describe_service
-svc = describe_service(client.channel, "hazel.rpc.MujocoSceneService")
-print([m.name for m in svc.methods])
-
-# Attach a third-party stub to the same channel
+# Attach a third-party stub to the same channel, no SDK fork required.
 from mypkg.grpc import my_pb2_grpc
 client.register_stub("my_service", my_pb2_grpc.MyServiceStub)
 client.my_service.DoThing(request, timeout=5.0)
 ```
 
-Service stubs are **lazy** — each of `client.scene`, `client.mujoco`,
-`client.mujoco_scene`, `client.agent`, `client.camera`, `client.debug` is only
-instantiated on first access, so pulling in unused ones costs nothing.
-`client.channel` is public if you want to bypass the wrappers entirely.
+`client.pb` is a `SimpleNamespace` exposing every checked-in proto module — `client.pb.scene`, `client.pb.agent`, `client.pb.mujoco`, `client.pb.mujoco_scene`, `client.pb.camera`, `client.pb.debug`, `client.pb.telemetry`, `client.pb.viewport`, `client.pb.media`, `client.pb.common` — for hand-rolling requests.
 
-## Policy & MujocoScene API (v0.2.0+)
-
-Drive multi-policy robots from Python with the new high-level wrappers:
+## RL step + reset + multi-policy
 
 ```python
-from luckyrobots import Session, RobotController, list_robot_controllers
-from luckyrobots.scene import MujocoScene
+schema = client.get_agent_schema()
+obs = client.step(actions=[0.0] * schema.schema.action_size)
 
-with Session() as sess:
-    sess.connect(timeout_s=30.0)
+# Reset with domain randomization between episodes.
+client.reset_agent(randomization_cfg={
+    "vel_command_x_range": [-1.0, 1.0],
+    "vel_command_yaw_range": [-0.5, 0.5],
+})
 
-    # Discover what's running
-    for ctl in list_robot_controllers(sess):
-        print(ctl.entity_name, [s.name for s in ctl.slots])
+# Multi-policy: stage groups separately, fire atomically on Step.
+client.set_action_group("locomotion", actions=[0.5, 0.0, 0.1], action_indices=[0, 1, 2])
+client.set_action_group("arm",        actions=[1.0, 0.3, 0.0, 0.5], action_indices=[3, 4, 5, 6])
+obs = client.step()                                        # both groups fire in one tick
 
-    # Drive a slot
-    robot = RobotController.from_state(sess, list_robot_controllers(sess)[0])
-    with robot.policy_slot("Walker"):
-        robot.commands("Walker")["SetVx"] = 0.5
-
-    # Inspect raw scene
-    scene = MujocoScene(sess)
-    info = scene.model_info()
-    print(f"{info.nq=} {info.nu=} joints={len(info.joints)}")
+# Or inline, in a single RPC:
+obs = client.step(action_groups=[
+    {"group_name": "locomotion", "actions": [0.5, 0.0, 0.1], "action_indices": [0, 1, 2]},
+    {"group_name": "arm",        "actions": [1.0, 0.3, 0.0, 0.5], "action_indices": [3, 4, 5, 6]},
+])
 ```
 
-See `examples/single_policy_with_commands.py`, `examples/policy_descriptor_hot_swap.py`,
-`examples/scene_introspection.py`, and `examples/actuator_gain_inspector.py`.
+`step()` is the RL primitive: actions in, physics tick, observation out — plus camera frames if you've configured cameras, plus enriched `reward_signals`/`terminated`/`truncated`/`info`/`termination_flags` if you've negotiated a contract.
 
-## API Reference
-
-### LuckyEnv
-
-| Method | Description |
-|--------|-------------|
-| `LuckyEnv(robot, scene, reward_fn, reward_terms, termination_terms, ...)` | Create Gymnasium env |
-| `reset(seed, options)` | Reset environment, returns `(obs, info)` |
-| `step(action)` | Step environment, returns `(obs, reward, terminated, truncated, info)` |
-| `close()` | Disconnect from engine |
-
-**Constructor parameters:**
-- `reward_fn`: `Callable[[dict[str, float]], float]` — combines engine signals into scalar reward
-- `reward_terms`: List of engine reward signal names to request
-- `termination_terms`: List of engine termination condition names
-- `observation_terms`: List of observation terms (optional, uses agent defaults if omitted)
-- `host`, `port`, `timeout`: Connection settings
-
-### LuckyEngineClient
-
-| Method | Description |
-|--------|-------------|
-| `connect()` | Open gRPC channel (stubs created lazily) |
-| `wait_for_server(timeout)` | Wait for engine to be ready |
-| `step(actions, action_groups=...)` | Send actions + physics step + get observation |
-| `reset_agent(agent_name, randomization_cfg)` | Reset agent with optional domain randomization |
-| `get_agent_schema()` | Get observation/action names and sizes |
-| `get_capability_manifest(robot_name)` | Discover available MDP components |
-| `negotiate_task(contract)` | Validate and configure engine for task contract |
-| `set_simulation_mode(mode)` | Set timing: `"fast"`, `"realtime"`, `"deterministic"` |
-| `configure_cameras(cameras)` | Set up camera capture per step |
-| `list_cameras()` | Discover cameras in the scene |
-| `set_action_group(group_name, actions, indices)` | Preload actions for multi-policy control |
-| **`get_model_info()`** | Full mjModel (every joint + actuator) |
-| **`get_full_state(include_qpos=, include_qvel=, include_ctrl=)`** | Snapshot full `qpos`/`qvel`/`ctrl` |
-| **`stream_full_state(target_fps=30, ...)`** | Server-streamed full state |
-| **`set_ctrl(values_or_dict)`** | Write actuator control (safety-gated) |
-| **`list_all_joints()` / `list_all_actuators()`** | Lightweight dict view over the model |
-| **`discover_services()`** | List services the server advertises via reflection |
-| **`register_stub(name, stub_cls)`** | Attach a third-party stub to the same channel |
-| `channel` (property) | The underlying `grpc.Channel` — use for custom stubs |
-| `benchmark(duration, method)` | Measure step RPC latency |
-| `close()` | Disconnect |
-
-**Stub attributes** (lazy): `client.agent`, `client.scene`, `client.mujoco`,
-`client.mujoco_scene`, `client.camera`, `client.debug`.
-
-### Session
-
-| Method | Description |
-|--------|-------------|
-| `start(scene, robot, task, task_contract)` | Launch engine + connect + negotiate contract |
-| `connect(robot)` | Connect to already-running engine |
-| `step(actions)` | RL step |
-| `reset(randomization_cfg)` | Reset agent |
-| `close(stop_engine)` | Disconnect and optionally stop engine |
-
-### ObservationResponse
-
-Returned by `step()`, `reset()`, and `get_observation()`.
+Optional camera capture per step:
 
 ```python
-obs.observation          # List[float] — flat RL observation vector
-obs.actions              # List[float] — last applied actions
-obs.timestamp_ms         # int — wall-clock timestamp
-obs.frame_number         # int — monotonic counter
-obs.camera_frames        # List[CameraFrame] — synchronized camera images
-obs.reward_signals       # Dict[str, float] — engine-computed reward signals
-obs.terminated           # bool — hard termination (episode failure)
-obs.truncated            # bool — soft termination (time limit)
-obs.termination_flags    # Dict[str, bool] — per-condition flags
-obs.info                 # Dict[str, float] — auxiliary diagnostics
-obs["name"]              # Named access (if schema fetched)
-obs.to_dict()            # Convert to name->value dict
+client.configure_cameras([{"name": "FrontCam", "width": 640, "height": 480}])
+obs = client.step(actions=[...])                           # obs.camera_frames is populated
 ```
 
-### Available Engine MDP Components
+## Task-contract API
+
+The contract surface is what makes `LuckyEnv` work — and you can use it directly for custom training stacks.
+
+```python
+manifest = client.get_capability_manifest(robot_name="unitreego2")
+print([r["name"] for r in manifest["rewards"]])
+# → ['track_linear_velocity', 'track_angular_velocity', 'feet_air_time', ...]
+
+# Validate before negotiating (dry run; useful for CLI tooling).
+result = client.validate_task_contract(my_contract_dict)
+for err in result["errors"]:
+    print(err["component"], err["term_name"], err["message"], err["suggestion"])
+print(result["resolved_optionals"], result["unresolved_optionals"])
+
+# Negotiate — engine validates + configures + returns the resolved layout.
+session = client.negotiate_task({
+    "task_id": "go2_velocity",
+    "robot": "unitreego2",
+    "rewards": {"engine_terms": [{"name": "track_linear_velocity", "weight": 2.0}]},
+    "terminations": {
+        "terms": [{"name": "fell_over"}, {"name": "time_out", "is_timeout": True}],
+    },
+})
+print(session["session_id"], session["reward_terms"], session["termination_terms"])
+
+# Subsequent Step responses now carry reward_signals + terminated + truncated inline.
+obs = client.step(actions=[0.0] * 12)
+print(obs.reward_signals, obs.terminated, obs.truncated, obs.termination_flags)
+```
+
+Custom reward / observation / termination terms are added engine-side by decorating C# static methods with `[MdpReward]`, `[MdpObservation]`, `[MdpTermination]` in any RobotSandbox script — they're discovered automatically and appear in the next `get_capability_manifest()` call. See `LuckyEditor/RobotSandbox/Assets/Scripts/Source/MdpExamples.cs` for the pattern.
+
+## Driving IK from Python
+
+There is no direct cartesian IK RPC yet. The supported path is to author a motion graph that exposes `Vec3` Input nodes wired into `LimbIK.TargetPosition`, then drive those inputs from Python:
+
+```python
+robot.set_motion_graph_active(True)
+robot.set_motion_graph_input("LeftTarget",  (0.30, 0.90,  0.20))
+robot.set_motion_graph_input("RightTarget", (0.30, 0.90, -0.20))
+robot.fire_motion_graph_trigger("ResetIKBlend")
+```
+
+Inputs and triggers are addressed by name; the graph author and the client agree on those names. (See `policy-ik-test-walkthrough.md` for the full G1 walker + LimbIK setup, including the gotcha that the waist must be claimed by the walker policy, not left to the graph.)
+
+## Validation, reflection, feature detection
+
+```python
+warnings = sess.validate()                                 # → list[ValidationWarning]
+for w in warnings:
+    print(w.severity, w.code, w.message, w.entity_id, w.slot_id)
+
+# Feature-detect at runtime — the right way to write code that works against multiple engine versions.
+sess.has_rpc("hazel.rpc.AgentService/SetPolicyCommandFloat")  # True
+sess.has_rpc("hazel.rpc.AgentService/NegotiateTask")          # True
+```
+
+`validate_session` checks for: missing policy RPCs on the server, empty PolicyRegistry, slots referencing descriptors not in the registry, slots with unknown driven joints, duplicate priorities on the same robot, slots with commands but inactive — each returns a typed `ValidationWarning(severity, code, message, entity_id, slot_id)`.
+
+## PolicyMonitor — event-driven slot observer
+
+```python
+monitor = sess.policy_monitor(entity_id=robot.entity_id, target_fps=30)
+
+@monitor.on_active_change
+def _(slot, was, now):
+    print(f"{slot.name} active: {was} → {now}")
+
+@monitor.on_descriptor_swap
+def _(slot, old, new):
+    print(f"{slot.name} descriptor: {old} → {new}")
+
+@monitor.on_joint_claim_change
+def _(slot, added, removed):
+    print(f"{slot.name} joints: +{added} -{removed}")
+
+@monitor.on_motion_graph_active_change
+def _(was, now):
+    print(f"motion graph: {was} → {now}")
+
+thread = monitor.run_in_thread()                           # daemon — keeps invoking callbacks
+# ... do other work ...
+monitor.stop()
+```
+
+Also `on_ready_change(slot, was, now)` for slot ready-state. Callbacks are wrapped so an exception in one doesn't stop the stream.
+
+## Recording + replay
+
+Every `Set*` / `Get*` RPC issued through the session can be captured and replayed:
+
+```python
+with sess.record() as rec:
+    robot.set_policy_active("Walker", True)
+    robot.commands("Walker")["SetVx"] = 0.5
+    obs = sess.step(actions=[0.0] * 12)
+
+print(len(rec.events), "events captured")
+rec.save("run.parquet")                                    # or "run.jsonl"
+
+later = SessionRecording.load("run.parquet")
+later.replay(sess, speed=1.0)                              # re-issue at original timestamps
+```
+
+`SessionRecording.events` is a list of `RecordedEvent(timestamp_s, rpc, request_json, response_json)`.
+
+## Multiplexed streams
+
+Merge N concurrent server-streams into one timestamp-aligned iterator (handy when training loops want both `StreamRobotController` and `StreamFullState`):
+
+```python
+from luckyrobots import StreamMultiplexer
+
+mux = StreamMultiplexer()
+mux.add("robot", sess.engine_client.agent.StreamRobotController(req1))
+mux.add("state", sess.engine_client.mujoco_scene.StreamFullState(req2))
+
+for batch in mux.run(period_s=0.05, timeout_s=10.0):
+    # batch = {"robot": <latest RobotControllerSummary>, "state": <latest FullState>}
+    ...
+
+mux.stop()
+```
+
+Each input stream runs in a daemon thread with a maxsize-1 queue (drops older items for backpressure); `run()` polls every `period_s` and yields the latest dict.
+
+## Async surface
+
+`AsyncSession` and `AsyncRobotController` mirror the sync surface but use `grpc.aio` channels and `await`-able RPCs.
+
+```python
+import asyncio
+from luckyrobots import AsyncSession, AsyncRobotController
+
+async def main():
+    async with AsyncSession() as sess:
+        await sess.connect(timeout_s=30.0)
+        controller = AsyncRobotController(sess, entity_id=42)
+        async with controller.policy_slot("Walker"):
+            await controller.set_command_float("Walker", 0, 0.5)
+            for _ in range(100):
+                await sess.agent.Step(...)
+
+asyncio.run(main())
+```
+
+Same RPC surface, same proto types — only the channel + method calling convention differs.
+
+## Available built-in MDP terms
 
 **Observations:** `base_lin_vel`, `base_ang_vel`, `projected_gravity`, `joint_pos`, `joint_vel`, `vel_command`, `foot_contact`, `foot_heights`, `foot_contact_forces`, `actions`
 
 **Reward signals:** `track_linear_velocity`, `track_angular_velocity`, `lin_vel_z_penalty`, `ang_vel_xy_penalty`, `joint_acc_penalty`, `feet_air_time`, `orientation_error`, `action_rate`, `action_magnitude`, `foot_slip_penalty`, `stand_still`
 
-**Termination conditions:** `fell_over`, `time_out`, `illegal_contact`
+**Terminations:** `fell_over`, `time_out` (truncation), `illegal_contact`
 
 **Domain randomization:** `friction`, `mass_scale`, `motor_strength`, `motor_offset`, `push_disturbance`, `joint_position_noise`, `joint_velocity_noise`, `pose_position_noise`, `pose_orientation_noise`
 
-Use `client.get_capability_manifest()` to discover all available components at runtime.
+Add your own with `[MdpReward]` / `[MdpObservation]` / `[MdpTermination]` decorators in any RobotSandbox C# script — `client.get_capability_manifest()` will pick them up on the next call.
 
-### Runtime gRPC discovery
+## Known engine limitations
 
-Independently of the MDP capability manifest, the engine advertises its gRPC
-service surface via `grpc.reflection.v1alpha.ServerReflection`:
+- **No cartesian IK RPC.** Drive IK targets through motion-graph inputs by name (above). There is also no schema RPC listing what inputs / triggers a given motion graph exposes — graph author and client must agree on names.
+- **Single viewport.** `ViewportService.GetViewportInfo` always returns `["Main"]` on this engine branch — no multi-viewport spectator support.
+- **`SetSimulationMode("realtime")`** is rejected while a gRPC client is connected (the action-gate invariant). Use `"deterministic"` for visualization or `"fast"` for training.
+- **`MujocoService.GetMujocoInfo` actuator names mirror joint names.** For full actuator metadata use `MujocoSceneService.GetModelInfo` (i.e. `MujocoScene.model_info()`).
 
-```python
-client.discover_services()
-# → ['hazel.rpc.AgentService', 'hazel.rpc.CameraService',
-#    'hazel.rpc.MujocoSceneService', 'hazel.rpc.MujocoService', ...]
-
-from luckyrobots.reflection import describe_service
-svc = describe_service(client.channel, "hazel.rpc.MujocoSceneService")
-for m in svc.methods:
-    print(m.name, m.input_type.full_name, "->", m.output_type.full_name)
-```
-
-Useful when the installed SDK predates a server-side service you want to poke at.
-
-## Available Robots & Scenes
+## Available robots & scenes
 
 | Robot | DOF | Type | Scenes |
-|-------|:---:|------|--------|
+|---|:---:|---|---|
 | `unitreego2` | 12 | Quadruped | velocity |
 | `so100` | 6 | Manipulator | pickandplace |
 | `piper` | 7 | Manipulator | manipulation |
 
-## System Identification (optional)
-
-Calibrate MuJoCo model parameters to match real robot behavior.
+## System identification (optional)
 
 ```bash
 pip install luckyrobots[sysid]
 
+luckyrobots sysid presets --robot unitreego2                # list available parameter presets
 luckyrobots sysid collect --robot unitreego2 --signal chirp --duration 15 -o traj.npz
 luckyrobots sysid identify traj.npz -m go2.xml --preset go2:motor -o result.json
 luckyrobots sysid apply result.json -m go2.xml -o go2_calibrated.xml
 ```
+
+`presets`, `collect`, `identify`, `apply` are the four subcommands.
+
+## Examples
+
+`examples/` ships these scripts. All target the current engine; none require a launched executable beyond the gRPC server being up.
+
+| Script | Demonstrates |
+|---|---|
+| `single_policy_with_commands.py` | Activate a `Walker` slot, drive `SetVx` from a sine wave, print live state every 50 steps |
+| `dual_policy_remote.py` | Remote mirror of `DualPolicyExample.cs` — two slots on one robot (Walker + Rotator) |
+| `policy_descriptor_hot_swap.py` | Cycle a slot's descriptor every 200 steps to hot-swap policies without restarting |
+| `scene_introspection.py` | Dump the full joint/actuator ownership map; stream a slot-filtered state for 5s |
+| `actuator_gain_inspector.py` | Verify `NeutralizeActuatorsForTorquePolicy` zero/restore around slot activation |
+| `controller.py` | Minimal baseline: launch + connect + step + periodic reset (no policy slots) |
+
+## Tests
+
+`tests/` ships pytest suites for the four big surfaces:
+
+| File | Covers |
+|---|---|
+| `test_client.py` | `LuckyEngineClient` lifecycle, lazy stubs, schema cache |
+| `test_mujoco_scene.py` | `MujocoScene` model info + state filters + actuator gains |
+| `test_robot_controller.py` | `RobotController` state, slot control, command store, motion graph |
+| `test_robot_controller_integration.py` | End-to-end policy bridge against a live engine |
+| `conftest.py` | Shared fixtures (engine mock, sample state) |
 
 ## Development
 
@@ -382,9 +553,9 @@ uv sync
 uv run pytest
 ```
 
-### Regenerating gRPC Stubs
+### Regenerating gRPC stubs
 
-After modifying `.proto` files:
+After modifying `.proto` files in `src/luckyrobots/grpc/proto/`:
 
 ```bash
 python -m grpc_tools.protoc \
@@ -394,32 +565,47 @@ python -m grpc_tools.protoc \
   src/luckyrobots/grpc/proto/*.proto
 ```
 
-Then fix imports in generated files to be relative (`from . import common_pb2 as ...`).
+`grpc_tools.protoc` emits sibling-style `import foo_pb2` lines; rewrite them to `from . import foo_pb2` so the package imports cleanly.
 
-### Project Structure
+### Project structure
 
 ```
 src/luckyrobots/
-├── client.py            # LuckyEngineClient — low-level gRPC client
-├── session.py           # Session — managed engine lifecycle
-├── lucky_env.py         # LuckyEnv — Gymnasium wrapper with reward_fn
-├── debug.py             # Draw helpers (velocity arrows, lines)
-├── sim_contract.py      # SimulationContract protobuf builder
-├── utils.py             # Robot config, validation
+├── __init__.py            # Re-exports the public surface
+├── client.py              # LuckyEngineClient — low-level gRPC client + lazy stubs
+├── session.py             # Session — managed engine lifecycle + convenience forwards
+├── lucky_env.py           # LuckyEnv — Gymnasium env with engine-computed rewards
+├── policy_env.py          # PolicyEnv — Gymnasium env over policy slot commands
+├── monitor.py             # PolicyMonitor — event-driven RobotController observer
+├── recording.py           # SessionRecording / record_session — capture + replay
+├── streams.py             # StreamMultiplexer — merge N server-streams
+├── poses.py               # set_robot_pose — human-friendly qpos teleporter
+├── reflection.py          # has_rpc / supported_services / supported_methods
+├── validation.py          # validate_session, ValidationWarning
+├── debug.py               # DebugService low-level helpers
+├── debug_overlay.py       # draw_policy_overlay — colored arrows per active slot
+├── async_session.py       # AsyncSession — aio mirror of Session
+├── async_robots.py        # AsyncRobotController — aio mirror of RobotController
+├── sim_contract.py        # SimulationContract proto builder
+├── utils.py               # Robot config helpers
+├── robots/
+│   └── robot_controller.py   # RobotController + state classes + CommandStoreView
+├── scene/
+│   └── mujoco_scene.py       # MujocoScene + JointInfo / ActuatorInfo / ModelInfo
 ├── models/
-│   ├── observation.py   # ObservationResponse (obs + rewards + termination)
-│   └── benchmark.py     # BenchmarkResult, FPS
-├── engine/              # Engine process management
+│   ├── observation.py     # ObservationResponse (with reward_signals + termination)
+│   └── benchmark.py       # BenchmarkResult, FPS
+├── engine/                # launch_luckyengine / stop_luckyengine
 ├── grpc/
-│   ├── generated/       # Protobuf stubs (checked in)
-│   └── proto/           # .proto source files
-├── config/              # Robot configurations (robots.yaml)
-└── sysid/               # System identification (optional)
+│   ├── generated/         # Checked-in protobuf stubs
+│   └── proto/             # .proto sources
+├── config/                # Robot configurations (robots.yaml)
+└── sysid/                 # System identification CLI (collect / identify / apply / presets)
 ```
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file.
+MIT License — see [LICENSE](LICENSE).
 
 ## Support
 
