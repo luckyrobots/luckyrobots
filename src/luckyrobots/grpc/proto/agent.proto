@@ -508,4 +508,261 @@ service AgentService {
     rpc ValidateTaskContract(ValidateTaskContractRequest) returns (ValidateTaskContractResponse);
     // Validate + configure engine for the contract. Returns session handle.
     rpc NegotiateTask(NegotiateTaskRequest) returns (NegotiateTaskResponse);
+
+    // ------------------------------------------------------------------------
+    // Robot Controller / Policy RPCs (multi-slot PolicySlot + MotionGraph)
+    // Added by mick/policy-redo. Coexists with the action-group / task-contract
+    // surface above; clients pick whichever model fits.
+    // ------------------------------------------------------------------------
+    rpc ListRobotControllers(ListRobotControllersRequest) returns (ListRobotControllersResponse);
+    rpc GetRobotController(GetRobotControllerRequest) returns (GetRobotControllerResponse);
+    rpc ListPolicyDescriptors(ListPolicyDescriptorsRequest) returns (ListPolicyDescriptorsResponse);
+
+    rpc SetPolicyActive(SetPolicyActiveRequest) returns (PolicyOperationAck);
+    rpc SetPolicyDescriptor(SetPolicyDescriptorRequest) returns (PolicyOperationAck);
+    rpc SetPolicyDrivenJoints(SetPolicyDrivenJointsRequest) returns (PolicyOperationAck);
+    rpc SetPolicyClampObservation(SetPolicyClampObservationRequest) returns (PolicyOperationAck);
+    rpc SetPolicyPriority(SetPolicyPriorityRequest) returns (PolicyOperationAck);
+    rpc SetPolicyCommandFloat(SetPolicyCommandFloatRequest) returns (PolicyOperationAck);
+    rpc SetPolicyCommandBool(SetPolicyCommandBoolRequest) returns (PolicyOperationAck);
+    rpc GetPolicyCommandFloat(GetPolicyCommandFloatRequest) returns (PolicyCommandFloatValue);
+    rpc GetPolicyCommandBool(GetPolicyCommandBoolRequest) returns (PolicyCommandBoolValue);
+
+    rpc SetMotionGraphActive(SetMotionGraphActiveRequest) returns (PolicyOperationAck);
+    rpc GetMotionGraphActive(GetMotionGraphActiveRequest) returns (GetMotionGraphActiveResponse);
+    rpc SetMotionGraphInput(SetMotionGraphInputRequest) returns (PolicyOperationAck);
+    rpc GetMotionGraphInput(GetMotionGraphInputRequest) returns (GetMotionGraphInputResponse);
+    rpc FireMotionGraphTrigger(FireMotionGraphTriggerRequest) returns (PolicyOperationAck);
+
+    rpc GetPolicyBasePose(GetPolicyBasePoseRequest) returns (PolicyBasePose);
+    rpc GetPolicyLastAction(GetPolicyLastActionRequest) returns (PolicyLastAction);
+
+    rpc StreamPolicySlotState(StreamPolicySlotStateRequest) returns (stream PolicySlotSummary);
+    rpc StreamRobotController(StreamRobotControllerRequest) returns (stream RobotControllerSummary);
+}
+
+// =============================================================================
+// Robot Controller / Policy messages
+// =============================================================================
+
+enum PolicyCommandType {
+    POLICY_CMD_FLOAT  = 0;
+    POLICY_CMD_BOOL   = 1;
+    POLICY_CMD_INT    = 2;
+    POLICY_CMD_UINT   = 3;
+    POLICY_CMD_VEC2   = 4;
+    POLICY_CMD_VEC3   = 5;
+    POLICY_CMD_VEC4   = 6;
+    POLICY_CMD_STRING = 7;
+}
+
+message PolicyCommandIdEntry {
+    uint32 id = 1;                                   // 1-based; 0 reserved.
+    string name = 2;
+    PolicyCommandType type = 3;
+}
+
+message PolicyObservationField {
+    string name = 1;
+    string type = 2;
+    uint32 size = 3;
+}
+
+message PolicySlotSummary {
+    uint32 slot_id = 1;
+    string name = 2;
+    string descriptor_path = 3;
+    bool active = 4;
+    int32 priority = 5;
+    repeated string driven_joints = 6;
+    bool clamp_observation_for_unclaimed_joints = 7;
+    bool ready = 8;
+    string active_policy_id = 9;
+    repeated PolicyCommandIdEntry command_id_map = 10;
+    repeated string policy_joint_names = 11;
+}
+
+message RobotControllerSummary {
+    EntityId entity = 1;
+    string entity_name = 2;
+    bool motion_graph_active = 3;
+    repeated PolicySlotSummary slots = 4;
+}
+
+message PolicyRegistryEntry {
+    string policy_id = 1;
+    string descriptor_path = 2;
+    repeated string joints = 3;
+    repeated PolicyCommandIdEntry command_id_map = 4;
+    repeated PolicyObservationField observation_spec = 5;
+    repeated string freeze_joint_names = 6;
+    map<string, string> command_aliases = 7;
+}
+
+message MotionGraphInputValue {
+    oneof value {
+        bool  bool_val    = 1;
+        int32 int_val     = 2;
+        float float_val   = 3;
+        Vec3  vec3_val    = 4;
+        bool  trigger     = 5;
+    }
+}
+
+message PolicyOperationAck {
+    bool success = 1;
+    string message = 2;
+}
+
+message ListRobotControllersRequest {}
+message ListRobotControllersResponse {
+    repeated RobotControllerSummary controllers = 1;
+}
+
+message GetRobotControllerRequest { EntityId entity = 1; }
+message GetRobotControllerResponse {
+    bool found = 1;
+    RobotControllerSummary controller = 2;
+}
+
+message ListPolicyDescriptorsRequest {}
+message ListPolicyDescriptorsResponse {
+    repeated PolicyRegistryEntry policies = 1;
+}
+
+message SetPolicyActiveRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    bool active = 3;
+}
+
+message SetPolicyDescriptorRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    string descriptor_path = 3;
+}
+
+message SetPolicyDrivenJointsRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    repeated string joint_names = 3;
+}
+
+message SetPolicyClampObservationRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    bool clamp_observation_for_unclaimed_joints = 3;
+}
+
+message SetPolicyPriorityRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    int32 priority = 3;
+}
+
+message SetPolicyCommandFloatRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    uint32 command_id = 3;
+    float value = 4;
+}
+
+message SetPolicyCommandBoolRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    uint32 command_id = 3;
+    bool value = 4;
+}
+
+message GetPolicyCommandFloatRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    uint32 command_id = 3;
+}
+message PolicyCommandFloatValue {
+    bool success = 1;
+    float value = 2;
+    string message = 3;
+}
+
+message GetPolicyCommandBoolRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    uint32 command_id = 3;
+}
+message PolicyCommandBoolValue {
+    bool success = 1;
+    bool value = 2;
+    string message = 3;
+}
+
+message SetMotionGraphActiveRequest {
+    EntityId entity = 1;
+    bool active = 2;
+}
+
+message GetMotionGraphActiveRequest { EntityId entity = 1; }
+message GetMotionGraphActiveResponse {
+    bool success = 1;
+    bool active = 2;
+    string message = 3;
+}
+
+message SetMotionGraphInputRequest {
+    EntityId entity = 1;
+    uint32 input_id = 2;
+    MotionGraphInputValue value = 3;
+}
+
+message GetMotionGraphInputRequest {
+    EntityId entity = 1;
+    uint32 input_id = 2;
+    PolicyCommandType type_hint = 3;
+}
+message GetMotionGraphInputResponse {
+    bool success = 1;
+    MotionGraphInputValue value = 2;
+    string message = 3;
+}
+
+message FireMotionGraphTriggerRequest {
+    EntityId entity = 1;
+    uint32 input_id = 2;
+}
+
+message StreamPolicySlotStateRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    uint32 target_fps = 3;
+}
+
+message StreamRobotControllerRequest {
+    EntityId entity = 1;
+    uint32 target_fps = 2;
+}
+
+message GetPolicyBasePoseRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+}
+message PolicyBasePose {
+    bool success = 1;
+    string message = 2;
+    float x = 3;
+    float y = 4;
+    float yaw = 5;
+    float x_hz = 6;
+    float z_hz = 7;
+    float yaw_hz = 8;
+}
+
+message GetPolicyLastActionRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+}
+message PolicyLastAction {
+    bool success = 1;
+    string message = 2;
+    repeated float action = 3 [packed = true];
+    repeated string joint_names = 4;
 }

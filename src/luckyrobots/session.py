@@ -331,3 +331,110 @@ class Session:
     def engine_client(self) -> Optional[LuckyEngineClient]:
         """Access the underlying LuckyEngine gRPC client for advanced operations."""
         return self._engine_client
+
+    # ── Policy / scene convenience surface (consolidator additions) ──────────
+    # Each method is a thin forward to the high-level wrappers introduced by
+    # the parallel SDK rollout. Imports are deferred to the call site to avoid
+    # circular-import issues at package load time.
+
+    @property
+    def scene(self):
+        """Lazily-cached `MujocoScene` wrapper for this session."""
+        if getattr(self, "_scene_cache", None) is None:
+            from .scene import MujocoScene
+            self._scene_cache = MujocoScene(self)
+        return self._scene_cache
+
+    def list_robot_controllers(self):
+        """Enumerate every `RobotControllerComponent` in the active scene."""
+        from .robots.robot_controller import list_robot_controllers
+        return list_robot_controllers(self)
+
+    def list_policy_descriptors(self):
+        """List every entry in `PolicyRegistry.yaml` with descriptor fields resolved."""
+        from .robots.robot_controller import list_policy_descriptors
+        return list_policy_descriptors(self)
+
+    def get_robot_controller(self, entity_id: int):
+        """Fetch a single robot controller's live state by entity id."""
+        from .robots.robot_controller import RobotController
+        return RobotController(self, entity_id).get_state()
+
+    def robot(self, name_or_entity_id):
+        """Resolve a `RobotController` by entity tag (str) or numeric id (int)."""
+        from .robots.robot_controller import RobotController, list_robot_controllers
+        if isinstance(name_or_entity_id, int):
+            return RobotController(self, name_or_entity_id)
+        for state in list_robot_controllers(self):
+            if state.entity_name == name_or_entity_id:
+                return RobotController.from_state(self, state)
+        raise KeyError(f"no robot controller named {name_or_entity_id!r}")
+
+    # ── MujocoScene forwards ────────────────────────────────────────────────
+    def get_model_info(self, refresh: bool = False):
+        """Forward to `MujocoScene.model_info(refresh)`."""
+        return self.scene.model_info(refresh=refresh)
+
+    def get_full_state(self, filter=None, *, include_qpos: bool = True,
+                       include_qvel: bool = True, include_ctrl: bool = True):
+        """Forward to `MujocoScene.state(...)`."""
+        return self.scene.state(
+            filter=filter,
+            include_qpos=include_qpos,
+            include_qvel=include_qvel,
+            include_ctrl=include_ctrl,
+        )
+
+    def stream_full_state(self, filter=None, target_fps: int = 30, **include):
+        """Forward to `MujocoScene.stream_state(...)` (returns iterator)."""
+        return self.scene.stream_state(filter=filter, target_fps=target_fps, **include)
+
+    def set_qpos(self, bulk=None, indexed=None, *, force: bool = False,
+                 skip_policy_reseed: bool = False):
+        """Forward to `MujocoScene.set_qpos(...)`."""
+        return self.scene.set_qpos(
+            bulk=bulk, indexed=indexed,
+            force=force, skip_policy_reseed=skip_policy_reseed,
+        )
+
+    def set_control(self, bulk=None, indexed=None, named=None, *,
+                    skip_range_clamp: bool = False, wait_for_next_step: bool = False):
+        """Forward to `MujocoScene.set_control(...)`."""
+        return self.scene.set_control(
+            bulk=bulk, indexed=indexed, named=named,
+            skip_range_clamp=skip_range_clamp,
+            wait_for_next_step=wait_for_next_step,
+        )
+
+    def get_actuator_gains(self):
+        """Forward to `MujocoScene.actuator_gains()`."""
+        return self.scene.actuator_gains()
+
+    # ── Validation + reflection forwards ────────────────────────────────────
+    def validate(self):
+        """Run startup validation; returns list of `ValidationWarning`."""
+        from .validation import validate_session
+        return validate_session(self)
+
+    def has_rpc(self, qualified_method: str) -> bool:
+        """Check whether the connected server advertises `qualified_method`
+        (e.g. ``"hazel.rpc.AgentService/SetPolicyDrivenJoints"``)."""
+        from .reflection import has_rpc
+        client = self._require_client()
+        return has_rpc(client.channel, qualified_method)
+
+    # ── Recording + monitoring forwards ─────────────────────────────────────
+    def record(self):
+        """Open a recording context: ``with sess.record() as rec: ...``."""
+        from .recording import record_session
+        return record_session(self)
+
+    def policy_monitor(self, entity_id: int, target_fps: int = 30):
+        """Construct a `PolicyMonitor` for the given robot entity."""
+        from .monitor import PolicyMonitor
+        return PolicyMonitor(self, entity_id, target_fps=target_fps)
+
+    def draw_policy_overlay(self, entity_id: int, **kwargs) -> None:
+        """Submit one frame of the policy-overlay debug-draw to the editor."""
+        from .debug_overlay import draw_policy_overlay
+        draw_policy_overlay(self, entity_id, **kwargs)

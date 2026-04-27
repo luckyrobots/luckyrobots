@@ -218,6 +218,35 @@ Service stubs are **lazy** — each of `client.scene`, `client.mujoco`,
 instantiated on first access, so pulling in unused ones costs nothing.
 `client.channel` is public if you want to bypass the wrappers entirely.
 
+## Policy & MujocoScene API (v0.2.0+)
+
+Drive multi-policy robots from Python with the new high-level wrappers:
+
+```python
+from luckyrobots import Session, RobotController, list_robot_controllers
+from luckyrobots.scene import MujocoScene
+
+with Session() as sess:
+    sess.connect(timeout_s=30.0)
+
+    # Discover what's running
+    for ctl in list_robot_controllers(sess):
+        print(ctl.entity_name, [s.name for s in ctl.slots])
+
+    # Drive a slot
+    robot = RobotController.from_state(sess, list_robot_controllers(sess)[0])
+    with robot.policy_slot("Walker"):
+        robot.commands("Walker")["SetVx"] = 0.5
+
+    # Inspect raw scene
+    scene = MujocoScene(sess)
+    info = scene.model_info()
+    print(f"{info.nq=} {info.nu=} joints={len(info.joints)}")
+```
+
+See `examples/single_policy_with_commands.py`, `examples/policy_descriptor_hot_swap.py`,
+`examples/scene_introspection.py`, and `examples/actuator_gain_inspector.py`.
+
 ## API Reference
 
 ### LuckyEnv
