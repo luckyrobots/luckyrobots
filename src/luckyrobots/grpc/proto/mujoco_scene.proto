@@ -263,6 +263,38 @@ message GetActuatorGainsResponse {
 }
 
 // =============================================================================
+// Reset
+// =============================================================================
+
+// Soft reset of the active MuJoCo scene back to its authored initial state.
+// Restores qpos to keyframe[0] when one is authored (typical "natural standing
+// pose"), or qpos0 as fallback. Velocities, applied forces, and ctrl are zeroed.
+// Active PolicyRuntime PD targets are reseeded so policies don't yank the robot
+// back to a stale target on the next substep.
+//
+// Does NOT recompile the model, reload the scene file, or touch scene entities.
+// The gRPC connection, registered RobotAgent, and active policy slots all
+// survive — call this when the agent has knocked the room over without
+// restarting Play mode.
+//
+// Recording behaviour: recording continues across the reset by design (this is
+// often used for mid-episode recovery from a learned state). The first frame
+// captured after the reset has FrameFlag::PostReset (= 0x02) set in the
+// frame_flags column so consumers that don't want the qpos/ctrl discontinuity
+// can drop it.
+message ResetSceneRequest {
+    // Keep mjData.time intact across the reset. Default (false) zeroes time
+    // for a clean-slate feel — set true when in-flight RL training or data
+    // capture is tracking elapsed sim time and shouldn't see a discontinuity.
+    bool preserve_time = 1;
+}
+
+message ResetSceneResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// =============================================================================
 // Service
 // =============================================================================
 
@@ -278,4 +310,7 @@ service MujocoSceneService {
     // Live actuator gainprm/biasprm inspection for verifying
     // NeutralizeActuatorsForTorquePolicy's zero/restore cycle.
     rpc GetActuatorGains(GetActuatorGainsRequest) returns (GetActuatorGainsResponse);
+
+    // Soft reset to authored initial pose. Survives gRPC connection.
+    rpc ResetScene(ResetSceneRequest) returns (ResetSceneResponse);
 }

@@ -5,7 +5,7 @@ import warnings
 
 from . import scene_pb2 as scene__pb2
 
-GRPC_GENERATED_VERSION = '1.78.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -65,6 +65,16 @@ class SceneServiceStub(object):
                 request_serializer=scene__pb2.GetSimulationModeRequest.SerializeToString,
                 response_deserializer=scene__pb2.GetSimulationModeResponse.FromString,
                 _registered_method=True)
+        self.EnterPlayMode = channel.unary_unary(
+                '/hazel.rpc.SceneService/EnterPlayMode',
+                request_serializer=scene__pb2.EnterPlayModeRequest.SerializeToString,
+                response_deserializer=scene__pb2.EnterPlayModeResponse.FromString,
+                _registered_method=True)
+        self.ExitPlayMode = channel.unary_unary(
+                '/hazel.rpc.SceneService/ExitPlayMode',
+                request_serializer=scene__pb2.ExitPlayModeRequest.SerializeToString,
+                response_deserializer=scene__pb2.ExitPlayModeResponse.FromString,
+                _registered_method=True)
 
 
 class SceneServiceServicer(object):
@@ -109,6 +119,35 @@ class SceneServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def EnterPlayMode(self, request, context):
+        """Editor scene lifecycle. Both RPCs return immediately after dispatching
+        the request — the actual transition is async (entering Play triggers
+        a MuJoCo recompile that lives in a Preparing state until ready).
+        Clients should poll readiness via AgentService.GetAgentSchema or
+        MujocoSceneService.GetModelInfo before driving the simulation.
+
+        In standalone (dist) runtime builds there is no Edit/Play distinction;
+        these RPCs succeed but have no effect.
+
+        The gRPC server is application-scoped, NOT scene-scoped — calling
+        ExitPlayMode does NOT disconnect existing gRPC clients or stop the
+        server. Existing PolicySlot configuration on a RobotControllerComponent
+        is preserved across Edit/Play transitions (it lives on the editor
+        scene, which is restored on stop).
+
+        These are session boundaries, not pause/resume — exiting Play tears
+        down the active simulation session including any in-flight recording.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ExitPlayMode(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SceneServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -141,6 +180,16 @@ def add_SceneServiceServicer_to_server(servicer, server):
                     servicer.GetSimulationMode,
                     request_deserializer=scene__pb2.GetSimulationModeRequest.FromString,
                     response_serializer=scene__pb2.GetSimulationModeResponse.SerializeToString,
+            ),
+            'EnterPlayMode': grpc.unary_unary_rpc_method_handler(
+                    servicer.EnterPlayMode,
+                    request_deserializer=scene__pb2.EnterPlayModeRequest.FromString,
+                    response_serializer=scene__pb2.EnterPlayModeResponse.SerializeToString,
+            ),
+            'ExitPlayMode': grpc.unary_unary_rpc_method_handler(
+                    servicer.ExitPlayMode,
+                    request_deserializer=scene__pb2.ExitPlayModeRequest.FromString,
+                    response_serializer=scene__pb2.ExitPlayModeResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -306,6 +355,60 @@ class SceneService(object):
             '/hazel.rpc.SceneService/GetSimulationMode',
             scene__pb2.GetSimulationModeRequest.SerializeToString,
             scene__pb2.GetSimulationModeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def EnterPlayMode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.SceneService/EnterPlayMode',
+            scene__pb2.EnterPlayModeRequest.SerializeToString,
+            scene__pb2.EnterPlayModeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ExitPlayMode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.SceneService/ExitPlayMode',
+            scene__pb2.ExitPlayModeRequest.SerializeToString,
+            scene__pb2.ExitPlayModeResponse.FromString,
             options,
             channel_credentials,
             insecure,

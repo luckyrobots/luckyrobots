@@ -82,6 +82,9 @@ Engine computes the named reward signals + termination flags inline with each `s
 | `StreamMultiplexer` | Time-aligned merge of N concurrent server-streams | Any streaming RPC |
 | `AsyncSession` / `AsyncRobotController` | Asyncio-native mirror of the sync surface | Same RPCs, aio channel |
 | `set_robot_pose` | Teleport via human-friendly inputs | `MujocoSceneService.SetQpos` |
+| `RobotController.set_policy_gains` | Per-joint runtime PD/scale/default override | `AgentService.SetPolicyGains` |
+| `Session.reset_scene` / `MujocoScene.reset` | Soft reset to keyframe[0]; recording continues | `MujocoSceneService.ResetScene` |
+| `Session.enter_play_mode` / `exit_play_mode` | Editor Edit ↔ Play over gRPC | `SceneService.EnterPlayMode` / `ExitPlayMode` |
 | `validate_session`, `has_rpc` | Startup feature-detection + warnings | gRPC reflection |
 
 Discovery is the through-line — every API prefers `list_*` / `get_*` / `discover_*` over hardcoded names.
@@ -121,6 +124,14 @@ with Session() as sess:
     # Diagnostics for tuning / debug.
     base = robot.get_base_pose("Walker")          # (x, y, yaw) in MuJoCo + Hazel frames
     action, joint_names = robot.get_last_action("Walker")  # raw ONNX output
+
+    # Per-joint runtime PD/scale/default override — no descriptor reload.
+    # Unset fields keep the descriptor's value; `clear` restores everything.
+    robot.set_policy_gains("Walker", {
+        "torso":     {"kp": 200.0, "kd": 20.0},
+        "left_hip":  {"effort_limit": 60.0},        # leave kp/kd alone
+    })
+    robot.clear_policy_gains("Walker")
 ```
 
 The `commands(slot)` mapping view (`CommandStoreView`) is dict-like:
@@ -196,6 +207,11 @@ with Session() as sess:
 
     # Teleport joint positions. Owned joints require force=True; reseed control unless skip_policy_reseed.
     scene.set_qpos(indexed={pelvis.qpos_adr: 1.0})
+
+    # Soft reset to keyframe[0] / qpos0. Zeroes ctrl/forces, reseeds active
+    # PolicyRuntime PD targets so they don't yank the robot back. Recording
+    # continues — the next captured frame is tagged with the post_reset bit.
+    scene.reset(preserve_time=False)
 ```
 
 For human-friendly teleporting use the `set_robot_pose` helper:
@@ -296,6 +312,22 @@ client.my_service.DoThing(request, timeout=5.0)
 ```
 
 `client.pb` is a `SimpleNamespace` exposing every checked-in proto module — `client.pb.scene`, `client.pb.agent`, `client.pb.mujoco`, `client.pb.mujoco_scene`, `client.pb.camera`, `client.pb.debug`, `client.pb.telemetry`, `client.pb.viewport`, `client.pb.media`, `client.pb.common` — for hand-rolling requests.
+
+```python
+# Editor lifecycle — async transitions; poll readiness before stepping.
+# These are session boundaries, NOT pause/resume — Exit ends the active
+# recording session (a new EnterPlayMode starts a fresh one).
+client.enter_play_mode()
+# ...wait for client.get_agent_schema() to succeed...
+client.exit_play_mode()
+
+# Soft scene reset — qpos→keyframe[0]/qpos0, zero ctrl/forces, reseed
+# active PolicyRuntimes. Recording continues across the reset; the
+# first frame after gets `frame_flags & post_reset` set engine-side.
+client.reset_scene(preserve_time=False)
+```
+
+`Session` exposes the same three as `sess.enter_play_mode()` / `sess.exit_play_mode()` / `sess.reset_scene(preserve_time=...)`. `AsyncSession` mirrors them as awaitables.
 
 ## RL step + reset + multi-policy
 
@@ -420,22 +452,44 @@ Also `on_ready_change(slot, was, now)` for slot ready-state. Callbacks are wrapp
 
 ## Recording + replay
 
-Every `Set*` / `Get*` RPC issued through the session can be captured and replayed:
+Two distinct things share the word "recording":
 
-```python
-with sess.record() as rec:
-    robot.set_policy_active("Walker", True)
-    robot.commands("Walker")["SetVx"] = 0.5
-    obs = sess.step(actions=[0.0] * 12)
+1. **RPC capture/replay** (this SDK). Every `Set*` / `Get*` RPC issued through the session can be captured and replayed:
 
-print(len(rec.events), "events captured")
-rec.save("run.parquet")                                    # or "run.jsonl"
+   ```python
+   with sess.record() as rec:
+       robot.set_policy_active("Walker", True)
+       robot.commands("Walker")["SetVx"] = 0.5
+       obs = sess.step(actions=[0.0] * 12)
 
-later = SessionRecording.load("run.parquet")
-later.replay(sess, speed=1.0)                              # re-issue at original timestamps
-```
+   print(len(rec.events), "events captured")
+   rec.save("run.parquet")                                    # or "run.jsonl"
 
-`SessionRecording.events` is a list of `RecordedEvent(timestamp_s, rpc, request_json, response_json)`.
+   later = SessionRecording.load("run.parquet")
+   later.replay(sess, speed=1.0)                              # re-issue at original timestamps
+   ```
+
+   `SessionRecording.events` is a list of `RecordedEvent(timestamp_s, rpc, request_json, response_json)`.
+
+2. **Episode/Parquet recording** (engine-side). The engine writes per-substep `qpos` / `ctrl` rows to Parquet under `data/chunk-XXX/file-YYY.parquet`. As of LuckyEngine `mick/policy-fixes` each row carries a `frame_flags : uint8` bit-packed column:
+
+   | Bit | Mask | Meaning |
+   |---|---|---|
+   | 0 | `0x01` | `new_policy_step` — at least one active slot ran fresh ONNX inference this substep (vs. holding the previous action under decimation). |
+   | 1 | `0x02` | `post_reset` — first frame after a `MujocoSceneService.ResetScene` call; `qpos` teleported and `ctrl` was zeroed. |
+
+   ```python
+   import pyarrow.compute as pc, pyarrow.parquet as pq
+   table = pq.read_table("data/chunk-000/file-000.parquet")
+   flags = table["frame_flags"]
+   # Drop held-action ticks AND drop the post-reset discontinuity row
+   fresh = table.filter(pc.and_(
+       pc.equal(pc.bit_wise_and(flags, 1), 1),
+       pc.equal(pc.bit_wise_and(flags, 2), 0),
+   ))
+   ```
+
+   The SDK doesn't write these files — the engine does. This SDK only reads them.
 
 ## Multiplexed streams
 

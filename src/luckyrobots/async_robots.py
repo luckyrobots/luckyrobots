@@ -19,7 +19,7 @@ Quick start:
 
 from __future__ import annotations
 
-from typing import AsyncIterator, Iterable, List, Tuple, Union
+from typing import AsyncIterator, Iterable, List, Mapping, Tuple, Union
 
 import numpy as np
 
@@ -225,6 +225,36 @@ class AsyncRobotController:
         if not resp.success:
             raise RuntimeError(f"GetPolicyCommandBool failed: {resp.message}")
         return resp.value
+
+    # ---- runtime gain override ----
+
+    async def set_policy_gains(
+        self,
+        slot: SlotId,
+        overrides: Mapping[str, Mapping[str, float]],
+    ) -> None:
+        """Async sibling of :meth:`RobotController.set_policy_gains`. See
+        that docstring for semantics — joint name -> field map, with omitted
+        / ``None`` fields meaning "keep the descriptor's value"."""
+        slot_id = await self._resolve_slot(slot)
+        req = _agent_pb2.SetPolicyGainsRequest(
+            entity=self._entity(), slot_id=slot_id
+        )
+        for joint_name, fields in overrides.items():
+            ov = req.overrides.add()
+            ov.joint_name = joint_name
+            for key in ("kp", "kd", "effort_limit", "action_scale", "default_pos"):
+                v = fields.get(key)
+                if v is not None:
+                    setattr(ov, key, float(v))
+        self._check_ack(await self._stub().SetPolicyGains(req))
+
+    async def clear_policy_gains(self, slot: SlotId) -> None:
+        slot_id = await self._resolve_slot(slot)
+        req = _agent_pb2.ClearPolicyGainsRequest(
+            entity=self._entity(), slot_id=slot_id
+        )
+        self._check_ack(await self._stub().ClearPolicyGains(req))
 
     # ---- motion graph ----
     #

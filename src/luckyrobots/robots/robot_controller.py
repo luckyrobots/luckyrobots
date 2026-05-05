@@ -316,6 +316,44 @@ class RobotController:
             raise RuntimeError(f"GetPolicyCommandBool failed: {resp.message}")
         return resp.value
 
+    # ---- runtime gain override ----
+
+    def set_policy_gains(
+        self,
+        slot: SlotId,
+        overrides: Mapping[str, Mapping[str, float]],
+    ) -> None:
+        """Override per-joint PD/scale/default values on an active slot.
+
+        ``overrides`` maps joint name -> ``{"kp": ..., "kd": ...,
+        "effort_limit": ..., "action_scale": ..., "default_pos": ...}``. Any
+        field omitted (or set to ``None``) keeps the descriptor's authored
+        value. Joint names not in the descriptor are silently ignored.
+
+        Useful for retuning a policy from a pure-gRPC client without
+        shipping a model_config.json. Persists until :meth:`clear_policy_gains`
+        is called or the policy is swapped.
+        """
+        req = _agent_pb2.SetPolicyGainsRequest(
+            entity=self._entity(), slot_id=self._resolve_slot(slot)
+        )
+        for joint_name, fields in overrides.items():
+            ov = req.overrides.add()
+            ov.joint_name = joint_name
+            for key in ("kp", "kd", "effort_limit", "action_scale", "default_pos"):
+                v = fields.get(key)
+                if v is not None:
+                    setattr(ov, key, float(v))
+        self._check_ack(self._stub().SetPolicyGains(req))
+
+    def clear_policy_gains(self, slot: SlotId) -> None:
+        """Restore all gain/scale/default values for the slot's joints back
+        to the descriptor's authored values."""
+        req = _agent_pb2.ClearPolicyGainsRequest(
+            entity=self._entity(), slot_id=self._resolve_slot(slot)
+        )
+        self._check_ack(self._stub().ClearPolicyGains(req))
+
     # ---- motion graph ----
 
     @property

@@ -39,7 +39,9 @@ from .grpc.generated import (
     agent_pb2_grpc,
     debug_pb2_grpc,
     mujoco_pb2_grpc,
+    mujoco_scene_pb2,
     mujoco_scene_pb2_grpc,
+    scene_pb2,
     scene_pb2_grpc,
 )
 from .robots.robot_controller import (
@@ -177,3 +179,29 @@ class AsyncSession:
         stub = self.agent
         resp = await stub.ListPolicyDescriptors(agent_pb2.ListPolicyDescriptorsRequest())
         return [PolicyDescriptorInfo._from_pb(p) for p in resp.policies]
+
+    # ---- editor lifecycle / scene reset ----
+
+    async def enter_play_mode(self):
+        """Trigger the editor Edit -> Play transition (no-op in dist builds).
+
+        Session boundary, not pause/resume — Exit will tear down any in-flight
+        recording. Returns immediately; the transition is async, so poll
+        agent / model readiness before stepping the simulation."""
+        return await self.scene.EnterPlayMode(scene_pb2.EnterPlayModeRequest())
+
+    async def exit_play_mode(self):
+        """Trigger the editor Play -> Edit transition (no-op in dist builds).
+
+        Closes out any active recording session as part of the transition."""
+        return await self.scene.ExitPlayMode(scene_pb2.ExitPlayModeRequest())
+
+    async def reset_scene(self, preserve_time: bool = False):
+        """Soft-reset the live MuJoCo scene back to ``keyframe[0]`` /
+        ``qpos0``, zeroing velocities/forces/ctrl and reseeding active
+        PolicyRuntime PD targets. Recording continues — the next captured
+        frame is tagged with the ``post_reset`` flag bit.
+        """
+        return await self.mujoco_scene.ResetScene(
+            mujoco_scene_pb2.ResetSceneRequest(preserve_time=preserve_time)
+        )

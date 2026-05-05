@@ -1175,6 +1175,65 @@ class LuckyEngineClient:
         )
         return {0: "realtime", 1: "deterministic", 2: "fast"}.get(resp.mode, "unknown")
 
+    def enter_play_mode(self, timeout: Optional[float] = None):
+        """Trigger the editor's Edit -> Play transition over gRPC.
+
+        These RPCs are session boundaries, NOT pause/resume — entering Play
+        recompiles MuJoCo and may take a moment to become ready. Returns
+        immediately; poll ``get_agent_schema()`` or ``get_model_info()`` to
+        detect when the simulation is steppable. In standalone (dist) builds
+        there is no Edit/Play distinction and this RPC is a no-op.
+
+        Active recordings will be torn down when ExitPlayMode is later called
+        (Play->Edit ends the recording session).
+        """
+        timeout = timeout or self.timeout
+        return self.scene.EnterPlayMode(
+            self.pb.scene.EnterPlayModeRequest(),
+            timeout=timeout,
+        )
+
+    def exit_play_mode(self, timeout: Optional[float] = None):
+        """Trigger the editor's Play -> Edit transition over gRPC.
+
+        See :meth:`enter_play_mode` for the session-boundary semantics.
+        Any in-flight recording is closed out as part of the transition.
+        """
+        timeout = timeout or self.timeout
+        return self.scene.ExitPlayMode(
+            self.pb.scene.ExitPlayModeRequest(),
+            timeout=timeout,
+        )
+
+    def reset_scene(
+        self,
+        preserve_time: bool = False,
+        timeout: Optional[float] = None,
+    ):
+        """Soft-reset the active MuJoCo scene back to its authored initial state.
+
+        Restores ``qpos`` to ``keyframe[0]`` (or ``qpos0`` if no keyframe is
+        authored), zeroes velocities/forces/ctrl, and reseeds active
+        PolicyRuntime PD targets so the policies don't yank the robot back to
+        a stale target on the next substep.
+
+        Recording behaviour: recording continues across the reset by design.
+        The first frame captured after the reset has the ``post_reset`` bit
+        (= 0x02) set in the new ``frame_flags`` column so consumers can drop
+        the qpos/ctrl discontinuity if needed.
+
+        Args:
+            preserve_time: Keep ``mjData.time`` intact across the reset.
+                Default (False) zeroes time. Set True when in-flight RL
+                training or data capture is tracking elapsed sim time.
+            timeout: RPC timeout in seconds.
+        """
+        timeout = timeout or self.timeout
+        return self.mujoco_scene.ResetScene(
+            self.pb.mujoco_scene.ResetSceneRequest(preserve_time=preserve_time),
+            timeout=timeout,
+        )
+
     def get_scene_info(self, timeout: Optional[float] = None) -> dict:
         """Return the active scene's name, path, and entity count."""
         timeout = timeout or self.timeout

@@ -475,6 +475,18 @@ service AgentService {
     rpc SetPolicyPriority(SetPolicyPriorityRequest) returns (PolicyOperationAck);
     rpc SetPolicyCommandFloat(SetPolicyCommandFloatRequest) returns (PolicyOperationAck);
     rpc SetPolicyCommandBool(SetPolicyCommandBoolRequest) returns (PolicyOperationAck);
+
+    // Per-joint runtime PD/scale/default override. Mutates the slot's
+    // PolicyRuntime kp/kd/effort_limit/action_scale/default_pos in place
+    // without reloading the descriptor. Use to retune a policy from a
+    // pure-gRPC client that doesn't ship a model_config.json. Joint names
+    // not in the descriptor are silently ignored. Unset proto fields mean
+    // "do not override that field — keep the descriptor's value".
+    rpc SetPolicyGains(SetPolicyGainsRequest) returns (PolicyOperationAck);
+    // Restore all gain/scale/default values for the slot's joints back to
+    // the descriptor's authored values.
+    rpc ClearPolicyGains(ClearPolicyGainsRequest) returns (PolicyOperationAck);
+
     rpc GetPolicyCommandFloat(GetPolicyCommandFloatRequest) returns (PolicyCommandFloatValue);
     rpc GetPolicyCommandBool(GetPolicyCommandBoolRequest) returns (PolicyCommandBoolValue);
 
@@ -622,6 +634,28 @@ message SetPolicyCommandBoolRequest {
     uint32 slot_id = 2;
     uint32 command_id = 3;
     bool value = 4;
+}
+
+// Override for a single joint. Any field left unset (proto3 'optional')
+// means "do not override that field — keep the descriptor's value".
+message JointGainOverride {
+    string joint_name = 1;
+    optional float kp = 2;
+    optional float kd = 3;
+    optional float effort_limit = 4;
+    optional float action_scale = 5;
+    optional float default_pos = 6;
+}
+
+message SetPolicyGainsRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
+    repeated JointGainOverride overrides = 3;
+}
+
+message ClearPolicyGainsRequest {
+    EntityId entity = 1;
+    uint32 slot_id = 2;
 }
 
 message GetPolicyCommandFloatRequest {

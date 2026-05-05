@@ -5,7 +5,7 @@ import warnings
 
 from . import mujoco_scene_pb2 as mujoco__scene__pb2
 
-GRPC_GENERATED_VERSION = '1.78.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -68,6 +68,11 @@ class MujocoSceneServiceStub(object):
                 request_serializer=mujoco__scene__pb2.GetActuatorGainsRequest.SerializeToString,
                 response_deserializer=mujoco__scene__pb2.GetActuatorGainsResponse.FromString,
                 _registered_method=True)
+        self.ResetScene = channel.unary_unary(
+                '/hazel.rpc.MujocoSceneService/ResetScene',
+                request_serializer=mujoco__scene__pb2.ResetSceneRequest.SerializeToString,
+                response_deserializer=mujoco__scene__pb2.ResetSceneResponse.FromString,
+                _registered_method=True)
 
 
 class MujocoSceneServiceServicer(object):
@@ -115,6 +120,13 @@ class MujocoSceneServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ResetScene(self, request, context):
+        """Soft reset to authored initial pose. Survives gRPC connection.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MujocoSceneServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -147,6 +159,11 @@ def add_MujocoSceneServiceServicer_to_server(servicer, server):
                     servicer.GetActuatorGains,
                     request_deserializer=mujoco__scene__pb2.GetActuatorGainsRequest.FromString,
                     response_serializer=mujoco__scene__pb2.GetActuatorGainsResponse.SerializeToString,
+            ),
+            'ResetScene': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResetScene,
+                    request_deserializer=mujoco__scene__pb2.ResetSceneRequest.FromString,
+                    response_serializer=mujoco__scene__pb2.ResetSceneResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -315,6 +332,33 @@ class MujocoSceneService(object):
             '/hazel.rpc.MujocoSceneService/GetActuatorGains',
             mujoco__scene__pb2.GetActuatorGainsRequest.SerializeToString,
             mujoco__scene__pb2.GetActuatorGainsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResetScene(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.MujocoSceneService/ResetScene',
+            mujoco__scene__pb2.ResetSceneRequest.SerializeToString,
+            mujoco__scene__pb2.ResetSceneResponse.FromString,
             options,
             channel_credentials,
             insecure,

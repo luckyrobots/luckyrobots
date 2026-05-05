@@ -461,3 +461,26 @@ class MujocoScene:
         resp = self._stub().GetActuatorGains(_ms_pb2.GetActuatorGainsRequest())
         self._check_ok(resp)
         return [ActuatorGainInfo._from_pb(g) for g in resp.actuators]
+
+    # ---- reset ----
+
+    def reset(self, preserve_time: bool = False):
+        """Soft reset back to the authored initial state — ``mj_resetData``
+        plus ``keyframe[0]`` (or ``qpos0`` fallback), velocities/forces/ctrl
+        zeroed, active PolicyRuntime PD targets reseeded.
+
+        Recording continues across the reset by design (this is often used
+        for mid-episode recovery from a learned state). The first frame
+        captured after the reset has the ``post_reset`` bit set in the
+        ``frame_flags`` Parquet column so consumers can drop the qpos/ctrl
+        discontinuity if they want.
+
+        Args:
+            preserve_time: Keep ``mjData.time`` intact across the reset.
+                Default (False) zeroes time for a clean-slate feel.
+        """
+        resp = self._stub().ResetScene(
+            _ms_pb2.ResetSceneRequest(preserve_time=bool(preserve_time))
+        )
+        self._check_ok(resp)
+        return resp

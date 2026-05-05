@@ -5,7 +5,7 @@ import warnings
 
 from . import agent_pb2 as agent__pb2
 
-GRPC_GENERATED_VERSION = '1.78.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -123,6 +123,16 @@ class AgentServiceStub(object):
         self.SetPolicyCommandBool = channel.unary_unary(
                 '/hazel.rpc.AgentService/SetPolicyCommandBool',
                 request_serializer=agent__pb2.SetPolicyCommandBoolRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyGains = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyGains',
+                request_serializer=agent__pb2.SetPolicyGainsRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.ClearPolicyGains = channel.unary_unary(
+                '/hazel.rpc.AgentService/ClearPolicyGains',
+                request_serializer=agent__pb2.ClearPolicyGainsRequest.SerializeToString,
                 response_deserializer=agent__pb2.PolicyOperationAck.FromString,
                 _registered_method=True)
         self.GetPolicyCommandFloat = channel.unary_unary(
@@ -312,6 +322,26 @@ class AgentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SetPolicyGains(self, request, context):
+        """Per-joint runtime PD/scale/default override. Mutates the slot's
+        PolicyRuntime kp/kd/effort_limit/action_scale/default_pos in place
+        without reloading the descriptor. Use to retune a policy from a
+        pure-gRPC client that doesn't ship a model_config.json. Joint names
+        not in the descriptor are silently ignored. Unset proto fields mean
+        "do not override that field — keep the descriptor's value".
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ClearPolicyGains(self, request, context):
+        """Restore all gain/scale/default values for the slot's joints back to
+        the descriptor's authored values.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetPolicyCommandFloat(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -469,6 +499,16 @@ def add_AgentServiceServicer_to_server(servicer, server):
             'SetPolicyCommandBool': grpc.unary_unary_rpc_method_handler(
                     servicer.SetPolicyCommandBool,
                     request_deserializer=agent__pb2.SetPolicyCommandBoolRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyGains': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyGains,
+                    request_deserializer=agent__pb2.SetPolicyGainsRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'ClearPolicyGains': grpc.unary_unary_rpc_method_handler(
+                    servicer.ClearPolicyGains,
+                    request_deserializer=agent__pb2.ClearPolicyGainsRequest.FromString,
                     response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
             ),
             'GetPolicyCommandFloat': grpc.unary_unary_rpc_method_handler(
@@ -1013,6 +1053,60 @@ class AgentService(object):
             target,
             '/hazel.rpc.AgentService/SetPolicyCommandBool',
             agent__pb2.SetPolicyCommandBoolRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyGains(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyGains',
+            agent__pb2.SetPolicyGainsRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ClearPolicyGains(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/ClearPolicyGains',
+            agent__pb2.ClearPolicyGainsRequest.SerializeToString,
             agent__pb2.PolicyOperationAck.FromString,
             options,
             channel_credentials,

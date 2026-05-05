@@ -263,6 +263,31 @@ class Session:
         """Query the engine's current simulation timing mode."""
         return self._require_client().get_simulation_mode()
 
+    def enter_play_mode(self):
+        """Trigger the editor Edit -> Play transition (no-op in dist builds).
+
+        Session boundary, not pause/resume — Exit will tear down any in-flight
+        recording. Returns immediately; the transition is async, so poll
+        ``get_agent_schema()`` to detect readiness."""
+        return self._require_client().enter_play_mode()
+
+    def exit_play_mode(self):
+        """Trigger the editor Play -> Edit transition (no-op in dist builds).
+
+        Closes out any active recording session as part of the transition."""
+        return self._require_client().exit_play_mode()
+
+    def reset_scene(self, preserve_time: bool = False):
+        """Soft-reset the live MuJoCo scene back to ``keyframe[0]`` /
+        ``qpos0``, zeroing velocities/forces/ctrl and reseeding active
+        PolicyRuntime PD targets. Recording continues — the next captured
+        frame is tagged with the ``post_reset`` flag bit.
+
+        Args:
+            preserve_time: Keep ``mjData.time`` intact across the reset.
+        """
+        return self._require_client().reset_scene(preserve_time=preserve_time)
+
     def get_scene_info(self) -> dict:
         """Return the active scene's name, path, and entity count."""
         return self._require_client().get_scene_info()

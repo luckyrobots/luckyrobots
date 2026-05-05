@@ -91,6 +91,22 @@ message GetSimulationModeResponse {
     SimulationMode mode = 1;
 }
 
+// =============================================================================
+// Editor Play Mode
+// =============================================================================
+
+message EnterPlayModeRequest {}
+message EnterPlayModeResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message ExitPlayModeRequest {}
+message ExitPlayModeResponse {
+    bool success = 1;
+    string message = 2;
+}
+
 // Scene inspection + basic editing.
 service SceneService {
     rpc GetSceneInfo(GetSceneInfoRequest) returns (GetSceneInfoResponse);
@@ -101,4 +117,24 @@ service SceneService {
     rpc SetSimulationMode(SetSimulationModeRequest) returns (SetSimulationModeResponse);
     // Get current simulation timing mode.
     rpc GetSimulationMode(GetSimulationModeRequest) returns (GetSimulationModeResponse);
+
+    // Editor scene lifecycle. Both RPCs return immediately after dispatching
+    // the request — the actual transition is async (entering Play triggers
+    // a MuJoCo recompile that lives in a Preparing state until ready).
+    // Clients should poll readiness via AgentService.GetAgentSchema or
+    // MujocoSceneService.GetModelInfo before driving the simulation.
+    //
+    // In standalone (dist) runtime builds there is no Edit/Play distinction;
+    // these RPCs succeed but have no effect.
+    //
+    // The gRPC server is application-scoped, NOT scene-scoped — calling
+    // ExitPlayMode does NOT disconnect existing gRPC clients or stop the
+    // server. Existing PolicySlot configuration on a RobotControllerComponent
+    // is preserved across Edit/Play transitions (it lives on the editor
+    // scene, which is restored on stop).
+    //
+    // These are session boundaries, not pause/resume — exiting Play tears
+    // down the active simulation session including any in-flight recording.
+    rpc EnterPlayMode(EnterPlayModeRequest) returns (EnterPlayModeResponse);
+    rpc ExitPlayMode(ExitPlayModeRequest) returns (ExitPlayModeResponse);
 }
