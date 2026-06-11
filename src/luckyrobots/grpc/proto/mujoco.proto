@@ -26,18 +26,6 @@ message GetJointStateResponse {
     JointState state = 3;
 }
 
-message SendControlRequest {
-    // Entity name or tag hint for which robot to target.
-    // Current Learn integration treats this as "set external actions for the next step".
-    string robot_name = 1;
-    repeated float controls = 2;    // Control input vector
-}
-
-message SendControlResponse {
-    bool success = 1;
-    string message = 2;
-}
-
 message GetMujocoInfoRequest {
     // Entity name or tag hint.
     string robot_name = 1;
@@ -54,9 +42,14 @@ message GetMujocoInfoResponse {
 }
 
 // MuJoCo state + control IO.
+//
+// Agent-scoped surface — values are indexed by joints/actuators the registered
+// `RobotAgent` declared, NOT the full mjModel. For full-model access, use
+// MujocoSceneService. To deliver actions to an external RL agent, use
+// AgentService.Step. To poke arbitrary actuators by name, use
+// MujocoSceneService.SetControl.
 service MujocoService {
     rpc GetJointState(GetJointStateRequest) returns (GetJointStateResponse);
-    rpc SendControl(SendControlRequest) returns (SendControlResponse);
     rpc GetMujocoInfo(GetMujocoInfoRequest) returns (GetMujocoInfoResponse);
 
     // Streaming variant for continuous state observation

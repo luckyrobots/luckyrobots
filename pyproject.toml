@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "luckyrobots"
-version = "0.1.84"
+version = "0.3.0"
 description = "Robotics-AI Training in Hyperrealistic Game Environments"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -23,6 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "grpcio>=1.60.0",
+    "grpcio-reflection>=1.60.0",
     "protobuf>=4.25.0",
     "pydantic>=2.0.0",
     "numpy>=1.24.0",
@@ -41,6 +42,19 @@ dependencies = [
 sysid = [
     "mujoco>=3.2.0",
     "scipy>=1.10.0",
+]
+# RL / gymnasium-based env wrappers (LuckyEnv, PolicyEnv).
+rl = [
+    "gymnasium>=0.29",
+]
+# Reflection-driven service discovery (luckyrobots.reflection,
+# luckyrobots.cli inspect, runtime feature detection via Session.has_rpc).
+reflection = [
+    "grpcio-reflection>=1.60.0",
+]
+# Parquet support for SessionRecording.save("episode.parquet").
+recording = [
+    "pyarrow>=15.0",
 ]
 
 [project.scripts]

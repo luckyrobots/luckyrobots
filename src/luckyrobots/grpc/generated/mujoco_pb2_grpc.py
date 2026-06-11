@@ -5,7 +5,7 @@ import warnings
 
 from . import mujoco_pb2 as mujoco__pb2
 
-GRPC_GENERATED_VERSION = '1.76.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -27,6 +27,12 @@ if _version_not_supported:
 
 class MujocoServiceStub(object):
     """MuJoCo state + control IO.
+
+    Agent-scoped surface — values are indexed by joints/actuators the registered
+    `RobotAgent` declared, NOT the full mjModel. For full-model access, use
+    MujocoSceneService. To deliver actions to an external RL agent, use
+    AgentService.Step. To poke arbitrary actuators by name, use
+    MujocoSceneService.SetControl.
     """
 
     def __init__(self, channel):
@@ -39,11 +45,6 @@ class MujocoServiceStub(object):
                 '/hazel.rpc.MujocoService/GetJointState',
                 request_serializer=mujoco__pb2.GetJointStateRequest.SerializeToString,
                 response_deserializer=mujoco__pb2.GetJointStateResponse.FromString,
-                _registered_method=True)
-        self.SendControl = channel.unary_unary(
-                '/hazel.rpc.MujocoService/SendControl',
-                request_serializer=mujoco__pb2.SendControlRequest.SerializeToString,
-                response_deserializer=mujoco__pb2.SendControlResponse.FromString,
                 _registered_method=True)
         self.GetMujocoInfo = channel.unary_unary(
                 '/hazel.rpc.MujocoService/GetMujocoInfo',
@@ -59,15 +60,15 @@ class MujocoServiceStub(object):
 
 class MujocoServiceServicer(object):
     """MuJoCo state + control IO.
+
+    Agent-scoped surface — values are indexed by joints/actuators the registered
+    `RobotAgent` declared, NOT the full mjModel. For full-model access, use
+    MujocoSceneService. To deliver actions to an external RL agent, use
+    AgentService.Step. To poke arbitrary actuators by name, use
+    MujocoSceneService.SetControl.
     """
 
     def GetJointState(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def SendControl(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -94,11 +95,6 @@ def add_MujocoServiceServicer_to_server(servicer, server):
                     request_deserializer=mujoco__pb2.GetJointStateRequest.FromString,
                     response_serializer=mujoco__pb2.GetJointStateResponse.SerializeToString,
             ),
-            'SendControl': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendControl,
-                    request_deserializer=mujoco__pb2.SendControlRequest.FromString,
-                    response_serializer=mujoco__pb2.SendControlResponse.SerializeToString,
-            ),
             'GetMujocoInfo': grpc.unary_unary_rpc_method_handler(
                     servicer.GetMujocoInfo,
                     request_deserializer=mujoco__pb2.GetMujocoInfoRequest.FromString,
@@ -119,6 +115,12 @@ def add_MujocoServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class MujocoService(object):
     """MuJoCo state + control IO.
+
+    Agent-scoped surface — values are indexed by joints/actuators the registered
+    `RobotAgent` declared, NOT the full mjModel. For full-model access, use
+    MujocoSceneService. To deliver actions to an external RL agent, use
+    AgentService.Step. To poke arbitrary actuators by name, use
+    MujocoSceneService.SetControl.
     """
 
     @staticmethod
@@ -138,33 +140,6 @@ class MujocoService(object):
             '/hazel.rpc.MujocoService/GetJointState',
             mujoco__pb2.GetJointStateRequest.SerializeToString,
             mujoco__pb2.GetJointStateResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def SendControl(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/hazel.rpc.MujocoService/SendControl',
-            mujoco__pb2.SendControlRequest.SerializeToString,
-            mujoco__pb2.SendControlResponse.FromString,
             options,
             channel_credentials,
             insecure,

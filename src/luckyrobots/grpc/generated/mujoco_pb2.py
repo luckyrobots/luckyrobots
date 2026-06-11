@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmujoco.proto\x12\thazel.rpc\"K\n\nJointState\x12\x11\n\tpositions\x18\x01 \x03(\x02\x12\x12\n\nvelocities\x18\x02 \x03(\x02\x12\n\n\x02nq\x18\x03 \x01(\r\x12\n\n\x02nv\x18\x04 \x01(\r\"*\n\x14GetJointStateRequest\x12\x12\n\nrobot_name\x18\x01 \x01(\t\"_\n\x15GetJointStateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12$\n\x05state\x18\x03 \x01(\x0b\x32\x15.hazel.rpc.JointState\":\n\x12SendControlRequest\x12\x12\n\nrobot_name\x18\x01 \x01(\t\x12\x10\n\x08\x63ontrols\x18\x02 \x03(\x02\"7\n\x13SendControlResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"*\n\x14GetMujocoInfoRequest\x12\x12\n\nrobot_name\x18\x01 \x01(\t\"\x8a\x01\n\x15GetMujocoInfoResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\n\n\x02nq\x18\x03 \x01(\r\x12\n\n\x02nv\x18\x04 \x01(\r\x12\n\n\x02nu\x18\x05 \x01(\r\x12\x13\n\x0bjoint_names\x18\x06 \x03(\t\x12\x16\n\x0e\x61\x63tuator_names\x18\x07 \x03(\t2\xde\x02\n\rMujocoService\x12R\n\rGetJointState\x12\x1f.hazel.rpc.GetJointStateRequest\x1a .hazel.rpc.GetJointStateResponse\x12L\n\x0bSendControl\x12\x1d.hazel.rpc.SendControlRequest\x1a\x1e.hazel.rpc.SendControlResponse\x12R\n\rGetMujocoInfo\x12\x1f.hazel.rpc.GetMujocoInfoRequest\x1a .hazel.rpc.GetMujocoInfoResponse\x12W\n\x10StreamJointState\x12\x1f.hazel.rpc.GetJointStateRequest\x1a .hazel.rpc.GetJointStateResponse0\x01\x42\x03\xf8\x01\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmujoco.proto\x12\thazel.rpc\"K\n\nJointState\x12\x11\n\tpositions\x18\x01 \x03(\x02\x12\x12\n\nvelocities\x18\x02 \x03(\x02\x12\n\n\x02nq\x18\x03 \x01(\r\x12\n\n\x02nv\x18\x04 \x01(\r\"*\n\x14GetJointStateRequest\x12\x12\n\nrobot_name\x18\x01 \x01(\t\"_\n\x15GetJointStateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12$\n\x05state\x18\x03 \x01(\x0b\x32\x15.hazel.rpc.JointState\"*\n\x14GetMujocoInfoRequest\x12\x12\n\nrobot_name\x18\x01 \x01(\t\"\x8a\x01\n\x15GetMujocoInfoResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\n\n\x02nq\x18\x03 \x01(\r\x12\n\n\x02nv\x18\x04 \x01(\r\x12\n\n\x02nu\x18\x05 \x01(\r\x12\x13\n\x0bjoint_names\x18\x06 \x03(\t\x12\x16\n\x0e\x61\x63tuator_names\x18\x07 \x03(\t2\x90\x02\n\rMujocoService\x12R\n\rGetJointState\x12\x1f.hazel.rpc.GetJointStateRequest\x1a .hazel.rpc.GetJointStateResponse\x12R\n\rGetMujocoInfo\x12\x1f.hazel.rpc.GetMujocoInfoRequest\x1a .hazel.rpc.GetMujocoInfoResponse\x12W\n\x10StreamJointState\x12\x1f.hazel.rpc.GetJointStateRequest\x1a .hazel.rpc.GetJointStateResponse0\x01\x42\x03\xf8\x01\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -38,14 +38,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETJOINTSTATEREQUEST']._serialized_end=146
   _globals['_GETJOINTSTATERESPONSE']._serialized_start=148
   _globals['_GETJOINTSTATERESPONSE']._serialized_end=243
-  _globals['_SENDCONTROLREQUEST']._serialized_start=245
-  _globals['_SENDCONTROLREQUEST']._serialized_end=303
-  _globals['_SENDCONTROLRESPONSE']._serialized_start=305
-  _globals['_SENDCONTROLRESPONSE']._serialized_end=360
-  _globals['_GETMUJOCOINFOREQUEST']._serialized_start=362
-  _globals['_GETMUJOCOINFOREQUEST']._serialized_end=404
-  _globals['_GETMUJOCOINFORESPONSE']._serialized_start=407
-  _globals['_GETMUJOCOINFORESPONSE']._serialized_end=545
-  _globals['_MUJOCOSERVICE']._serialized_start=548
-  _globals['_MUJOCOSERVICE']._serialized_end=898
+  _globals['_GETMUJOCOINFOREQUEST']._serialized_start=245
+  _globals['_GETMUJOCOINFOREQUEST']._serialized_end=287
+  _globals['_GETMUJOCOINFORESPONSE']._serialized_start=290
+  _globals['_GETMUJOCOINFORESPONSE']._serialized_end=428
+  _globals['_MUJOCOSERVICE']._serialized_start=431
+  _globals['_MUJOCOSERVICE']._serialized_end=703
 # @@protoc_insertion_point(module_scope)

@@ -21,13 +21,22 @@ logger = logging.getLogger("luckyrobots.client")
 try:
     from .grpc.generated import agent_pb2  # type: ignore
     from .grpc.generated import agent_pb2_grpc  # type: ignore
+    from .grpc.generated import camera_pb2  # type: ignore
+    from .grpc.generated import camera_pb2_grpc  # type: ignore
     from .grpc.generated import common_pb2  # type: ignore
     from .grpc.generated import debug_pb2  # type: ignore
     from .grpc.generated import debug_pb2_grpc  # type: ignore
     from .grpc.generated import mujoco_pb2  # type: ignore
     from .grpc.generated import mujoco_pb2_grpc  # type: ignore
+    from .grpc.generated import mujoco_scene_pb2  # type: ignore
+    from .grpc.generated import mujoco_scene_pb2_grpc  # type: ignore
     from .grpc.generated import scene_pb2  # type: ignore
     from .grpc.generated import scene_pb2_grpc  # type: ignore
+    from .grpc.generated import telemetry_pb2  # type: ignore
+    from .grpc.generated import telemetry_pb2_grpc  # type: ignore
+    from .grpc.generated import viewport_pb2  # type: ignore
+    from .grpc.generated import viewport_pb2_grpc  # type: ignore
+    from .grpc.generated import media_pb2  # type: ignore
 except Exception as e:  # pragma: no cover
     raise ImportError(
         "Missing generated gRPC stubs. Regenerate them from the protos in "
@@ -92,11 +101,18 @@ class LuckyEngineClient:
 
         self._channel = None
 
-        # Service stubs (populated after connect)
+        # Service stubs (created lazily on first property access)
         self._scene = None
         self._mujoco = None
+        self._mujoco_scene = None
         self._agent = None
+        self._camera = None
         self._debug = None
+        self._telemetry = None
+        self._viewport = None
+
+        # Additional user-registered stubs (see register_stub).
+        self._extra_stubs: dict[str, Any] = {}
 
         # Cached agent schemas: agent_name -> (observation_names, action_names)
         self._schema_cache: dict[str, tuple[list[str], list[str]]] = {}
@@ -109,13 +125,21 @@ class LuckyEngineClient:
             common=common_pb2,
             scene=scene_pb2,
             mujoco=mujoco_pb2,
+            mujoco_scene=mujoco_scene_pb2,
             agent=agent_pb2,
             debug=debug_pb2,
+            camera=camera_pb2,
+            telemetry=telemetry_pb2,
+            viewport=viewport_pb2,
+            media=media_pb2,
         )
 
     def connect(self) -> None:
         """
         Connect to the LuckyEngine gRPC server.
+
+        Opens the gRPC channel. Service stubs are created lazily on first
+        access so importers can skip unused services without cost.
 
         Raises:
             GrpcConnectionError: If connection fails.
@@ -125,11 +149,16 @@ class LuckyEngineClient:
 
         self._channel = grpc.insecure_channel(target)
 
-        # Create service stubs
-        self._scene = scene_pb2_grpc.SceneServiceStub(self._channel)
-        self._mujoco = mujoco_pb2_grpc.MujocoServiceStub(self._channel)
-        self._agent = agent_pb2_grpc.AgentServiceStub(self._channel)
-        self._debug = debug_pb2_grpc.DebugServiceStub(self._channel)
+        # Drop any cached stubs so a reconnect re-binds them to the new channel.
+        self._scene = None
+        self._mujoco = None
+        self._mujoco_scene = None
+        self._agent = None
+        self._camera = None
+        self._debug = None
+        self._telemetry = None
+        self._viewport = None
+        self._extra_stubs: dict[str, Any] = {}
 
         logger.info(f"Channel opened to {target} (server not verified yet)")
 
@@ -143,8 +172,11 @@ class LuckyEngineClient:
             self._channel = None
             self._scene = None
             self._mujoco = None
+            self._mujoco_scene = None
             self._agent = None
+            self._camera = None
             self._debug = None
+            self._extra_stubs = {}
             logger.info("gRPC channel closed")
 
     def is_connected(self) -> bool:
@@ -220,32 +252,132 @@ class LuckyEngineClient:
         self._robot_name = robot_name
 
     @property
-    def scene(self) -> Any:
-        """SceneService stub."""
-        if self._scene is None:
+    def channel(self) -> grpc.Channel:
+        """The underlying gRPC channel.
+
+        Exposed so users can attach their own service stubs using the same
+        connection (shared keep-alive, auth, etc.):
+
+            client.connect()
+            my_stub = my_pb2_grpc.MyServiceStub(client.channel)
+        """
+        if self._channel is None:
             raise GrpcConnectionError("Not connected. Call connect() first.")
+        return self._channel
+
+    @property
+    def scene(self) -> Any:
+        """SceneService stub (lazy)."""
+        if self._scene is None:
+            self._scene = scene_pb2_grpc.SceneServiceStub(self.channel)
         return self._scene
 
     @property
     def mujoco(self) -> Any:
-        """MujocoService stub."""
+        """MujocoService stub (lazy) — agent-scoped joint state.
+
+        For the full, engine-wide MuJoCo model (every joint, every actuator),
+        use :attr:`mujoco_scene` instead.
+        """
         if self._mujoco is None:
-            raise GrpcConnectionError("Not connected. Call connect() first.")
+            self._mujoco = mujoco_pb2_grpc.MujocoServiceStub(self.channel)
         return self._mujoco
 
     @property
+    def mujoco_scene(self) -> Any:
+        """MujocoSceneService stub (lazy) — engine-wide MuJoCo access.
+
+        Exposes every joint, actuator, and the full qpos/qvel/ctrl vectors
+        in the loaded model. Use the higher-level helpers
+        :meth:`get_model_info`, :meth:`get_full_state`, and :meth:`set_ctrl`
+        for common operations.
+        """
+        if self._mujoco_scene is None:
+            self._mujoco_scene = mujoco_scene_pb2_grpc.MujocoSceneServiceStub(self.channel)
+        return self._mujoco_scene
+
+    @property
     def agent(self) -> Any:
-        """AgentService stub."""
+        """AgentService stub (lazy)."""
         if self._agent is None:
-            raise GrpcConnectionError("Not connected. Call connect() first.")
+            self._agent = agent_pb2_grpc.AgentServiceStub(self.channel)
         return self._agent
 
     @property
     def debug(self) -> Any:
-        """DebugService stub."""
+        """DebugService stub (lazy)."""
         if self._debug is None:
-            raise GrpcConnectionError("Not connected. Call connect() first.")
+            self._debug = debug_pb2_grpc.DebugServiceStub(self.channel)
         return self._debug
+
+    @property
+    def camera(self) -> Any:
+        """CameraService stub (lazy)."""
+        if self._camera is None:
+            self._camera = camera_pb2_grpc.CameraServiceStub(self.channel)
+        return self._camera
+
+    @property
+    def telemetry(self) -> Any:
+        """TelemetryService stub (lazy) — lightweight qpos + ctrl streaming."""
+        if self._telemetry is None:
+            self._telemetry = telemetry_pb2_grpc.TelemetryServiceStub(self.channel)
+        return self._telemetry
+
+    @property
+    def viewport(self) -> Any:
+        """ViewportService stub (lazy) — editor viewport pixel streaming."""
+        if self._viewport is None:
+            self._viewport = viewport_pb2_grpc.ViewportServiceStub(self.channel)
+        return self._viewport
+
+    # ── Extension seam for user-provided services ──
+
+    def register_stub(self, name: str, stub_class: Any) -> Any:
+        """Attach a third-party stub class to this client's channel.
+
+        Useful when an engine build exposes a service that the shipped SDK
+        doesn't know about:
+
+            client.register_stub("my_svc", my_pb2_grpc.MyServiceStub)
+            client.my_svc.DoThing(...)
+
+        Args:
+            name: Attribute name under which the stub is exposed.
+            stub_class: Generated ``*Stub`` class from a ``_pb2_grpc`` module.
+
+        Returns:
+            The instantiated stub (also available as ``client.<name>``).
+        """
+        if not name or name.startswith("_"):
+            raise ValueError("Stub name must be non-empty and not start with '_'.")
+        if hasattr(type(self), name):
+            raise ValueError(
+                f"Cannot register stub '{name}': attribute reserved on LuckyEngineClient."
+            )
+        stub = stub_class(self.channel)
+        self._extra_stubs[name] = stub
+        return stub
+
+    def __getattr__(self, name: str) -> Any:
+        # Only reached for attributes not found on self or the class.
+        # Resolves user-registered stubs as ``client.<name>``.
+        extras = self.__dict__.get("_extra_stubs")
+        if extras and name in extras:
+            return extras[name]
+        raise AttributeError(name)
+
+    def discover_services(self) -> list[str]:
+        """Ask the server which gRPC services it advertises.
+
+        Uses ``grpc.reflection.v1alpha.ServerReflection``. Requires the engine
+        to be built with reflection enabled (default in the v0.2.0+ LuckyEngine
+        server). The standard reflection service itself is filtered out of the
+        result.
+        """
+        from . import reflection as _reflection
+
+        return _reflection.list_services(self.channel)
 
     # ── Camera configuration ──
 
@@ -266,6 +398,63 @@ class LuckyEngineClient:
             )
             for c in cameras
         ]
+
+    def list_cameras(self, timeout: float | None = None) -> list[dict]:
+        """List available cameras in the scene.
+
+        Returns:
+            List of dicts with 'name' and 'id' keys for each camera.
+        """
+        timeout = timeout or self.timeout
+        resp = self.camera.ListCameras(
+            camera_pb2.ListCamerasRequest(),
+            timeout=timeout,
+        )
+        return [
+            {"name": c.name, "id": c.id.id}
+            for c in resp.cameras
+        ]
+
+    # ── Multi-policy action groups ──
+
+    def set_action_group(
+        self,
+        group_name: str,
+        actions: list[float],
+        action_indices: list[int],
+        agent_name: str = "",
+        timeout: float | None = None,
+    ) -> bool:
+        """Preload actions for a named group without triggering a physics step.
+
+        Call this for each policy/controller, then call step() to fire them
+        all atomically in one physics tick.
+
+        Args:
+            group_name: Name for this action group (e.g., "lower_body", "right_arm").
+            actions: Action values for this group.
+            action_indices: Which indices in the action vector these map to.
+            agent_name: Agent name (empty = default agent).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            True if the group was preloaded successfully.
+        """
+        timeout = timeout or self.timeout
+        resp = self.agent.SetActionGroup(
+            self.pb.agent.SetActionGroupRequest(
+                agent_name=agent_name,
+                group=self.pb.agent.ActionGroupEntry(
+                    group_name=group_name,
+                    actions=actions,
+                    action_indices=action_indices,
+                ),
+            ),
+            timeout=timeout,
+        )
+        if not resp.success:
+            logger.warning("SetActionGroup failed: %s", resp.message)
+        return resp.success
 
     # ── MujocoService RPCs ──
 
@@ -299,6 +488,152 @@ class LuckyEngineClient:
             self.pb.mujoco.GetMujocoInfoRequest(robot_name=robot_name),
             timeout=timeout,
         )
+
+    # ── MujocoSceneService RPCs (engine-wide, not agent-scoped) ──
+
+    def get_model_info(self, timeout: Optional[float] = None):
+        """Introspect the full loaded MuJoCo model.
+
+        Returns a ``GetModelInfoResponse`` whose ``joints`` and ``actuators``
+        lists cover every entry in ``mjModel`` — not just those declared by
+        the registered RL agent. Use this to discover fingers, non-agent
+        joints, and actuator names the agent API doesn't expose.
+        """
+        timeout = timeout or self.timeout
+        return self.mujoco_scene.GetModelInfo(
+            self.pb.mujoco_scene.GetModelInfoRequest(),
+            timeout=timeout,
+        )
+
+    def get_full_state(
+        self,
+        *,
+        include_qpos: bool = True,
+        include_qvel: bool = True,
+        include_ctrl: bool = True,
+        timeout: Optional[float] = None,
+    ):
+        """Snapshot the complete mjData state (qpos, qvel, ctrl, time)."""
+        timeout = timeout or self.timeout
+        return self.mujoco_scene.GetFullState(
+            self.pb.mujoco_scene.GetFullStateRequest(
+                include_qpos=include_qpos,
+                include_qvel=include_qvel,
+                include_ctrl=include_ctrl,
+            ),
+            timeout=timeout,
+        )
+
+    def stream_full_state(
+        self,
+        *,
+        target_fps: int = 30,
+        include_qpos: bool = True,
+        include_qvel: bool = True,
+        include_ctrl: bool = True,
+    ):
+        """Iterate ``GetFullStateResponse`` messages at approximately ``target_fps``.
+
+        Example:
+            for resp in client.stream_full_state(target_fps=60):
+                qpos = list(resp.state.qpos)
+        """
+        return self.mujoco_scene.StreamFullState(
+            self.pb.mujoco_scene.StreamFullStateRequest(
+                target_fps=target_fps,
+                include_qpos=include_qpos,
+                include_qvel=include_qvel,
+                include_ctrl=include_ctrl,
+            )
+        )
+
+    def set_ctrl(
+        self,
+        values: Any,
+        *,
+        skip_range_clamp: bool = False,
+        wait_for_next_step: bool = False,
+        timeout: Optional[float] = None,
+    ):
+        """Write actuator control values.
+
+        Accepts three input shapes:
+            - A flat sequence of floats: bulk write starting at index 0.
+            - A dict[str, float]: write by actuator name.
+            - A dict[int, float]: write by actuator index.
+
+        Actuators currently owned by an active RL agent are refused and
+        returned in ``SetControlResponse.rejected_actuators``.
+        """
+        timeout = timeout or self.timeout
+
+        req_kwargs: dict[str, Any] = {
+            "skip_range_clamp": skip_range_clamp,
+            "wait_for_next_step": wait_for_next_step,
+        }
+
+        if isinstance(values, dict):
+            named: list = []
+            indexed: list = []
+            for k, v in values.items():
+                if isinstance(k, str):
+                    named.append(
+                        self.pb.mujoco_scene.NamedControlEntry(actuator_name=k, value=float(v))
+                    )
+                elif isinstance(k, int):
+                    indexed.append(
+                        self.pb.mujoco_scene.IndexedControlEntry(actuator_index=int(k), value=float(v))
+                    )
+                else:
+                    raise TypeError(
+                        f"set_ctrl dict keys must be str or int; got {type(k).__name__}"
+                    )
+            if named:
+                req_kwargs["named"] = named
+            if indexed:
+                req_kwargs["indexed"] = indexed
+        else:
+            req_kwargs["bulk"] = [float(v) for v in values]
+
+        return self.mujoco_scene.SetControl(
+            self.pb.mujoco_scene.SetControlRequest(**req_kwargs),
+            timeout=timeout,
+        )
+
+    def list_all_joints(self, timeout: Optional[float] = None) -> list[dict]:
+        """Return lightweight dicts for every joint in the loaded MuJoCo model.
+
+        Convenience wrapper around :meth:`get_model_info`. Each entry:
+            {"index": int, "name": str, "type": int, "qpos_adr": int,
+             "qvel_adr": int, "limited": bool, "range": (lo, hi)}
+        """
+        info = self.get_model_info(timeout=timeout)
+        return [
+            {
+                "index": j.index,
+                "name": j.name,
+                "type": int(j.type),
+                "qpos_adr": j.qpos_adr,
+                "qvel_adr": j.qvel_adr,
+                "limited": j.limited,
+                "range": (j.range_lo, j.range_hi),
+            }
+            for j in info.joints
+        ]
+
+    def list_all_actuators(self, timeout: Optional[float] = None) -> list[dict]:
+        """Return lightweight dicts for every actuator in the loaded MuJoCo model."""
+        info = self.get_model_info(timeout=timeout)
+        return [
+            {
+                "index": a.index,
+                "name": a.name,
+                "ctrl_limited": a.ctrl_limited,
+                "ctrl_range": (a.ctrl_range_lo, a.ctrl_range_hi),
+                "target_joint_index": a.target_joint_index,
+            }
+            for a in info.actuators
+        ]
 
     # ── AgentService RPCs ──
 
@@ -370,33 +705,59 @@ class LuckyEngineClient:
 
     def step(
         self,
-        actions: list[float],
+        actions: list[float] | None = None,
         agent_name: str = "",
         step_timeout_s: float = 0.0,
         timeout: Optional[float] = None,
+        action_groups: list[dict] | None = None,
     ) -> ObservationResponse:
         """
         Synchronous RL step: apply action, wait for physics, return observation.
 
         Args:
-            actions: Action vector to apply for this step.
+            actions: Action vector to apply for this step (optional when using action_groups).
             agent_name: Agent name (empty = default agent).
             step_timeout_s: Server-side timeout for waiting for the physics step (seconds).
                 0 means use server default.
             timeout: RPC timeout in seconds.
+            action_groups: Optional list of action group dicts, each with keys:
+                group_name: str, actions: list[float], action_indices: list[int].
+                Groups are applied on top of actions (if provided) or default positions.
 
         Returns:
             ObservationResponse with observation after physics step.
         """
         timeout = timeout or self.timeout
 
+        # Build inline action groups if provided
+        proto_groups = []
+        if action_groups:
+            for g in action_groups:
+                gname = g.get("group_name", "")
+                gactions = g.get("actions", [])
+                gindices = g.get("action_indices", [])
+                if not gname or not gactions or not gindices:
+                    logger.warning(
+                        "Skipping invalid action group (missing group_name, actions, or action_indices): %s",
+                        g,
+                    )
+                    continue
+                proto_groups.append(
+                    self.pb.agent.ActionGroupEntry(
+                        group_name=gname,
+                        actions=gactions,
+                        action_indices=gindices,
+                    )
+                )
+
         try:
             resp = self.agent.Step(
                 self.pb.agent.StepRequest(
                     agent_name=agent_name,
-                    actions=actions,
+                    actions=actions or [],
                     timeout_s=step_timeout_s,
                     camera_requests=self._camera_requests,
+                    action_groups=proto_groups,
                 ),
                 timeout=timeout,
             )
@@ -435,6 +796,13 @@ class LuckyEngineClient:
             for nf in resp.camera_frames
         ]
 
+        # Extract enriched step data if present
+        reward_signals = dict(resp.reward_signals) if resp.reward_signals else None
+        terminated = resp.terminated
+        truncated = resp.truncated
+        info = dict(resp.info) if resp.info else None
+        termination_flags = dict(resp.termination_flags) if resp.termination_flags else None
+
         return ObservationResponse(
             observation=observations,
             actions=actions_out,
@@ -444,6 +812,11 @@ class LuckyEngineClient:
             observation_names=obs_names,
             action_names=action_names,
             camera_frames=camera_frames,
+            reward_signals=reward_signals,
+            terminated=terminated,
+            truncated=truncated,
+            info=info,
+            termination_flags=termination_flags,
         )
 
     # ── Progress reporting ──
@@ -487,6 +860,273 @@ class LuckyEngineClient:
         except Exception as e:
             logger.debug("report_progress failed (non-fatal): %s", e)
 
+    # ── Task Contract RPCs ──
+
+    def get_capability_manifest(
+        self,
+        robot_name: str = "",
+        scene: str = "",
+        timeout: Optional[float] = None,
+    ) -> dict:
+        """Discover what MDP components the engine supports.
+
+        Args:
+            robot_name: Filter by robot (empty = all).
+            scene: Filter by scene (empty = all).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            Dict with observations, rewards, terminations, randomizations lists.
+        """
+        timeout = timeout or self.timeout
+        resp = self.agent.GetCapabilityManifest(
+            self.pb.agent.GetCapabilityManifestRequest(
+                robot_name=robot_name,
+                scene=scene,
+            ),
+            timeout=timeout,
+        )
+        manifest = resp.manifest
+        return {
+            "engine_version": manifest.engine_version,
+            "manifest_version": manifest.manifest_version,
+            "observations": [
+                {"name": d.name, "description": d.description, "category": d.category}
+                for d in manifest.observations
+            ],
+            "rewards": [
+                {"name": d.name, "description": d.description, "category": d.category}
+                for d in manifest.rewards
+            ],
+            "terminations": [
+                {"name": d.name, "description": d.description, "category": d.category}
+                for d in manifest.terminations
+            ],
+            "randomizations": [
+                {
+                    "name": d.base.name,
+                    "description": d.base.description,
+                    "default_range": (d.default_range_min, d.default_range_max),
+                    "engine_target": d.engine_target,
+                }
+                for d in manifest.randomizations
+            ],
+        }
+
+    def validate_task_contract(
+        self,
+        contract: dict,
+        timeout: Optional[float] = None,
+    ) -> dict:
+        """Dry-run a task contract against the engine's capability registry.
+
+        Validates without configuring anything — useful for CLI tooling and
+        pre-flight checks. Errors include actionable suggestions ("did you
+        mean `track_angular_velocity`?").
+
+        Args:
+            contract: Task contract dict (same shape as ``negotiate_task``).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            Dict with keys: ``is_valid`` (bool), ``errors`` (list of dicts),
+            ``warnings`` (list of dicts), ``resolved_optionals`` (list of
+            term names that were resolved), ``unresolved_optionals``.
+        """
+        timeout = timeout or self.timeout
+        proto_contract = self._build_task_contract(contract)
+        resp = self.agent.ValidateTaskContract(
+            self.pb.agent.ValidateTaskContractRequest(contract=proto_contract),
+            timeout=timeout,
+        )
+        result = resp.result
+        return {
+            "is_valid": result.is_valid,
+            "errors": [
+                {
+                    "severity": m.severity,
+                    "component": m.component,
+                    "term_name": m.term_name,
+                    "message": m.message,
+                    "suggestion": m.suggestion,
+                }
+                for m in result.errors
+            ],
+            "warnings": [
+                {
+                    "severity": m.severity,
+                    "component": m.component,
+                    "term_name": m.term_name,
+                    "message": m.message,
+                    "suggestion": m.suggestion,
+                }
+                for m in result.warnings
+            ],
+            "resolved_optionals": list(result.resolved_optionals),
+            "unresolved_optionals": list(result.unresolved_optionals),
+        }
+
+    def negotiate_task(
+        self,
+        contract: dict,
+        timeout: Optional[float] = None,
+    ) -> dict:
+        """Validate and configure engine for a task contract.
+
+        Args:
+            contract: Task contract dict with observations, rewards, terminations, etc.
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            Dict with session_id, reward_terms, termination_terms on success.
+
+        Raises:
+            RuntimeError: If contract validation fails.
+        """
+        timeout = timeout or self.timeout
+
+        # Build protobuf contract from dict
+        proto_contract = self._build_task_contract(contract)
+
+        resp = self.agent.NegotiateTask(
+            self.pb.agent.NegotiateTaskRequest(contract=proto_contract),
+            timeout=timeout,
+        )
+
+        if not resp.success:
+            raise RuntimeError(f"Task contract negotiation failed: {resp.message}")
+
+        result = {
+            "session_id": resp.session.session_id if resp.session else "",
+            "reward_terms": list(resp.session.reward_terms) if resp.session else [],
+            "termination_terms": list(resp.session.termination_terms) if resp.session else [],
+        }
+
+        # Include warnings if any
+        if resp.validation and resp.validation.warnings:
+            result["warnings"] = [
+                {
+                    "component": w.component,
+                    "term_name": w.term_name,
+                    "message": w.message,
+                    "suggestion": w.suggestion,
+                }
+                for w in resp.validation.warnings
+            ]
+
+        return result
+
+    def _build_task_contract(self, contract: dict):
+        """Convert a Python dict to a TaskContract protobuf message."""
+        pb = self.pb.agent
+
+        # Build observation contract
+        obs_contract = None
+        if "observations" in contract:
+            obs = contract["observations"]
+            required = [
+                pb.ObservationTermRequest(
+                    name=t["name"],
+                    params=t.get("params", {}),
+                    group=t.get("group", "policy"),
+                )
+                for t in obs.get("required", [])
+            ]
+            optional = [
+                pb.ObservationTermRequest(
+                    name=t["name"],
+                    params=t.get("params", {}),
+                    group=t.get("group", "policy"),
+                )
+                for t in obs.get("optional", [])
+            ]
+            obs_contract = pb.ObservationContract(required=required, optional=optional)
+
+        # Build reward contract
+        reward_contract = None
+        if "rewards" in contract:
+            rew = contract["rewards"]
+            engine_terms = [
+                pb.RewardTermRequest(
+                    name=t["name"],
+                    weight=t.get("weight", 1.0),
+                    params=t.get("params", {}),
+                )
+                for t in rew.get("engine_terms", [])
+            ]
+            reward_contract = pb.RewardContract(
+                engine_terms=engine_terms,
+                python_terms=rew.get("python_terms", []),
+            )
+
+        # Build termination contract
+        term_contract = None
+        if "terminations" in contract:
+            terms = [
+                pb.TerminationTermRequest(
+                    name=t["name"],
+                    is_timeout=t.get("is_timeout", False),
+                    params=t.get("params", {}),
+                )
+                for t in contract["terminations"].get("terms", [])
+            ]
+            term_contract = pb.TerminationContract(terms=terms)
+
+        # Build action contract
+        action_contract = None
+        if "actions" in contract:
+            act = contract["actions"]
+            action_terms = [
+                pb.ActionTermRequest(
+                    type=t["type"],
+                    joint_pattern=t.get("joint_pattern", "*"),
+                    params=t.get("params", {}),
+                    group=t.get("group", ""),
+                )
+                for t in act.get("terms", [])
+            ]
+            action_contract = pb.ActionContract(terms=action_terms)
+
+        # Build randomization contract
+        rand_contract = None
+        if "randomization" in contract:
+            rand = contract["randomization"]
+            custom_rands = [
+                pb.CustomRandomization(
+                    name=r["name"],
+                    range_min=r.get("range_min", 0.0),
+                    range_max=r.get("range_max", 1.0),
+                    target=r.get("target", ""),
+                )
+                for r in rand.get("custom_randomizations", [])
+            ]
+            rand_contract = pb.RandomizationContract(
+                custom_randomizations=custom_rands,
+            )
+
+        # Build auxiliary data requests
+        aux_data = []
+        if "auxiliary_data" in contract:
+            aux_data = [
+                pb.AuxiliaryDataRequest(
+                    name=a["name"],
+                    params=a.get("params", {}),
+                )
+                for a in contract["auxiliary_data"]
+            ]
+
+        return pb.TaskContract(
+            task_id=contract.get("task_id", ""),
+            robot=contract.get("robot", ""),
+            scene=contract.get("scene", ""),
+            observations=obs_contract,
+            actions=action_contract,
+            rewards=reward_contract,
+            terminations=term_contract,
+            randomization=rand_contract,
+            auxiliary_data=aux_data,
+        )
+
     # ── SceneService RPCs ──
 
     def set_simulation_mode(
@@ -519,6 +1159,345 @@ class LuckyEngineClient:
         return self.scene.SetSimulationMode(
             self.pb.scene.SetSimulationModeRequest(mode=mode_value),
             timeout=timeout,
+        )
+
+    def get_simulation_mode(self, timeout: Optional[float] = None) -> str:
+        """Query the engine's current simulation timing mode.
+
+        Returns:
+            One of ``"realtime"``, ``"deterministic"``, ``"fast"``, or
+            ``"unknown"`` if the engine returned an unrecognized enum value.
+        """
+        timeout = timeout or self.timeout
+        resp = self.scene.GetSimulationMode(
+            self.pb.scene.GetSimulationModeRequest(),
+            timeout=timeout,
+        )
+        return {0: "realtime", 1: "deterministic", 2: "fast"}.get(resp.mode, "unknown")
+
+    def enter_play_mode(self, timeout: Optional[float] = None):
+        """Trigger the editor's Edit -> Play transition over gRPC.
+
+        These RPCs are session boundaries, NOT pause/resume — entering Play
+        recompiles MuJoCo and may take a moment to become ready. Returns
+        immediately; poll ``get_agent_schema()`` or ``get_model_info()`` to
+        detect when the simulation is steppable. In standalone (dist) builds
+        there is no Edit/Play distinction and this RPC is a no-op.
+
+        Active recordings will be torn down when ExitPlayMode is later called
+        (Play->Edit ends the recording session).
+        """
+        timeout = timeout or self.timeout
+        return self.scene.EnterPlayMode(
+            self.pb.scene.EnterPlayModeRequest(),
+            timeout=timeout,
+        )
+
+    def exit_play_mode(self, timeout: Optional[float] = None):
+        """Trigger the editor's Play -> Edit transition over gRPC.
+
+        See :meth:`enter_play_mode` for the session-boundary semantics.
+        Any in-flight recording is closed out as part of the transition.
+        """
+        timeout = timeout or self.timeout
+        return self.scene.ExitPlayMode(
+            self.pb.scene.ExitPlayModeRequest(),
+            timeout=timeout,
+        )
+
+    def reset_scene(
+        self,
+        preserve_time: bool = False,
+        timeout: Optional[float] = None,
+    ):
+        """Soft-reset the active MuJoCo scene back to its authored initial state.
+
+        Restores ``qpos`` to ``keyframe[0]`` (or ``qpos0`` if no keyframe is
+        authored), zeroes velocities/forces/ctrl, and reseeds active
+        PolicyRuntime PD targets so the policies don't yank the robot back to
+        a stale target on the next substep.
+
+        Recording behaviour: recording continues across the reset by design.
+        The first frame captured after the reset has the ``post_reset`` bit
+        (= 0x02) set in the new ``frame_flags`` column so consumers can drop
+        the qpos/ctrl discontinuity if needed.
+
+        Args:
+            preserve_time: Keep ``mjData.time`` intact across the reset.
+                Default (False) zeroes time. Set True when in-flight RL
+                training or data capture is tracking elapsed sim time.
+            timeout: RPC timeout in seconds.
+        """
+        timeout = timeout or self.timeout
+        return self.mujoco_scene.ResetScene(
+            self.pb.mujoco_scene.ResetSceneRequest(preserve_time=preserve_time),
+            timeout=timeout,
+        )
+
+    def get_scene_info(self, timeout: Optional[float] = None) -> dict:
+        """Return the active scene's name, path, and entity count."""
+        timeout = timeout or self.timeout
+        resp = self.scene.GetSceneInfo(
+            self.pb.scene.GetSceneInfoRequest(),
+            timeout=timeout,
+        )
+        return {
+            "scene_name": resp.scene_name,
+            "scene_path": resp.scene_path,
+            "entity_count": resp.entity_count,
+        }
+
+    def list_entities(
+        self,
+        include_transforms: bool = False,
+        include_components: bool = False,
+        timeout: Optional[float] = None,
+    ) -> list[dict]:
+        """Enumerate entities in the active scene.
+
+        Args:
+            include_transforms: Populate per-entity ``transform``.
+            include_components: Populate per-entity ``components`` (type names).
+            timeout: RPC timeout in seconds.
+
+        Returns:
+            List of dicts with keys ``id``, ``name``, optionally ``transform``,
+            ``components``.
+        """
+        timeout = timeout or self.timeout
+        resp = self.scene.ListEntities(
+            self.pb.scene.ListEntitiesRequest(
+                include_transforms=include_transforms,
+                include_components=include_components,
+            ),
+            timeout=timeout,
+        )
+        out = []
+        for e in resp.entities:
+            entry: dict[str, Any] = {"id": e.id.id, "name": e.name}
+            if include_transforms and e.HasField("transform"):
+                t = e.transform
+                entry["transform"] = {
+                    "position": (t.position.x, t.position.y, t.position.z),
+                    "rotation": (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w),
+                    "scale": (t.scale.x, t.scale.y, t.scale.z),
+                }
+            if include_components and len(e.components) > 0:
+                entry["components"] = list(e.components)
+            out.append(entry)
+        return out
+
+    def get_entity(
+        self,
+        name: Optional[str] = None,
+        entity_id: Optional[int] = None,
+        timeout: Optional[float] = None,
+    ) -> Optional[dict]:
+        """Look up one entity by name or numeric id.
+
+        Returns the same dict shape as :meth:`list_entities` (always with
+        ``transform`` and ``components`` populated), or ``None`` if not found.
+        """
+        if (name is None) == (entity_id is None):
+            raise ValueError("Pass exactly one of `name` or `entity_id`.")
+        timeout = timeout or self.timeout
+        if entity_id is not None:
+            req = self.pb.scene.GetEntityRequest(id=self.pb.common.EntityId(id=entity_id))
+        else:
+            req = self.pb.scene.GetEntityRequest(name=name)
+        resp = self.scene.GetEntity(req, timeout=timeout)
+        if not resp.found:
+            return None
+        e = resp.entity
+        t = e.transform
+        return {
+            "id": e.id.id,
+            "name": e.name,
+            "transform": {
+                "position": (t.position.x, t.position.y, t.position.z),
+                "rotation": (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w),
+                "scale": (t.scale.x, t.scale.y, t.scale.z),
+            },
+            "components": list(e.components),
+        }
+
+    def set_entity_transform(
+        self,
+        entity_id: int,
+        position: Optional[tuple[float, float, float]] = None,
+        rotation: Optional[tuple[float, float, float, float]] = None,
+        scale: Optional[tuple[float, float, float]] = None,
+        timeout: Optional[float] = None,
+    ) -> bool:
+        """Set an entity's transform. Unspecified fields default to identity.
+
+        Args:
+            entity_id: The entity's numeric id (from ``list_entities`` /
+                ``get_entity``).
+            position: ``(x, y, z)`` world-space position.
+            rotation: ``(x, y, z, w)`` quaternion.
+            scale: ``(x, y, z)`` scale.
+
+        Returns:
+            ``True`` on success.
+        """
+        timeout = timeout or self.timeout
+        pos = position or (0.0, 0.0, 0.0)
+        rot = rotation or (0.0, 0.0, 0.0, 1.0)
+        scl = scale or (1.0, 1.0, 1.0)
+        transform = self.pb.common.Transform(
+            position=self.pb.common.Vec3(x=pos[0], y=pos[1], z=pos[2]),
+            rotation=self.pb.common.Quat(x=rot[0], y=rot[1], z=rot[2], w=rot[3]),
+            scale=self.pb.common.Vec3(x=scl[0], y=scl[1], z=scl[2]),
+        )
+        resp = self.scene.SetEntityTransform(
+            self.pb.scene.SetEntityTransformRequest(
+                id=self.pb.common.EntityId(id=entity_id),
+                transform=transform,
+            ),
+            timeout=timeout,
+        )
+        if not resp.success:
+            logger.warning("set_entity_transform failed: %s", resp.message)
+        return resp.success
+
+    # ── TelemetryService RPCs ──
+
+    def get_telemetry_schema(self, timeout: Optional[float] = None) -> dict:
+        """Return the telemetry vector schema (observation names, action names, nq, nu).
+
+        Telemetry is the lightweight streaming surface — qpos + last-applied
+        ctrl per frame. For full mjData (qpos/qvel/ctrl with filters), use
+        :meth:`stream_full_state` on the MujocoScene wrapper instead.
+        """
+        timeout = timeout or self.timeout
+        resp = self.telemetry.GetTelemetrySchema(
+            self.pb.telemetry.GetTelemetrySchemaRequest(),
+            timeout=timeout,
+        )
+        s = resp.schema
+        return {
+            "observation_names": list(s.observation_names),
+            "action_names": list(s.action_names),
+            "nq": s.nq,
+            "nu": s.nu,
+        }
+
+    def stream_telemetry(self, target_fps: int = 30):
+        """Iterate over server-streamed :class:`TelemetryFrame` protos.
+
+        Each frame carries ``timestamp_ms``, ``frame_number``,
+        ``observation_qpos`` (full mjData qpos), and ``action_ctrl``
+        (last-applied ctrl). Cancellation-safe — break out of the loop to
+        terminate the stream.
+        """
+        return self.telemetry.StreamTelemetry(
+            self.pb.telemetry.StreamTelemetryRequest(target_fps=target_fps),
+        )
+
+    # ── ViewportService RPCs ──
+
+    def get_viewport_info(self, timeout: Optional[float] = None) -> dict:
+        """List the viewports the engine exposes plus the current stream config.
+
+        On this engine branch the server reports a single ``"Main"`` viewport.
+        """
+        timeout = timeout or self.timeout
+        resp = self.viewport.GetViewportInfo(
+            self.pb.viewport.GetViewportInfoRequest(),
+            timeout=timeout,
+        )
+        cfg = resp.current_config
+        return {
+            "available_viewports": list(resp.available_viewports),
+            "current_config": {
+                "streaming": cfg.streaming,
+                "viewport_name": cfg.viewport_name,
+                "fps": cfg.fps,
+                "width": cfg.width,
+                "height": cfg.height,
+            },
+        }
+
+    def stream_viewport(
+        self,
+        viewport_name: str = "Main",
+        target_fps: int = 30,
+        width: int = 0,
+        height: int = 0,
+        format: str = "raw",
+    ):
+        """Iterate over server-streamed :class:`ImageFrame` protos for a viewport.
+
+        Args:
+            viewport_name: Viewport id (``"Main"`` is the only one on this
+                engine branch).
+            target_fps: Desired frame rate; server may clamp.
+            width / height: Desired resolution. ``0`` = native.
+            format: ``"raw"`` (RGBA bytes) or ``"jpeg"``.
+        """
+        return self.viewport.StreamViewport(
+            self.pb.viewport.StartViewportStreamRequest(
+                viewport_name=viewport_name,
+                target_fps=target_fps,
+                width=width,
+                height=height,
+                format=format,
+            ),
+        )
+
+    # ── CameraService streaming ──
+
+    def stream_camera(
+        self,
+        name: Optional[str] = None,
+        entity_id: Optional[int] = None,
+        target_fps: int = 30,
+        width: int = 0,
+        height: int = 0,
+        format: str = "raw",
+    ):
+        """Iterate over server-streamed :class:`ImageFrame` protos for a camera.
+
+        Identify by name (camera entity tag) or by numeric entity id. For
+        synchronous in-step capture use :meth:`configure_cameras` plus
+        :meth:`step` instead.
+        """
+        if (name is None) == (entity_id is None):
+            raise ValueError("Pass exactly one of `name` or `entity_id`.")
+        if entity_id is not None:
+            req = self.pb.camera.StreamCameraRequest(
+                id=self.pb.common.EntityId(id=entity_id),
+                target_fps=target_fps,
+                width=width,
+                height=height,
+                format=format,
+            )
+        else:
+            req = self.pb.camera.StreamCameraRequest(
+                name=name,
+                target_fps=target_fps,
+                width=width,
+                height=height,
+                format=format,
+            )
+        return self.camera.StreamCamera(req)
+
+    # ── MujocoService streaming ──
+
+    def stream_joint_state(
+        self,
+        robot_name: Optional[str] = None,
+    ):
+        """Iterate over server-streamed agent-scoped joint state.
+
+        Returns positions/velocities only for the joints declared by the
+        registered ``RobotAgent`` — *not* the full mjModel. For full-model
+        streaming use :meth:`stream_full_state` on the MujocoScene wrapper.
+        """
+        robot = robot_name if robot_name is not None else (self._robot_name or "")
+        return self.mujoco.StreamJointState(
+            self.pb.mujoco.GetJointStateRequest(robot_name=robot),
         )
 
     # ── Benchmarking ──

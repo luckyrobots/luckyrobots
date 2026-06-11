@@ -5,7 +5,7 @@ import warnings
 
 from . import agent_pb2 as agent__pb2
 
-GRPC_GENERATED_VERSION = '1.78.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -26,7 +26,7 @@ if _version_not_supported:
 
 
 class AgentServiceStub(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """RL training, policy / RobotController control, contract negotiation.
     """
 
     def __init__(self, channel):
@@ -40,16 +40,6 @@ class AgentServiceStub(object):
                 request_serializer=agent__pb2.GetAgentSchemaRequest.SerializeToString,
                 response_deserializer=agent__pb2.GetAgentSchemaResponse.FromString,
                 _registered_method=True)
-        self.GetObservation = channel.unary_unary(
-                '/hazel.rpc.AgentService/GetObservation',
-                request_serializer=agent__pb2.GetObservationRequest.SerializeToString,
-                response_deserializer=agent__pb2.GetObservationResponse.FromString,
-                _registered_method=True)
-        self.StreamAgent = channel.unary_stream(
-                '/hazel.rpc.AgentService/StreamAgent',
-                request_serializer=agent__pb2.StreamAgentRequest.SerializeToString,
-                response_deserializer=agent__pb2.AgentFrame.FromString,
-                _registered_method=True)
         self.ResetAgent = channel.unary_unary(
                 '/hazel.rpc.AgentService/ResetAgent',
                 request_serializer=agent__pb2.ResetAgentRequest.SerializeToString,
@@ -60,37 +50,154 @@ class AgentServiceStub(object):
                 request_serializer=agent__pb2.StepRequest.SerializeToString,
                 response_deserializer=agent__pb2.StepResponse.FromString,
                 _registered_method=True)
+        self.SetActionGroup = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetActionGroup',
+                request_serializer=agent__pb2.SetActionGroupRequest.SerializeToString,
+                response_deserializer=agent__pb2.SetActionGroupResponse.FromString,
+                _registered_method=True)
         self.ReportProgress = channel.unary_unary(
                 '/hazel.rpc.AgentService/ReportProgress',
                 request_serializer=agent__pb2.ProgressReport.SerializeToString,
                 response_deserializer=agent__pb2.ProgressAck.FromString,
                 _registered_method=True)
+        self.GetCapabilityManifest = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetCapabilityManifest',
+                request_serializer=agent__pb2.GetCapabilityManifestRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetCapabilityManifestResponse.FromString,
+                _registered_method=True)
+        self.ValidateTaskContract = channel.unary_unary(
+                '/hazel.rpc.AgentService/ValidateTaskContract',
+                request_serializer=agent__pb2.ValidateTaskContractRequest.SerializeToString,
+                response_deserializer=agent__pb2.ValidateTaskContractResponse.FromString,
+                _registered_method=True)
+        self.NegotiateTask = channel.unary_unary(
+                '/hazel.rpc.AgentService/NegotiateTask',
+                request_serializer=agent__pb2.NegotiateTaskRequest.SerializeToString,
+                response_deserializer=agent__pb2.NegotiateTaskResponse.FromString,
+                _registered_method=True)
+        self.ListRobotControllers = channel.unary_unary(
+                '/hazel.rpc.AgentService/ListRobotControllers',
+                request_serializer=agent__pb2.ListRobotControllersRequest.SerializeToString,
+                response_deserializer=agent__pb2.ListRobotControllersResponse.FromString,
+                _registered_method=True)
+        self.GetRobotController = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetRobotController',
+                request_serializer=agent__pb2.GetRobotControllerRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetRobotControllerResponse.FromString,
+                _registered_method=True)
+        self.ListPolicyDescriptors = channel.unary_unary(
+                '/hazel.rpc.AgentService/ListPolicyDescriptors',
+                request_serializer=agent__pb2.ListPolicyDescriptorsRequest.SerializeToString,
+                response_deserializer=agent__pb2.ListPolicyDescriptorsResponse.FromString,
+                _registered_method=True)
+        self.SetPolicyActive = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyActive',
+                request_serializer=agent__pb2.SetPolicyActiveRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyDescriptor = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyDescriptor',
+                request_serializer=agent__pb2.SetPolicyDescriptorRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyDrivenJoints = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyDrivenJoints',
+                request_serializer=agent__pb2.SetPolicyDrivenJointsRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyClampObservation = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyClampObservation',
+                request_serializer=agent__pb2.SetPolicyClampObservationRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyPriority = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyPriority',
+                request_serializer=agent__pb2.SetPolicyPriorityRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyCommandFloat = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyCommandFloat',
+                request_serializer=agent__pb2.SetPolicyCommandFloatRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyCommandBool = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyCommandBool',
+                request_serializer=agent__pb2.SetPolicyCommandBoolRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.SetPolicyGains = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetPolicyGains',
+                request_serializer=agent__pb2.SetPolicyGainsRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.ClearPolicyGains = channel.unary_unary(
+                '/hazel.rpc.AgentService/ClearPolicyGains',
+                request_serializer=agent__pb2.ClearPolicyGainsRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.GetPolicyCommandFloat = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetPolicyCommandFloat',
+                request_serializer=agent__pb2.GetPolicyCommandFloatRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyCommandFloatValue.FromString,
+                _registered_method=True)
+        self.GetPolicyCommandBool = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetPolicyCommandBool',
+                request_serializer=agent__pb2.GetPolicyCommandBoolRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyCommandBoolValue.FromString,
+                _registered_method=True)
+        self.SetMotionGraphActive = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetMotionGraphActive',
+                request_serializer=agent__pb2.SetMotionGraphActiveRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.GetMotionGraphActive = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetMotionGraphActive',
+                request_serializer=agent__pb2.GetMotionGraphActiveRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetMotionGraphActiveResponse.FromString,
+                _registered_method=True)
+        self.SetMotionGraphInput = channel.unary_unary(
+                '/hazel.rpc.AgentService/SetMotionGraphInput',
+                request_serializer=agent__pb2.SetMotionGraphInputRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.GetMotionGraphInput = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetMotionGraphInput',
+                request_serializer=agent__pb2.GetMotionGraphInputRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetMotionGraphInputResponse.FromString,
+                _registered_method=True)
+        self.FireMotionGraphTrigger = channel.unary_unary(
+                '/hazel.rpc.AgentService/FireMotionGraphTrigger',
+                request_serializer=agent__pb2.FireMotionGraphTriggerRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyOperationAck.FromString,
+                _registered_method=True)
+        self.GetPolicyBasePose = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetPolicyBasePose',
+                request_serializer=agent__pb2.GetPolicyBasePoseRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyBasePose.FromString,
+                _registered_method=True)
+        self.GetPolicyLastAction = channel.unary_unary(
+                '/hazel.rpc.AgentService/GetPolicyLastAction',
+                request_serializer=agent__pb2.GetPolicyLastActionRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicyLastAction.FromString,
+                _registered_method=True)
+        self.StreamPolicySlotState = channel.unary_stream(
+                '/hazel.rpc.AgentService/StreamPolicySlotState',
+                request_serializer=agent__pb2.StreamPolicySlotStateRequest.SerializeToString,
+                response_deserializer=agent__pb2.PolicySlotSummary.FromString,
+                _registered_method=True)
+        self.StreamRobotController = channel.unary_stream(
+                '/hazel.rpc.AgentService/StreamRobotController',
+                request_serializer=agent__pb2.StreamRobotControllerRequest.SerializeToString,
+                response_deserializer=agent__pb2.RobotControllerSummary.FromString,
+                _registered_method=True)
 
 
 class AgentServiceServicer(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """RL training, policy / RobotController control, contract negotiation.
     """
 
     def GetAgentSchema(self, request, context):
         """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetObservation(self, request, context):
-        """Single-shot observation snapshot (unified observation surface).
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def StreamAgent(self, request, context):
-        """Server-streaming observations (and optional action echo) for a single agent.
-
-        The client specifies which agent to stream via StreamAgentRequest and may
-        provide a target FPS hint. Actions are currently sent via MujocoService
-        (SendControl); AgentFrame.actions is primarily used for telemetry.
-        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -105,8 +212,17 @@ class AgentServiceServicer(object):
 
     def Step(self, request, context):
         """Synchronous RL step: apply action, wait for physics, return observation.
-        This is the recommended interface for RL training as it eliminates
-        one network round-trip compared to separate SendControl + GetObservation.
+        Primary RL interface — one round trip delivers actions, ticks physics, and
+        returns the next observation (plus reward signals + termination flags when
+        a task contract has been negotiated).
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetActionGroup(self, request, context):
+        """Preload actions for a named group without triggering physics.
+        Use with Step() for multi-policy control (e.g., separate locomotion + manipulation policies).
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -120,6 +236,178 @@ class AgentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetCapabilityManifest(self, request, context):
+        """Discover available MDP components for a robot/scene.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ValidateTaskContract(self, request, context):
+        """Validate a task contract against engine capabilities.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def NegotiateTask(self, request, context):
+        """Validate + configure engine for the contract. Returns session handle.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListRobotControllers(self, request, context):
+        """------------------------------------------------------------------------
+        Robot Controller / Policy RPCs (multi-slot PolicySlot + MotionGraph)
+        Added by mick/policy-redo. Coexists with the action-group / task-contract
+        surface above; clients pick whichever model fits.
+        ------------------------------------------------------------------------
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetRobotController(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListPolicyDescriptors(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyActive(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyDescriptor(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyDrivenJoints(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyClampObservation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyPriority(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyCommandFloat(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyCommandBool(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetPolicyGains(self, request, context):
+        """Per-joint runtime PD/scale/default override. Mutates the slot's
+        PolicyRuntime kp/kd/effort_limit/action_scale/default_pos in place
+        without reloading the descriptor. Use to retune a policy from a
+        pure-gRPC client that doesn't ship a model_config.json. Joint names
+        not in the descriptor are silently ignored. Unset proto fields mean
+        "do not override that field — keep the descriptor's value".
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ClearPolicyGains(self, request, context):
+        """Restore all gain/scale/default values for the slot's joints back to
+        the descriptor's authored values.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetPolicyCommandFloat(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetPolicyCommandBool(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetMotionGraphActive(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetMotionGraphActive(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetMotionGraphInput(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetMotionGraphInput(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def FireMotionGraphTrigger(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetPolicyBasePose(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetPolicyLastAction(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamPolicySlotState(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamRobotController(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -127,16 +415,6 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     servicer.GetAgentSchema,
                     request_deserializer=agent__pb2.GetAgentSchemaRequest.FromString,
                     response_serializer=agent__pb2.GetAgentSchemaResponse.SerializeToString,
-            ),
-            'GetObservation': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetObservation,
-                    request_deserializer=agent__pb2.GetObservationRequest.FromString,
-                    response_serializer=agent__pb2.GetObservationResponse.SerializeToString,
-            ),
-            'StreamAgent': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamAgent,
-                    request_deserializer=agent__pb2.StreamAgentRequest.FromString,
-                    response_serializer=agent__pb2.AgentFrame.SerializeToString,
             ),
             'ResetAgent': grpc.unary_unary_rpc_method_handler(
                     servicer.ResetAgent,
@@ -148,10 +426,145 @@ def add_AgentServiceServicer_to_server(servicer, server):
                     request_deserializer=agent__pb2.StepRequest.FromString,
                     response_serializer=agent__pb2.StepResponse.SerializeToString,
             ),
+            'SetActionGroup': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetActionGroup,
+                    request_deserializer=agent__pb2.SetActionGroupRequest.FromString,
+                    response_serializer=agent__pb2.SetActionGroupResponse.SerializeToString,
+            ),
             'ReportProgress': grpc.unary_unary_rpc_method_handler(
                     servicer.ReportProgress,
                     request_deserializer=agent__pb2.ProgressReport.FromString,
                     response_serializer=agent__pb2.ProgressAck.SerializeToString,
+            ),
+            'GetCapabilityManifest': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCapabilityManifest,
+                    request_deserializer=agent__pb2.GetCapabilityManifestRequest.FromString,
+                    response_serializer=agent__pb2.GetCapabilityManifestResponse.SerializeToString,
+            ),
+            'ValidateTaskContract': grpc.unary_unary_rpc_method_handler(
+                    servicer.ValidateTaskContract,
+                    request_deserializer=agent__pb2.ValidateTaskContractRequest.FromString,
+                    response_serializer=agent__pb2.ValidateTaskContractResponse.SerializeToString,
+            ),
+            'NegotiateTask': grpc.unary_unary_rpc_method_handler(
+                    servicer.NegotiateTask,
+                    request_deserializer=agent__pb2.NegotiateTaskRequest.FromString,
+                    response_serializer=agent__pb2.NegotiateTaskResponse.SerializeToString,
+            ),
+            'ListRobotControllers': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListRobotControllers,
+                    request_deserializer=agent__pb2.ListRobotControllersRequest.FromString,
+                    response_serializer=agent__pb2.ListRobotControllersResponse.SerializeToString,
+            ),
+            'GetRobotController': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRobotController,
+                    request_deserializer=agent__pb2.GetRobotControllerRequest.FromString,
+                    response_serializer=agent__pb2.GetRobotControllerResponse.SerializeToString,
+            ),
+            'ListPolicyDescriptors': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListPolicyDescriptors,
+                    request_deserializer=agent__pb2.ListPolicyDescriptorsRequest.FromString,
+                    response_serializer=agent__pb2.ListPolicyDescriptorsResponse.SerializeToString,
+            ),
+            'SetPolicyActive': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyActive,
+                    request_deserializer=agent__pb2.SetPolicyActiveRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyDescriptor': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyDescriptor,
+                    request_deserializer=agent__pb2.SetPolicyDescriptorRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyDrivenJoints': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyDrivenJoints,
+                    request_deserializer=agent__pb2.SetPolicyDrivenJointsRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyClampObservation': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyClampObservation,
+                    request_deserializer=agent__pb2.SetPolicyClampObservationRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyPriority': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyPriority,
+                    request_deserializer=agent__pb2.SetPolicyPriorityRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyCommandFloat': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyCommandFloat,
+                    request_deserializer=agent__pb2.SetPolicyCommandFloatRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyCommandBool': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyCommandBool,
+                    request_deserializer=agent__pb2.SetPolicyCommandBoolRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'SetPolicyGains': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPolicyGains,
+                    request_deserializer=agent__pb2.SetPolicyGainsRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'ClearPolicyGains': grpc.unary_unary_rpc_method_handler(
+                    servicer.ClearPolicyGains,
+                    request_deserializer=agent__pb2.ClearPolicyGainsRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'GetPolicyCommandFloat': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetPolicyCommandFloat,
+                    request_deserializer=agent__pb2.GetPolicyCommandFloatRequest.FromString,
+                    response_serializer=agent__pb2.PolicyCommandFloatValue.SerializeToString,
+            ),
+            'GetPolicyCommandBool': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetPolicyCommandBool,
+                    request_deserializer=agent__pb2.GetPolicyCommandBoolRequest.FromString,
+                    response_serializer=agent__pb2.PolicyCommandBoolValue.SerializeToString,
+            ),
+            'SetMotionGraphActive': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetMotionGraphActive,
+                    request_deserializer=agent__pb2.SetMotionGraphActiveRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'GetMotionGraphActive': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMotionGraphActive,
+                    request_deserializer=agent__pb2.GetMotionGraphActiveRequest.FromString,
+                    response_serializer=agent__pb2.GetMotionGraphActiveResponse.SerializeToString,
+            ),
+            'SetMotionGraphInput': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetMotionGraphInput,
+                    request_deserializer=agent__pb2.SetMotionGraphInputRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'GetMotionGraphInput': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMotionGraphInput,
+                    request_deserializer=agent__pb2.GetMotionGraphInputRequest.FromString,
+                    response_serializer=agent__pb2.GetMotionGraphInputResponse.SerializeToString,
+            ),
+            'FireMotionGraphTrigger': grpc.unary_unary_rpc_method_handler(
+                    servicer.FireMotionGraphTrigger,
+                    request_deserializer=agent__pb2.FireMotionGraphTriggerRequest.FromString,
+                    response_serializer=agent__pb2.PolicyOperationAck.SerializeToString,
+            ),
+            'GetPolicyBasePose': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetPolicyBasePose,
+                    request_deserializer=agent__pb2.GetPolicyBasePoseRequest.FromString,
+                    response_serializer=agent__pb2.PolicyBasePose.SerializeToString,
+            ),
+            'GetPolicyLastAction': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetPolicyLastAction,
+                    request_deserializer=agent__pb2.GetPolicyLastActionRequest.FromString,
+                    response_serializer=agent__pb2.PolicyLastAction.SerializeToString,
+            ),
+            'StreamPolicySlotState': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamPolicySlotState,
+                    request_deserializer=agent__pb2.StreamPolicySlotStateRequest.FromString,
+                    response_serializer=agent__pb2.PolicySlotSummary.SerializeToString,
+            ),
+            'StreamRobotController': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamRobotController,
+                    request_deserializer=agent__pb2.StreamRobotControllerRequest.FromString,
+                    response_serializer=agent__pb2.RobotControllerSummary.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -162,7 +575,7 @@ def add_AgentServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class AgentService(object):
-    """Per-agent RL-style observation streaming (training / inference clients consume this).
+    """RL training, policy / RobotController control, contract negotiation.
     """
 
     @staticmethod
@@ -182,60 +595,6 @@ class AgentService(object):
             '/hazel.rpc.AgentService/GetAgentSchema',
             agent__pb2.GetAgentSchemaRequest.SerializeToString,
             agent__pb2.GetAgentSchemaResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetObservation(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/hazel.rpc.AgentService/GetObservation',
-            agent__pb2.GetObservationRequest.SerializeToString,
-            agent__pb2.GetObservationResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def StreamAgent(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            '/hazel.rpc.AgentService/StreamAgent',
-            agent__pb2.StreamAgentRequest.SerializeToString,
-            agent__pb2.AgentFrame.FromString,
             options,
             channel_credentials,
             insecure,
@@ -301,6 +660,33 @@ class AgentService(object):
             _registered_method=True)
 
     @staticmethod
+    def SetActionGroup(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetActionGroup',
+            agent__pb2.SetActionGroupRequest.SerializeToString,
+            agent__pb2.SetActionGroupResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def ReportProgress(request,
             target,
             options=(),
@@ -317,6 +703,708 @@ class AgentService(object):
             '/hazel.rpc.AgentService/ReportProgress',
             agent__pb2.ProgressReport.SerializeToString,
             agent__pb2.ProgressAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetCapabilityManifest(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetCapabilityManifest',
+            agent__pb2.GetCapabilityManifestRequest.SerializeToString,
+            agent__pb2.GetCapabilityManifestResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ValidateTaskContract(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/ValidateTaskContract',
+            agent__pb2.ValidateTaskContractRequest.SerializeToString,
+            agent__pb2.ValidateTaskContractResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def NegotiateTask(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/NegotiateTask',
+            agent__pb2.NegotiateTaskRequest.SerializeToString,
+            agent__pb2.NegotiateTaskResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListRobotControllers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/ListRobotControllers',
+            agent__pb2.ListRobotControllersRequest.SerializeToString,
+            agent__pb2.ListRobotControllersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetRobotController(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetRobotController',
+            agent__pb2.GetRobotControllerRequest.SerializeToString,
+            agent__pb2.GetRobotControllerResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListPolicyDescriptors(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/ListPolicyDescriptors',
+            agent__pb2.ListPolicyDescriptorsRequest.SerializeToString,
+            agent__pb2.ListPolicyDescriptorsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyActive(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyActive',
+            agent__pb2.SetPolicyActiveRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyDescriptor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyDescriptor',
+            agent__pb2.SetPolicyDescriptorRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyDrivenJoints(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyDrivenJoints',
+            agent__pb2.SetPolicyDrivenJointsRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyClampObservation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyClampObservation',
+            agent__pb2.SetPolicyClampObservationRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyPriority(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyPriority',
+            agent__pb2.SetPolicyPriorityRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyCommandFloat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyCommandFloat',
+            agent__pb2.SetPolicyCommandFloatRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyCommandBool(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyCommandBool',
+            agent__pb2.SetPolicyCommandBoolRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPolicyGains(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetPolicyGains',
+            agent__pb2.SetPolicyGainsRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ClearPolicyGains(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/ClearPolicyGains',
+            agent__pb2.ClearPolicyGainsRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetPolicyCommandFloat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetPolicyCommandFloat',
+            agent__pb2.GetPolicyCommandFloatRequest.SerializeToString,
+            agent__pb2.PolicyCommandFloatValue.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetPolicyCommandBool(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetPolicyCommandBool',
+            agent__pb2.GetPolicyCommandBoolRequest.SerializeToString,
+            agent__pb2.PolicyCommandBoolValue.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetMotionGraphActive(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetMotionGraphActive',
+            agent__pb2.SetMotionGraphActiveRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMotionGraphActive(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetMotionGraphActive',
+            agent__pb2.GetMotionGraphActiveRequest.SerializeToString,
+            agent__pb2.GetMotionGraphActiveResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetMotionGraphInput(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/SetMotionGraphInput',
+            agent__pb2.SetMotionGraphInputRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMotionGraphInput(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetMotionGraphInput',
+            agent__pb2.GetMotionGraphInputRequest.SerializeToString,
+            agent__pb2.GetMotionGraphInputResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def FireMotionGraphTrigger(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/FireMotionGraphTrigger',
+            agent__pb2.FireMotionGraphTriggerRequest.SerializeToString,
+            agent__pb2.PolicyOperationAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetPolicyBasePose(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetPolicyBasePose',
+            agent__pb2.GetPolicyBasePoseRequest.SerializeToString,
+            agent__pb2.PolicyBasePose.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetPolicyLastAction(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/hazel.rpc.AgentService/GetPolicyLastAction',
+            agent__pb2.GetPolicyLastActionRequest.SerializeToString,
+            agent__pb2.PolicyLastAction.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamPolicySlotState(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/hazel.rpc.AgentService/StreamPolicySlotState',
+            agent__pb2.StreamPolicySlotStateRequest.SerializeToString,
+            agent__pb2.PolicySlotSummary.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamRobotController(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/hazel.rpc.AgentService/StreamRobotController',
+            agent__pb2.StreamRobotControllerRequest.SerializeToString,
+            agent__pb2.RobotControllerSummary.FromString,
             options,
             channel_credentials,
             insecure,
