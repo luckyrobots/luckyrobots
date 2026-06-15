@@ -35,7 +35,7 @@ Basic Usage::
    :maxdepth: 2
    :caption: Contents:
 
-   getting-started-lerobot
+   lerobot-luckyengine-tutorial/getting-started-lerobot
    api
    examples
    architecture
