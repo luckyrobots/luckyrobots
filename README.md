@@ -21,6 +21,74 @@
 
 `luckyrobots` is the Python client for [LuckyEngine](https://github.com/luckyrobots/luckyrobots), a hyperrealistic MuJoCo-based simulator. It mirrors every gRPC surface the engine exposes — robots and policies, joints and actuators, motion graphs and IK, RL contracts, telemetry, cameras, viewports — with discovery built in. List robots, list policies, list joints with their ownership, drive policy commands, pump arbitrary actuators, train a Gymnasium env on top, record + replay sessions.
 
+## Demo: LuckyEngine + LeRobot Sim2Real
+
+Record demonstrations in LuckyEngine, train an imitation-learning policy with
+[LeRobot](https://github.com/huggingface/lerobot), and deploy the same checkpoint
+in LE → Genesis → a real SO-100 — **72% success on the real robot, trained only
+on simulator demos** (no domain randomization, no real-data fine-tuning). Full
+write-up: [docs/getting-started-lerobot.md](docs/getting-started-lerobot.md).
+
+> The clips below are committed under [`docs/videos/`](docs/videos) and play
+> inline on GitHub. If a player doesn't load, use the link beneath it.
+
+**Manual leader-arm teleop** (one demo at a time) vs. **scripted in LuckyEngine** (hands-free, repeatable, same dataset format):
+
+<video src="docs/videos/hero_teleop.mp4" controls muted width="420"></video>
+
+▶️ [hero_teleop.mp4](docs/videos/hero_teleop.mp4)
+
+<video src="docs/videos/hero_sim.mp4" controls muted width="420"></video>
+
+▶️ [hero_sim.mp4](docs/videos/hero_sim.mp4)
+
+**The payoff** — the same checkpoint, autonomous on the real SO-100 (two-camera DICE-IMLE @ 30 Hz):
+
+<video src="docs/videos/hero_sim2real.mp4" controls muted width="640"></video>
+
+▶️ [hero_sim2real.mp4](docs/videos/hero_sim2real.mp4)
+
+<details>
+<summary><b>More clips</b> — recording, in-sim eval, Genesis sim-to-sim, real robot, scene building</summary>
+
+**Recording demonstrations in LE** (end-to-end walkthrough):
+
+<video src="docs/videos/recording_walkthrough.mp4" controls muted width="640"></video>
+
+▶️ [recording_walkthrough.mp4](docs/videos/recording_walkthrough.mp4)
+
+**SO-100 pick-and-place recorded inside LuckyEngine** (the dataset behind the case study):
+
+<video src="docs/videos/so100_sim.mp4" controls muted width="420"></video>
+
+▶️ [so100_sim.mp4](docs/videos/so100_sim.mp4)
+
+**Trained policy in LE, in-domain eval** (finalist checkpoint, 96×96 / 30 fps):
+
+<video src="docs/videos/le_finalist_trials.mp4" controls muted width="560"></video>
+
+▶️ [le_finalist_trials.mp4](docs/videos/le_finalist_trials.mp4)
+
+**Vanilla IMLE `044800`, zero-shot in Genesis** (sim-to-sim, 96×96 @ 30 fps):
+
+<video src="docs/videos/genesis_sim2sim.mp4" controls muted width="560"></video>
+
+▶️ [genesis_sim2sim.mp4](docs/videos/genesis_sim2sim.mp4)
+
+**Real SO-100 running the same checkpoint trained only on simulator demos:**
+
+<video src="docs/videos/sim2real_real_robot.mp4" controls muted width="640"></video>
+
+▶️ [sim2real_real_robot.mp4](docs/videos/sim2real_real_robot.mp4)
+
+**Building a scene in LuckyEngine and getting it ready for recording:**
+
+<video src="docs/videos/scene_creation.mp4" controls muted width="640"></video>
+
+▶️ [scene_creation.mp4](docs/videos/scene_creation.mp4)
+
+</details>
+
 ## Install + connect
 
 ```bash
