@@ -9,10 +9,6 @@ simulator demos** (no domain randomization, no real-data fine-tuning).
 - 🌐 Rendered tutorial: <https://luckyrobots.github.io/lerobot-luckyengine-tutorial/>
 - 📦 Python SDK: [`luckyrobots`](https://github.com/luckyrobots/luckyrobots)
 
-This directory is self-contained: the write-up, plus the demo clips under
-[`videos/`](videos). The videos embed inline on GitHub below — if a player
-doesn't load, use the link beneath it.
-
 ---
 
 ## The pitch: sim demos → real robot
