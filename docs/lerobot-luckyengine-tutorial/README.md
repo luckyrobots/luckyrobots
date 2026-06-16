@@ -23,21 +23,21 @@ LeRobot dataset format.
 
 **Manual leader-arm teleop** — one human, one demo at a time
 
-<video src="videos/hero_teleop.mp4" controls muted width="480"></video>
+https://github.com/user-attachments/assets/17a122b4-b880-4422-af7f-497fd37d2cb9
 
-▶️ [hero_teleop.mp4](videos/hero_teleop.mp4)
+<sub>▶️ [hero_teleop.mp4](videos/hero_teleop.mp4)</sub>
 
 **Scripted in LuckyEngine** — hands-free, repeatable, same dataset format
 
-<video src="videos/hero_sim.mp4" controls muted width="480"></video>
+https://github.com/user-attachments/assets/bdea560b-1175-45c9-b4a0-71a616ea81c8
 
-▶️ [hero_sim.mp4](videos/hero_sim.mp4)
+<sub>▶️ [hero_sim.mp4](videos/hero_sim.mp4)</sub>
 
 **The payoff** — the same checkpoint, autonomous on the real SO-100 (two-camera DICE-IMLE @ 30 Hz)
 
-<video src="videos/hero_sim2real.mp4" controls muted width="640"></video>
+https://github.com/user-attachments/assets/c83c4fb0-23d2-4ed1-a09b-91e1e6d3adad
 
-▶️ [hero_sim2real.mp4](videos/hero_sim2real.mp4)
+<sub>▶️ [hero_sim2real.mp4](videos/hero_sim2real.mp4)</sub>
 
 ---
 
@@ -48,15 +48,15 @@ writes a LeRobot 3.0 dataset to disk in parallel.
 
 **End-to-end walkthrough of recording demonstrations in LE**
 
-<video src="videos/recording_walkthrough.mp4" controls muted width="640"></video>
+https://github.com/user-attachments/assets/99eb681d-80f6-44be-814f-c86d0ae9f842
 
-▶️ [recording_walkthrough.mp4](videos/recording_walkthrough.mp4)
+<sub>▶️ [recording_walkthrough.mp4](videos/recording_walkthrough.mp4)</sub>
 
 **SO-100 pick-and-place recorded inside LuckyEngine** — the dataset behind the case study
 
-<video src="videos/so100_sim.mp4" controls muted width="480"></video>
+https://github.com/user-attachments/assets/4f3ba857-fc91-4cce-88cc-907b7a841d56
 
-▶️ [so100_sim.mp4](videos/so100_sim.mp4)
+<sub>▶️ [so100_sim.mp4](videos/so100_sim.mp4)</sub>
 
 ---
 
@@ -64,9 +64,9 @@ writes a LeRobot 3.0 dataset to disk in parallel.
 
 **Trained policy running in LE during in-domain eval** — finalist checkpoint at 96×96 / 30 fps
 
-<video src="videos/le_finalist_trials.mp4" controls muted width="560"></video>
+https://github.com/user-attachments/assets/b45317d8-5bd5-40ce-bd2d-c5550e9de8af
 
-▶️ [le_finalist_trials.mp4](videos/le_finalist_trials.mp4)
+<sub>▶️ [le_finalist_trials.mp4](videos/le_finalist_trials.mp4)</sub>
 
 ---
 
@@ -74,9 +74,9 @@ writes a LeRobot 3.0 dataset to disk in parallel.
 
 **Vanilla IMLE checkpoint `044800`, zero-shot in Genesis** — 96×96 @ 30 fps
 
-<video src="videos/genesis_sim2sim.mp4" controls muted width="560"></video>
+https://github.com/user-attachments/assets/bd0307ac-e452-449f-b53e-cd7144f9339a
 
-▶️ [genesis_sim2sim.mp4](videos/genesis_sim2sim.mp4)
+<sub>▶️ [genesis_sim2sim.mp4](videos/genesis_sim2sim.mp4)</sub>
 
 ---
 
@@ -84,9 +84,9 @@ writes a LeRobot 3.0 dataset to disk in parallel.
 
 **Real SO-100 running the same checkpoint trained only on simulator demos**
 
-<video src="videos/sim2real_real_robot.mp4" controls muted width="640"></video>
+https://github.com/user-attachments/assets/8cb3b6d9-d4b6-4430-993c-7c690854dbcc
 
-▶️ [sim2real_real_robot.mp4](videos/sim2real_real_robot.mp4)
+<sub>▶️ [sim2real_real_robot.mp4](videos/sim2real_real_robot.mp4)</sub>
 
 ---
 
@@ -94,9 +94,9 @@ writes a LeRobot 3.0 dataset to disk in parallel.
 
 **Building a scene in LuckyEngine and getting it ready for recording**
 
-<video src="videos/scene_creation.mp4" controls muted width="640"></video>
+https://github.com/user-attachments/assets/9dad2763-90e3-43be-bcb9-30a781a8407f
 
-▶️ [scene_creation.mp4](videos/scene_creation.mp4)
+<sub>▶️ [scene_creation.mp4](videos/scene_creation.mp4)</sub>
 
 ---
 
