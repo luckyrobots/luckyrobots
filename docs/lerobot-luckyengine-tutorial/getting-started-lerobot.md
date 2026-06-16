@@ -156,8 +156,7 @@ final step.
 
 The fastest signal you have is closing the loop in the same simulator you
 trained in. Talk to the running LE process from Python through the
-[`luckyrobots`](https://github.com/luckyrobots/luckyrobots) SDK; it speaks the
-same gRPC contract LuckyLab uses. `step()` returns a synchronous post-step
+[`luckyrobots`](https://github.com/luckyrobots/luckyrobots) SDK. `step()` returns a synchronous post-step
 `ObservationResponse` — state and any synchronized camera frames in one object —
 so there's no async stream to race against.
 
