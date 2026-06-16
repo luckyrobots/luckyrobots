@@ -21,6 +21,14 @@
 
 `luckyrobots` is the Python client for [LuckyEngine](https://github.com/luckyrobots/luckyrobots), a hyperrealistic MuJoCo-based simulator. It mirrors every gRPC surface the engine exposes — robots and policies, joints and actuators, motion graphs and IK, RL contracts, telemetry, cameras, viewports — with discovery built in. List robots, list policies, list joints with their ownership, drive policy commands, pump arbitrary actuators, train a Gymnasium env on top, record + replay sessions.
 
+## Demo: LuckyEngine + LeRobot Sim2Real
+
+Record demonstrations in LuckyEngine, train an imitation-learning policy with
+[LeRobot](https://github.com/huggingface/lerobot), and deploy the same checkpoint
+in LE → Genesis → a real SO-100 — **72% success on the real robot, trained only
+on simulator demos**. Full walkthrough, with embedded demo videos, in
+[`docs/lerobot-luckyengine-tutorial/`](docs/lerobot-luckyengine-tutorial).
+
 ## Install + connect
 
 ```bash
